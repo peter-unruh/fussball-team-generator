@@ -1173,12 +1173,11 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .btn.primary.armed { background: var(--warn); border-color: var(--warn); color: #1d1400; }
 .svcard.intro h2 { font-size: 1.2rem; }
 .svcard.intro p { margin: 0; }
-.svtiehint { padding: 8px 10px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); font-size: .9rem; }
+.svtips { display: grid; gap: 6px; padding: 10px 12px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); font-size: .9rem; }
+.svtips p { margin: 0; }
+.svok { margin: 0; padding: 8px 12px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--good) 12%, var(--surface)); color: var(--good); font-weight: 650; font-size: .9rem; }
 .svresort { display: flex; gap: 10px; align-items: center; position: sticky; top: 64px; z-index: 5; padding: 6px 0; }
 .svorder { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.svtier { display: grid; gap: 4px; }
-.svtier.tie { padding: 6px; border-radius: var(--r); border: 1.5px dashed color-mix(in srgb, var(--warn) 60%, var(--line)); background: color-mix(in srgb, var(--warn) 6%, transparent); }
-.svtiehead { font-size: .76rem; font-weight: 700; color: var(--warn); padding: 0 4px; }
 .svorow { display: grid; grid-template-columns: 2.1em minmax(0, 1fr) 54px auto 2.6ch auto; align-items: center; gap: 8px; padding: 6px 8px 6px 10px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line); }
 .svrank { color: var(--muted); font-weight: 700; font-size: .85rem; }
 .svoname { font-weight: 650; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1486,10 +1485,15 @@ const Engine = (() => {
     const raw = p.attrs || {};
     let given = 0;
     const attrs = {};
+    // Nicht bewertete Fähigkeiten: mit der groben Einschätzung – ist keine gesetzt (rated === false), mit dem
+    // gewichteten Schnitt der bewerteten Fähigkeiten
+    let rs = 0, rw = 0;
+    sport.attrs.forEach((a, k) => { if (isNum(raw[a.key])) { rs += clamp(+raw[a.key], 1, 10) * w[k]; rw += w[k]; } });
+    const gap = p.rated === false && rw > 0 ? rs / rw : manual;
     const filled = sport.attrs.map(a => {
       if (isNum(raw[a.key])) { given++; const v = clamp(+raw[a.key], 1, 10); attrs[a.key] = { v, est: false }; return v; }
-      attrs[a.key] = { v: manual, est: true };
-      return manual;
+      attrs[a.key] = { v: gap, est: true };
+      return gap;
     });
     const wsum = w.reduce((s, x) => s + x, 0);
     const derived = given > 0 && wsum > 0 ? wmean(filled, w) : null;
@@ -2519,7 +2523,7 @@ const Analysis = (() => {
     teams.forEach(ids => ids.forEach(id => {
       const q = snap.pl[id];
       if (!q) return;
-      const eff = Engine.effective({ strength: q.s, attrs: q.a || {}, gk: q.g, autoStrength: q.au }, sport, attrW, set.autoStrength);
+      const eff = Engine.effective({ strength: q.s, attrs: q.a || {}, gk: q.g, autoStrength: q.au, rated: q.rr }, sport, attrW, set.autoStrength);
       const p = { id, name: q.n, roleMain: q.rm || 'FLEX', roleSub: q.rs || '', gkWill: q.gw || 'never', tags: [], posFit: q.pf || {}, eff, unsure: q.u ? 1 : 0, sd: isNum(q.sd) ? +q.sd : 0.8 };
       if (isNum(q.bd)) eff.strength += +q.bd;   // Verschiebung durch Ergebnisse beim Bilden
       if (over.ds && isNum(over.ds[id])) eff.strength += +over.ds[id];
@@ -2719,7 +2723,7 @@ const Analysis = (() => {
   /* Torwart-Stärke eines Spielers im Schnappschuss (wie beim Bilden gerechnet) */
   function snapKeeper(snap, id, sport) {
     const q = snap && snap.pl[id]; if (!q) return null;
-    const eff = Engine.effective({ strength: q.s, attrs: q.a || {}, gk: q.g, autoStrength: q.au }, sport, snap.set.attrW, snap.set.autoStrength);
+    const eff = Engine.effective({ strength: q.s, attrs: q.a || {}, gk: q.g, autoStrength: q.au, rated: q.rr }, sport, snap.set.attrW, snap.set.autoStrength);
     return Engine.keeperBase({ eff, roleMain: q.rm || 'FLEX', roleSub: q.rs || '', gkWill: q.gw || 'never' }, sport);
   }
   /* Tendenz als Toranteil-Ergebnis: Tore A, Tore B (nicht ganzzahlig) */
@@ -3409,7 +3413,7 @@ function cleanSnap(sn) {
       n: str(q.n).slice(0, 60) || '?', s: clamp(+q.s, 1, 15), a: cleanMap(q.a, ATTR_KEYS, 1, 10), g: isNum(q.g) ? clamp(+q.g, 1, 10) : null,
       au: typeof q.au === 'boolean' ? q.au : null, rm: ROLE_KEYS.includes(q.rm) ? q.rm : 'FLEX', rs: ROLE_KEYS.includes(q.rs) && q.rs !== 'FLEX' ? q.rs : '',
       gw: SPORT.gkWill.some(g => g.key === q.gw) ? q.gw : 'never', pf: cleanMap(q.pf, FR, 0, 1.2), u: q.u ? 1 : 0, sd: cleanNum(q.sd, 0.2, 3, 0.8),
-      st: ['active', 'paused', 'guest', 'archived'].includes(q.st) ? q.st : 'active', nw: !!q.nw, rt: q.rt !== false, cf: CONF_KEYS.includes(q.cf) ? q.cf : null, ...(isNum(q.bd) && Math.abs(+q.bd) > 1e-6 ? { bd: clamp(+q.bd, -10, 10) } : {})
+      st: ['active', 'paused', 'guest', 'archived'].includes(q.st) ? q.st : 'active', nw: !!q.nw, rt: q.rt !== false, cf: CONF_KEYS.includes(q.cf) ? q.cf : null, ...(q.rr === false ? { rr: false } : {}), ...(isNum(q.bd) && Math.abs(+q.bd) > 1e-6 ? { bd: clamp(+q.bd, -10, 10) } : {})
     };
   });
   const st = sn.set, d = defaultSettings(), inPl = o => { const out = {}; if (o && typeof o === 'object') Object.keys(o).forEach(k => { if (pl[k]) out[k] = o[k]; }); return out; };
@@ -4100,7 +4104,7 @@ function makeSnapshot(teams) {
 }
 function snapPlayer(p) {
   const e = effOf(p);
-  return { n: disp(p), s: p.strength, a: { ...p.attrs }, g: p.gk, au: p.autoStrength, rm: p.roleMain, rs: p.roleSub, gw: p.gkWill, pf: { ...p.posFit }, u: isUnsure(p) ? 1 : 0, sd: sdOf(p, e), st: p.status, nw: p.isNew, rt: ratedOf(p, e), cf: p.conf || null };
+  return { n: disp(p), s: p.strength, a: { ...p.attrs }, g: p.gk, au: p.autoStrength, rm: p.roleMain, rs: p.roleSub, gw: p.gkWill, pf: { ...p.posFit }, u: isUnsure(p) ? 1 : 0, sd: sdOf(p, e), st: p.status, nw: p.isNew, rt: ratedOf(p, e), cf: p.conf || null, ...(p.rated === false ? { rr: false } : {}) };
 }
 const matchById = id => (id ? S.matches.find(m => m.id === id) : null);
 /* mode: 'new' = Teams neu gebildet, 'plan' = Variante gewählt, 'edit' = von Hand geändert.
@@ -4324,7 +4328,7 @@ function shareText() {
   if (when || where) lines.push([when, where].filter(Boolean).join('   '));
   R.teams.forEach((ids, t) => {
     const c = teamCol(t);
-    lines.push('', `${c.mark} *Team ${t + 1} · ${c.name}* (${ids.length})`);
+    lines.push('', `${c.mark} *Team ${t + 1}* (${ids.length} Spieler)`);
     ids.forEach(id => { const i = M.idx.get(id); lines.push(disp(byId(id)) + (det && det.gk[t] === i ? ' 🧤' : '')); });
   });
   if (det) lines.push('', `⚖️ Fairness: ${verdictWord(det.pct).toLowerCase()}`);
@@ -4621,7 +4625,7 @@ const INFO = {
   profile: () => 'Bestimmt, wie stark Stärke, Wünsche, Merkmale und Abwechslung gegeneinander abgewogen werden. Im erweiterten Modus kannst du jedes Gewicht einzeln einstellen.',
   status: () => 'Aktiv: normaler Mitspieler. Pausiert: fehlt eine Weile, am Spieltag ausgeblendet. Gast: nur ab und zu dabei, gilt automatisch als unsicher eingeschätzt. Archiviert: kommt voraussichtlich nicht mehr – überall ausgeblendet, bleibt aber in alten Runden und der Auswertung erhalten.',
   isNew: () => 'Neue Spieler kennt man noch kaum: Ihre Stärke gilt als unsicher, und sie werden wie Gäste gleichmäßig auf die Teams verteilt.',
-  auto: () => 'An: Die Gesamtstärke ist das gewichtete Mittel der Fähigkeiten; nicht bewertete Fähigkeiten zählen mit der groben Einschätzung. Aus: Es zählt die grobe Einschätzung, die Fähigkeiten dienen nur zum Ausgleichen der einzelnen Fähigkeiten.',
+  auto: () => 'An: Die Gesamtstärke ist das gewichtete Mittel der Fähigkeiten; nicht bewertete Fähigkeiten zählen mit der groben Einschätzung – solange keine gesetzt ist, wie der Schnitt der bewerteten Fähigkeiten. Aus: Es zählt die grobe Einschätzung, die Fähigkeiten dienen nur zum Ausgleichen der einzelnen Fähigkeiten.',
   posFit: () => `Wie viel seiner Stärke der Spieler auf jeder Position bringt. „auto“: Hauptposition 100 %, Nebenposition ${pctTxt(S.settings.fit.sub)}, fremde ${pctTxt(S.settings.fit.other)}. Spieler ohne Positionsangabe (flexibel) zählen überall ${pctTxt(S.settings.fit.flex)}. 0 heißt: spielt dort nie.`,
   tags: () => 'Spieler mit gleichem Merkmal werden gleichmäßig auf die Teams verteilt, z. B. Kinder oder Frauen. Unter „Regeln“ schaltest du einzelne Merkmale ab.',
   mix: () => 'So viele Feldspieler braucht ein Team mindestens je Position. Fehlt jemand, rückt ein Spieler einer überbesetzten Position nach und zählt dort mit seiner Eignung. Alles darüber ist frei – drei Stürmer sind also kein Problem. Das ist keine Formation, nur eine Mindestbesetzung.',
@@ -6268,7 +6272,7 @@ function editorHTML() {
       ${lbl(`Stärke${e.auto ? ' (aus Fähigkeiten berechnet)' : ''}`, 'strength')}
       <div class="bigval"><span class="num" id="edVal">${fmtS(e.strength)}</span><span id="edAnchor">${strengthAnchor(e.strength)}</span></div>
       <div class="refs"><span class="muted">Schnitt ${fmt(groupAvg(), 1)} · im Vergleich:</span>${weaker.map(ref).join('')}<span class="me">${esc(disp(p))} ${fmtS(e.strength)}</span>${stronger.map(ref).join('')}</div>
-      <label class="lbl" for="edStrength">${e.auto ? 'Grobe Einschätzung (zählt für nicht bewertete Fähigkeiten)' : 'Einschätzen'}</label>
+      <label class="lbl" for="edStrength">${e.auto ? (p.rated ? 'Grobe Einschätzung (zählt für nicht bewertete Fähigkeiten)' : 'Grobe Einschätzung – noch nicht gesetzt: nicht bewertete Fähigkeiten zählen wie der Schnitt der bewerteten') : 'Einschätzen'}</label>
       <div class="rangerow"><input type="range" min="1" max="${p.strength > 10 || p.star ? 15 : 10}" step="0.5" id="edStrength"${p.rated ? '' : ' class="unr"'} data-in="edStrength" data-ch="edStrengthDone" value="${e.manual}"><span class="num" id="edManual">${fmtS(e.manual)}</span></div>
       ${p.rated ? `<div class="row"><button type="button" class="linkbtn small" data-act="unrate">Einschätzung zurücknehmen</button><span class="small muted">wieder „nicht eingeschätzt“</span></div>` : ''}
       ${p.star || e.manual >= 9.5 ? `<label class="minichk"><input type="checkbox" data-ch="edStar"${p.star ? ' checked' : ''}>Ausnahmespieler – deutlich besser als 10, Regler bis 15</label>` : ''}
@@ -10200,7 +10204,7 @@ document.addEventListener('click', e => {
   if (!f) return;
   e.preventDefault();
   if (ui.arm && String(ui.arm).startsWith('bk:') && el.dataset.act === 'bkRestore') { /* bleibt scharf */ } else
-  if (ui.arm && !String(el.dataset.act).match(/^(delPlayer|resetDay|resetAll|delTag|importMultiReplace|delData|delPlace|fieldDel|newDay|projDel|rawReset|importConfirm)$/)) ui.arm = null;
+  if (ui.arm && !String(el.dataset.act).match(/^(delPlayer|resetDay|resetAll|delTag|importMultiReplace|delData|delPlace|fieldDel|newDay|projDel|rawReset|importConfirm|svRespDel|svDrop)$/)) ui.arm = null;
   if (ui.res && ui.res.arm && el.dataset.act !== 'resDel') ui.res.arm = false;
   f(el, e);
 });
@@ -10338,7 +10342,7 @@ function svBase() {
 function svLink(sv) {
   const data = { v: 1, i: sv.id, t: sv.title || S.name || 'Faire Teams', m: sv.text || '', n: sv.players.map(x => x.name) };
   const base = svBase();
-  return base ? `${base}#survey=${b32enc(svUtf8(JSON.stringify(data)))}` : '';
+  return base ? `${base}#ftu${b32enc(svUtf8(JSON.stringify(data)))}` : '';   // nur Buchstaben und Ziffern: WhatsApp erkennt sonst nicht den ganzen Link
 }
 const svDate = ts => new Date(ts).toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric', year: 'numeric' });
 const svWhoName = (sv, who) => { if (who[0] === 'p') { const x = sv.players[parseInt(who.slice(1), 36)]; return x ? x.name : '?'; } try { return svText(b32dec(who.slice(1))).slice(0, 60); } catch (e) { return '?'; } };
@@ -10437,10 +10441,10 @@ function svEval(sv, ownOf) {
    Läuft, wenn die Adresse #survey= enthält: keine Projekte, keine Navigation, nichts wird in die Projektdaten
    dieses Geräts geschrieben. Nur der Entwurf liegt unter einem eigenen Schlüssel.
    ============================================================ */
-var SV_MODE = /^#survey=/.test(location.hash);   // var: render() darf schon vorher aufgerufen werden
+var SV_MODE = /^#(survey=|ftu[a-z2-7])/.test(location.hash);   // var: render() darf schon vorher aufgerufen werden
 const SVP = { data: null, d: null, err: '', arm: false, order: null, dirty: false, copied: false };
 function svDecodeHash() {
-  const raw = location.hash.slice('#survey='.length).replace(/[^a-z2-7]/g, '');
+  const raw = location.hash.replace(/^#(survey=|ftu)/, '').replace(/[^a-z2-7]/g, '');
   const data = JSON.parse(svText(b32dec(raw)));
   if (!data || data.v !== 1 || !/^[a-z0-9]{6}$/.test(str(data.i)) || !Array.isArray(data.n) || !data.n.length) throw new Error('ungültig');
   return { i: data.i, t: str(data.t).slice(0, 60) || 'Faire Teams', m: str(data.m).slice(0, SV_MAX_TEXT), n: data.n.slice(0, 200).map(x => str(x).slice(0, 60) || '?') };
@@ -10519,14 +10523,23 @@ function svRender() {
   } else if (d.step === 'order') {
     if (!SVP.order) SVP.order = idx.filter(j => isNum(d.vals[j])).sort((a, b) => d.vals[b] - d.vals[a] || D.n[a].localeCompare(D.n[b], 'de'));
     const ord = SVP.order.filter(j => isNum(d.vals[j]));
-    const tiers = []; ord.forEach(j => { const v = d.vals[j], last = tiers[tiers.length - 1]; if (last && last.v === v) last.js.push(j); else tiers.push({ v, js: [j] }); });
-    const ties = tiers.filter(t => t.js.length > 1).length, unk = idx.filter(j => !isNum(d.vals[j]));
+    const unk = idx.filter(j => !isNum(d.vals[j]));
+    const xs = ord.map(j => d.vals[j]), nX = xs.length;
+    const mean = nX ? xs.reduce((a, b) => a + b, 0) / nX : 0, sd = nX > 1 ? Math.sqrt(xs.reduce((a, b) => a + (b - mean) ** 2, 0) / (nX - 1)) : 0;
+    const srt = xs.slice().sort((a, b) => a - b), pq = q => srt[Math.min(nX - 1, Math.max(0, Math.round((nX - 1) * q)))];
+    const tips = [];
+    if (nX >= 5) {
+      if (mean > 6.8) tips.push(`<b>Dein Schnitt liegt bei ${fmt(mean, 1)} – eher hoch.</b> Gedacht ist: 5–6 ist der Schnitt <i>eurer</i> Gruppe. Die meisten liegen also in der Mitte, nur wenige ganz oben.`);
+      if (mean < 4.2) tips.push(`<b>Dein Schnitt liegt bei ${fmt(mean, 1)} – eher niedrig.</b> Gedacht ist: 5–6 ist der Schnitt <i>eurer</i> Gruppe. Die meisten liegen also in der Mitte, nur wenige ganz unten.`);
+      if (sd < 1) tips.push(`<b>Deine Werte liegen eng beieinander</b> (fast alle zwischen ${fmtS(pq(0.1))} und ${fmtS(pq(0.9))}). Dann wirken alle fast gleich stark. Trau dich, die Skala breiter zu nutzen: die Schwächsten eher bei 2–3, die Stärksten bei 8–9.`);
+      if (sd > 3) tips.push('<b>Deine Werte liegen sehr weit auseinander.</b> Ist der Unterschied zwischen den Stärksten und den Schwächsten wirklich so groß?');
+    }
     let rank = 0;
     html += `<div class="svcard intro"><h2>So sieht deine Reihenfolge aus – passt das?</h2>
       <p>Geh die Liste von oben nach unten durch und vergleiche immer zwei Nachbarn: <b>Ist der Obere wirklich stärker?</b> Mit − und + verschiebst du jemanden um einen halben Punkt.</p>
-      ${ties ? `<p class="svtiehint">${ties === 1 ? 'Eine Gruppe ist' : `${ties} Gruppen sind`} gleich bewertet. Ist dort doch einer besser? Dann ihn um ½ anheben – vergleichen fällt meist leichter als Punkte vergeben.</p>` : ''}</div>
+      ${nX >= 5 ? (tips.length ? `<div class="svtips">${tips.map(t => `<p>${t}</p>`).join('')}<p class="small muted">Passt es trotzdem zu deinem Eindruck, lass es einfach so.</p></div>` : `<p class="svok">✓ Schnitt ${fmt(mean, 1)}, gut verteilt – sieht stimmig aus.</p>`) : ''}</div>
     ${SVP.dirty ? '<div class="svresort"><button type="button" class="btn sm primary" data-act="svResort">Neu sortieren</button><span class="small muted">Du hast Werte geändert.</span></div>' : ''}
-    <ol class="svorder">${tiers.map(t => `<li class="svtier${t.js.length > 1 ? ' tie' : ''}">${t.js.length > 1 ? `<div class="svtiehead"><span>gleich bewertet: ${fmtS(t.v)}</span></div>` : ''}${t.js.map(j => { rank++; const v = d.vals[j]; return `<div class="svorow" style="--lvl:${((v - 1) / 9 * 100).toFixed(0)}%"><span class="svrank num">${rank}</span><span class="svoname">${esc(D.n[j])}</span><span class="svobar" aria-hidden="true"><i></i></span><button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="-0.5"${v > 1 ? '' : ' disabled'} aria-label="${esc(D.n[j])} einen halben Punkt weniger">−</button><b class="svoval num">${fmtS(v)}</b><button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="0.5"${v < 10 ? '' : ' disabled'} aria-label="${esc(D.n[j])} einen halben Punkt mehr">+</button></div>`; }).join('')}</li>`).join('')}</ol>
+    <ol class="svorder">${ord.map(j => { rank++; const v = d.vals[j]; return `<li class="svorow" style="--lvl:${((v - 1) / 9 * 100).toFixed(0)}%"><span class="svrank num">${rank}</span><span class="svoname">${esc(D.n[j])}</span><span class="svobar" aria-hidden="true"><i></i></span><button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="-0.5"${v > 1 ? '' : ' disabled'} aria-label="${esc(D.n[j])} einen halben Punkt weniger">−</button><b class="svoval num">${fmtS(v)}</b><button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="0.5"${v < 10 ? '' : ' disabled'} aria-label="${esc(D.n[j])} einen halben Punkt mehr">+</button></li>`; }).join('')}</ol>
     ${unk.length ? `<p class="small muted svunk">Nicht beurteilt (${unk.length}): ${unk.map(j => esc(D.n[j])).join(', ')} – <button type="button" class="linkbtn" data-act="svGo" data-v="rate">doch noch bewerten</button></p>` : ''}`;
   } else {
     const code = svMakeCode(D.i, me >= 0 ? 'p' + me.toString(36) : 'n' + b32enc(svUtf8(str(d.name).slice(0, 40))), me >= 0 ? d.self : null, D.n.map((_, j) => (j === me ? 'y' : svChar(isNum(d.vals[j]) ? d.vals[j] : null))));
@@ -10774,7 +10787,7 @@ Object.assign(IN, {
   svPaste: el => { ui.svy.paste = el.value; const b = document.querySelector('[data-act="svRead"]'); if (b) b.disabled = !str(el.value); }
 });
 // Wird ein Umfrage-Link im selben Tab geöffnet (oder verlassen), neu laden – Umfrage und App laufen getrennt
-window.addEventListener('hashchange', e => { const was = /#survey=/.test(e.oldURL || ''), now = /^#survey=/.test(location.hash); if (was || now) location.reload(); });
+window.addEventListener('hashchange', e => { const was = /#(survey=|ftu[a-z2-7])/.test(e.oldURL || ''), now = /^#(survey=|ftu[a-z2-7])/.test(location.hash); if (was || now) location.reload(); });
 
 $('#logo').innerHTML = `<img src="${LOGO_SRC}" alt="" width="34" height="34">`;
 if (SV_MODE) svStart();
