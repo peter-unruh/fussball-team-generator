@@ -1238,6 +1238,10 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svapply { position: sticky; bottom: calc(-24px - env(safe-area-inset-bottom)); z-index: 6; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 96%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .svapply.on { border-color: var(--good); box-shadow: 0 -6px 20px -12px rgba(0, 0, 0, .35); }
 .svfoot { border-top: 1px solid var(--line); padding-top: 12px; }
+.svgot { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 12px; background: var(--surface); }
+.svgot > summary { cursor: pointer; font-weight: 650; font-size: .92rem; }
+.svgot[open] { display: grid; gap: 8px; }
+.svgot p { margin: 0; }
 </style>
 </head>
 <body>
@@ -4712,7 +4716,7 @@ const narrow = () => { try { return matchMedia('(max-width: 600px)').matches; } 
 /* ---------- Start ---------- */
 const LOGO_SRC = (document.getElementById('appIcon') || {}).href || '';   // App-Logo (eingebettet im Favicon)
 function viewWelcome() {
-  return `<section class="welcome">
+  return `${svGotHTML(false)}<section class="welcome">
     <div class="welcome-pitch" aria-hidden="true"><img src="${LOGO_SRC}" alt="" width="64" height="64"></div>
     <h2>Faire Teams für eure Runde</h2>
     <p class="lead">Schluss mit 10:1. Gleich starke Teams in Sekunden – gespeichert wird nur auf diesem Gerät.</p>
@@ -5190,6 +5194,7 @@ function projSheetHTML() {
     <p class="hint">Ein Projekt ist eine eigene Runde – z. B. „Fußball mit Freunden“ oder „Dienstagskick“ – mit eigenen Spielern, Regeln, Orten, Runden und Einstellungen. Gespeichert wird nur auf diesem Gerät.</p>
     <div class="field"><label class="lbl" for="projRenameIn">Name des geöffneten Projekts</label><div class="row"><input type="text" class="grow" id="projRenameIn" value="${esc(cur ? cur.name : '')}" maxlength="60"><button type="button" class="btn sm" data-act="projRename">Umbenennen</button></div></div>
     <ul class="rules">${items}</ul>
+    ${svGotHTML(false)}
     <div class="field"><label class="lbl" for="projNew">Neues Projekt</label><div class="row"><input type="text" class="grow" id="projNew" placeholder="z. B. Fußball mit Freunden" maxlength="60"><button type="button" class="btn primary sm" data-act="projNew">Anlegen</button></div>
       <span class="small muted">Das neue Projekt beginnt leer. Spieler aus einem anderen Projekt: dort unter Einstellungen → Daten als „Neue Saison“ exportieren (Spieler und Paarregeln, ohne Bewertungen und Runden) und hier einlesen.</span></div>
     ${P && P.err ? `<p class="errtxt">${esc(P.err)}</p>` : ''}`, 'projTitle', 'projClose');
@@ -10313,7 +10318,8 @@ const svChar = v => (isNum(v) ? SV_CH[clamp(Math.round((v - 1) * 2), 0, 18)] : '
 const svVal = c => { const k = SV_CH.indexOf(c); return k < 0 ? null : 1 + k / 2; };
 const svR2 = v => Math.round(v * 2) / 2;
 const svMed = a => { const s = a.slice().sort((x, y) => x - y), k = s.length; return k ? (k % 2 ? s[(k - 1) / 2] : (s[k / 2 - 1] + s[k / 2]) / 2) : null; };
-const svNewId = () => { const c = 'abcdefghijkmnpqrstuvwxyz23456789'; let s = ''; const r = new Uint32Array(6); try { crypto.getRandomValues(r); } catch (e) { for (let i = 0; i < 6; i++) r[i] = Math.random() * 1e9; } r.forEach(x => { s += c[x % c.length]; }); return s; };
+const svNewId = () => { const c = 'abcdefghijkmnpqrstuvwxyz';   // nur Buchstaben: kürzerer Link
+   let s = ''; const r = new Uint32Array(6); try { crypto.getRandomValues(r); } catch (e) { for (let i = 0; i < 6; i++) r[i] = Math.random() * 1e9; } r.forEach(x => { s += c[x % c.length]; }); return s; };
 
 /* ---------- Daten im Projekt ---------- */
 function cleanSurveys(list) {
@@ -10339,10 +10345,50 @@ function svBase() {
   const c = document.querySelector('link[rel="canonical"]'), h = c && c.href;
   return h && /^https:\/\//.test(h) && !/DEIN-GITHUB-NAME/.test(h) ? h : '';
 }
+/* Kompakter Link: WhatsApp verlinkt sehr lange Adressen nicht vollständig. Deshalb so kurz wie möglich:
+   Buchstaben bleiben Buchstaben (nur verschoben, damit die Namen nicht direkt lesbar sind), Leerzeichen wird „-“,
+   jedes andere Zeichen „0“ + 4 Zeichen (Unicode-Nummer, Basis 36); Felder getrennt durch „1“.
+   Der Link ist damit etwa so lang wie die Namen selbst. Die Begrüßung steht in der Nachricht, nicht im Link. */
+const SV_UML = 'äöüßÄÖÜé';   // häufige Sonderzeichen: je eine Ziffer 2–9 statt fünf Zeichen
+const SV_HASH = /^#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/;
+function svPack(fields) {
+  let out = '';
+  const put = c => { out += c; };
+  fields.forEach((f, k) => {
+    if (k) put('1');
+    for (const ch of String(f)) {
+      const lo = ch >= 'a' && ch <= 'z', up = ch >= 'A' && ch <= 'Z';
+      if (lo || up) { const b = lo ? 97 : 65, sft = (out.length * 7 + 3) % 26; put(String.fromCharCode(b + (ch.charCodeAt(0) - b + sft) % 26)); }
+      else if (ch === ' ') put('-');
+      else if (SV_UML.includes(ch)) put(String(2 + SV_UML.indexOf(ch)));
+      else { const cp = ch.codePointAt(0); if (cp <= 1679615) put('0' + cp.toString(36).padStart(4, '0')); }
+    }
+  });
+  return out;
+}
+function svUnpack(s) {
+  const f = [''];
+  for (let i = 0; i < s.length;) {
+    const ch = s[i], k = f.length - 1;
+    if (ch === '1') { f.push(''); i++; continue; }
+    if (ch === '-') { f[k] += ' '; i++; continue; }
+    if (ch >= '2' && ch <= '9') { f[k] += SV_UML[+ch - 2]; i++; continue; }
+    if (ch === '0') { const c = s.slice(i + 1, i + 5); if (!/^[0-9a-z]{4}$/.test(c)) throw new Error('Zeichen'); f[k] += String.fromCodePoint(parseInt(c, 36)); i += 5; continue; }
+    const lo = ch >= 'a' && ch <= 'z', up = ch >= 'A' && ch <= 'Z';
+    if (!lo && !up) throw new Error('Zeichen');
+    const b = lo ? 97 : 65, sft = (i * 7 + 3) % 26;
+    f[k] += String.fromCharCode(b + (ch.charCodeAt(0) - b - sft + 52) % 26); i++;
+  }
+  return f;
+}
 function svLink(sv) {
-  const data = { v: 1, i: sv.id, t: sv.title || S.name || 'Faire Teams', m: sv.text || '', n: sv.players.map(x => x.name) };
   const base = svBase();
-  return base ? `${base}#ftu${b32enc(svUtf8(JSON.stringify(data)))}` : '';   // nur Buchstaben und Ziffern: WhatsApp erkennt sonst nicht den ganzen Link
+  return base ? `${base}#ft2${svPack([sv.id, sv.title || S.name || 'Faire Teams', ...sv.players.map(x => x.name)])}` : '';
+}
+/* Nachricht zum Link (WhatsApp, Teilen, Kopieren) */
+function svMsg(sv) {
+  const greet = sv.text || 'Bitte schätz ein, wie stark unsere Spieler sind – damit die Teams fairer werden. Dauert ein paar Minuten, deine Einzelwerte sehe nur ich.';
+  return `⚽ ${sv.title || S.name}: ${greet}\n\n👉 ${svLink(sv)}\n\n(Öffnet sich nur die Startseite? Dann diese Nachricht kopieren und in der App bei „Bewertungs-Link einfügen“ einsetzen.)`;
 }
 const svDate = ts => new Date(ts).toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric', year: 'numeric' });
 const svWhoName = (sv, who) => { if (who[0] === 'p') { const x = sv.players[parseInt(who.slice(1), 36)]; return x ? x.name : '?'; } try { return svText(b32dec(who.slice(1))).slice(0, 60); } catch (e) { return '?'; } };
@@ -10441,10 +10487,17 @@ function svEval(sv, ownOf) {
    Läuft, wenn die Adresse #survey= enthält: keine Projekte, keine Navigation, nichts wird in die Projektdaten
    dieses Geräts geschrieben. Nur der Entwurf liegt unter einem eigenen Schlüssel.
    ============================================================ */
-var SV_MODE = /^#(survey=|ftu[a-z2-7])/.test(location.hash);   // var: render() darf schon vorher aufgerufen werden
+var SV_MODE = /^#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(location.hash);   // var: render() darf schon vorher aufgerufen werden
 const SVP = { data: null, d: null, err: '', arm: false, order: null, dirty: false, copied: false };
 function svDecodeHash() {
-  const raw = location.hash.replace(/^#(survey=|ftu)/, '').replace(/[^a-z2-7]/g, '');
+  const h = location.hash;
+  if (/^#ft2/.test(h)) {
+    const f = svUnpack(h.slice(4).replace(/[^A-Za-z0-9-]/g, ''));
+    if (f.length < 3 || !/^[a-z0-9]{6}$/.test(f[0])) throw new Error('ungültig');
+    return { i: f[0], t: str(f[1]).slice(0, 60) || 'Faire Teams', m: '', n: f.slice(2, 202).map(x => str(x).slice(0, 60) || '?') };
+  }
+  // Ältere Links (JSON, Base32)
+  const raw = h.replace(/^#(survey=|ftu)/, '').replace(/[^a-z2-7]/g, '');
   const data = JSON.parse(svText(b32dec(raw)));
   if (!data || data.v !== 1 || !/^[a-z0-9]{6}$/.test(str(data.i)) || !Array.isArray(data.n) || !data.n.length) throw new Error('ungültig');
   return { i: data.i, t: str(data.t).slice(0, 60) || 'Faire Teams', m: str(data.m).slice(0, SV_MAX_TEXT), n: data.n.slice(0, 200).map(x => str(x).slice(0, 60) || '?') };
@@ -10632,7 +10685,7 @@ function svSheetHTML() {
       ${noBase ? '<div class="banner warn"><p>Die App ist als Datei geöffnet. Ein Umfrage-Link funktioniert nur mit der Online-Adresse der App – öffne sie dafür über ihre Internetadresse.</p></div>' : ''}
       <div class="field"><div class="lblrow"><span class="lbl">Wer soll bewertet werden? (${nSel})</span><span class="grow"></span><button type="button" class="btn sm ghost" data-act="svPickAll" data-v="1">alle</button><button type="button" class="btn sm ghost" data-act="svPickAll" data-v="0">keinen</button></div>
         <div class="svpick">${pl.map(p => cbx('svPick', !!U.pick[p.id], label(p) + (st[p.status] ? ` · ${st[p.status]}` : ''), `data-id="${p.id}"`)).join('')}</div></div>
-      <div class="field"><label class="lbl" for="svText">Begrüßung (optional, höchstens ${SV_MAX_TEXT} Zeichen)</label>
+      <div class="field"><label class="lbl" for="svText">Begrüßung für die Nachricht (optional, höchstens ${SV_MAX_TEXT} Zeichen)</label>
         <textarea id="svText" data-in="svText" maxlength="${SV_MAX_TEXT}" rows="2" placeholder="z. B. Hi! Damit die Teams fairer werden: Wie stark schätzt du jeden ein? Dauert 3 Minuten.">${esc(U.text || '')}</textarea></div>
       <div class="row"><button type="button" class="btn primary" data-act="svCreate"${nSel >= 3 && !noBase ? '' : ' disabled'}>Link erstellen</button>${nSel < 3 ? '<span class="small muted">Mindestens 3 Spieler auswählen.</span>' : ''}</div>`, 'svTitle', 'svClose');
   }
@@ -10675,14 +10728,14 @@ function svSheetHTML() {
     }).join('')}</ul>
     ${strong.length ? `<div class="row svbulk"><span class="small grow">Alle mit mindestens 1 Punkt Abweichung und 3 Stimmen (${strong.length}):</span><button type="button" class="btn sm" data-act="svBulk" data-v="mid">Mitte vormerken</button><button type="button" class="btn sm" data-act="svBulk" data-v="grp">Gruppe vormerken</button></div>` : ''}
     <div class="svapply${nPick ? ' on' : ''}"><span class="grow small">${nPick ? `${plural(nPick, 'Änderung', 'Änderungen')} vorgemerkt – der grüne Punkt zeigt den neuen Wert.` : 'Je Spieler „Mitte“ oder „Gruppe“ wählen, dann hier übernehmen. Nichts ändert sich automatisch.'}</span>${nPick ? '<button type="button" class="btn sm ghost" data-act="svPickClear">verwerfen</button>' : ''}<button type="button" class="btn sm primary" data-act="svApply"${nPick ? '' : ' disabled'}>Übernehmen</button></div>`;
-  const msgTxt = `${sv.title || S.name}: Bitte schätz ein, wie stark die Spieler sind – damit unsere Teams fairer werden. Dauert ein paar Minuten. Deine Einzelwerte sehe nur ich.\n${link}`;
+  const msgTxt = svMsg(sv);
   const armedSv = ui.arm === 'svDrop:' + sv.id;
   return sheetWrap(`${head('Gruppenmeinung')}
     ${L.length > 1 ? `<div class="row"><span class="lbl">Umfrage</span><select data-ch="svSel" aria-label="Umfrage wählen">${L.map(x => `<option value="${x.id}"${x.id === sv.id ? ' selected' : ''}>vom ${svDate(x.created)} · ${plural(x.responses.length, 'Antwort', 'Antworten')}</option>`).join('')}</select></div>` : ''}
     <details class="field svsec" data-sec="svLink"${ui.open.svLink || !sv.responses.length ? ' open' : ''}><summary><b>1. Link teilen</b> <span class="small muted">· ${plural(sv.players.length, 'Spieler', 'Spieler')} · vom ${svDate(sv.created)}</span></summary>
       ${link ? `<div class="svlinkbox"><input type="text" readonly id="svLinkIn" value="${esc(link)}" aria-label="Umfrage-Link"></div>
       <div class="row"><a class="btn sm primary" href="https://wa.me/?text=${encodeURIComponent(msgTxt)}" target="_blank" rel="noopener">WhatsApp</a>${navigator.share ? '<button type="button" class="btn sm" data-act="svShareLink">Teilen …</button>' : ''}<button type="button" class="btn sm" data-act="svCopyLink">Kopieren</button><a class="btn sm ghost" href="${esc(link)}" target="_blank" rel="noopener">Selbst ausfüllen</a></div>
-      ${link.length > 4000 ? '<p class="small errtxt">Der Link ist sehr lang (viele Spieler). Manche Apps kürzen so lange Links.</p>' : ''}
+      ${link.length > 700 ? '<p class="small muted">Der Link ist lang (viele Spieler). Lässt er sich in WhatsApp nicht ganz antippen, öffnet sich nur die Startseite – dort können die Mitspieler die Nachricht unter „Bewertungs-Link einfügen“ einsetzen. Steht so auch in der Nachricht.</p>' : ''}
       <p class="small muted">Tipp: Füll die Umfrage selbst aus, bevor du dir die Ergebnisse ansiehst – dann zählt deine Meinung unbeeinflusst mit.</p>` : '<p class="small errtxt">Kein Link möglich: Die App ist als Datei geöffnet. Öffne sie über ihre Internetadresse.</p>'}</details>
     <div class="field"><label class="lbl" for="svPaste">2. Antworten einfügen</label>
       <textarea id="svPaste" data-in="svPaste" rows="3" placeholder="Nachrichten mit „FTU1-…“ hier einfügen – auch mehrere auf einmal oder ein ganzer Chat.">${esc(U.paste || '')}</textarea>
@@ -10726,8 +10779,8 @@ Object.assign(A, {
     ui.svy = { view: '', sel: sv.id, picks: {} }; ui.open.svLink = true;
     render(); toast('Umfrage erstellt – jetzt den Link teilen.');
   },
-  svShareLink: async () => { const sv = svCur(); if (!sv) return; try { await navigator.share({ text: `${sv.title || S.name}: Bitte schätz ein, wie stark die Spieler sind – damit unsere Teams fairer werden. Deine Einzelwerte sehe nur ich.`, url: svLink(sv) }); } catch (e) { /* abgebrochen */ } },
-  svCopyLink: () => { const sv = svCur(); if (sv) copyText(svLink(sv), 'Link kopiert.'); },
+  svShareLink: async () => { const sv = svCur(); if (!sv) return; try { await navigator.share({ text: svMsg(sv) }); } catch (e) { /* abgebrochen */ } },
+  svCopyLink: () => { const sv = svCur(); if (sv) copyText(svMsg(sv), 'Nachricht mit Link kopiert.'); },
   svRead: () => {
     const U = ui.svy, r = svIngest(U.paste);
     const parts = [];
@@ -10787,7 +10840,25 @@ Object.assign(IN, {
   svPaste: el => { ui.svy.paste = el.value; const b = document.querySelector('[data-act="svRead"]'); if (b) b.disabled = !str(el.value); }
 });
 // Wird ein Umfrage-Link im selben Tab geöffnet (oder verlassen), neu laden – Umfrage und App laufen getrennt
-window.addEventListener('hashchange', e => { const was = /#(survey=|ftu[a-z2-7])/.test(e.oldURL || ''), now = /^#(survey=|ftu[a-z2-7])/.test(location.hash); if (was || now) location.reload(); });
+window.addEventListener('hashchange', e => { const was = /#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(e.oldURL || ''), now = SV_HASH.test(location.hash); if (was || now) location.reload(); });
+
+/* Notausgang: Ist der Link in WhatsApp nicht vollständig antippbar, öffnet sich nur die Startseite.
+   Dort lässt sich die ganze Nachricht einfügen; der Link wird herausgesucht und die Umfrage geöffnet. */
+function svGotHTML(open) {
+  return `<details class="svgot"${open ? ' open' : ''}><summary>📩 Bewertungs-Link einfügen</summary>
+    <p class="small muted">Du hast einen Link zum Bewerten bekommen, aber es öffnet sich nur diese Seite? Halte die Nachricht in WhatsApp gedrückt → „Kopieren“ und füge sie hier ein.</p>
+    <textarea id="svGotIn" rows="3" placeholder="Nachricht hier einfügen"></textarea>
+    <div class="row"><button type="button" class="btn sm primary" data-act="svGotOpen">Bewertung öffnen</button>${ui.svGotErr ? `<span class="small errtxt">${esc(ui.svGotErr)}</span>` : ''}</div></details>`;
+}
+Object.assign(A, {
+  svGotOpen: () => {
+    const t = String(($('#svGotIn') || {}).value || '').replace(/\s+/g, '');
+    const m = /#(ft2[A-Za-z0-9-]{8,}|ftu[a-z2-7]{8,}|survey=[a-z2-7]{8,})/.exec(t);
+    if (!m) { ui.svGotErr = 'Darin steht kein Bewertungs-Link. Bitte die ganze Nachricht kopieren.'; render(); return; }
+    ui.svGotErr = '';
+    location.hash = '#' + m[1];   // löst das Neuladen im Umfrage-Modus aus
+  }
+});
 
 $('#logo').innerHTML = `<img src="${LOGO_SRC}" alt="" width="34" height="34">`;
 if (SV_MODE) svStart();
