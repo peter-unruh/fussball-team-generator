@@ -37,7 +37,8 @@ Zum Reinschnuppern gibt es eine **Beispielgruppe** („Erst mal ausprobieren“)
 - **Ergebnisse eintragen** – der Rückblick lernt daraus und schätzt Stärken mit der Zeit genauer
 - **Orte, Platz und Wetter** pro Spieltag
 - **Spielerliste aus Screenshots einlesen**, z. B. aus einer WhatsApp-Gruppe oder -Umfrage
-- **Teams teilen** per WhatsApp & Co.
+- **Spieler von der Gruppe bewerten lassen:** Link verschicken, Mitspieler schätzen alle ein (mit Reihenfolge-Check) und schicken einen kurzen Code zurück – du siehst die Gruppenmeinung neben deiner Bewertung und übernimmst, was passt
+- **Teams teilen** per WhatsApp & Co. – übersichtlich mit Uhrzeit, Ort und einer Liste je Team
 - **Mehrere Gruppen** (Projekte), **Sicherung als Datei** und **Export als Tabelle (CSV)**
 - Fürs Handy gemacht, mit **hellem und dunklem Design**
 
@@ -58,6 +59,7 @@ Die App erscheint dann mit eigenem Symbol auf dem Startbildschirm.
   - **Ortssuche und Wetter:** [Open-Meteo](https://open-meteo.com), [Photon (Komoot)](https://photon.komoot.io) und [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org)
   - **Screenshots einlesen:** Die Texterkennung [Tesseract.js](https://tesseract.projectnaptha.com) wird von jsDelivr geladen – die Bilder selbst werden auf deinem Gerät ausgewertet.
   - **Karten-Links** öffnen Google Maps.
+- **Bewertungs-Umfrage:** Die Spielernamen stecken nur im Link (hinter dem #, das wird nie an einen Server geschickt). Die Antworten schicken die Mitspieler selbst per Nachricht zurück; Einzelwerte sieht nur, wer die Umfrage verschickt hat.
 
 > **Tipp:** Weil alles lokal gespeichert ist, sind deine Daten an Gerät und Browser gebunden. Du kannst in der App jederzeit eine **Sicherungsdatei** herunterladen – damit ziehst du auf ein neues Handy um oder teilst die Gruppe mit einem Mitspieler.
 

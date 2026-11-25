@@ -144,6 +144,9 @@ input[type=text], input[type=search], input[type=number], input[type=date], inpu
 textarea { resize: vertical; }
 input.numin { width: 4.6em; min-height: 36px; padding: 5px 6px; text-align: center; }
 input[type=range] { width: 100%; accent-color: var(--turf); min-height: 30px; }
+/* Kein automatisches Hineinzoomen beim Antippen von Eingabefeldern (iPhone zoomt bei Schrift unter 16 px) */
+@media (hover: none) and (pointer: coarse) { input:not([type=range]):not([type=checkbox]):not([type=radio]), select, textarea { font-size: 16px !important; } }
+html { touch-action: manipulation; }
 /* Noch nicht eingeschätzt: Regler grau, bis man ihn bewegt */
 input[type=range].unr { accent-color: #9aa59e; opacity: .85; }
 .chk { display: inline-flex; gap: 8px; align-items: center; font-size: .9rem; }
@@ -1120,6 +1123,122 @@ a.btn { color: inherit; text-decoration: none; }
   .actionbar { backdrop-filter: saturate(1.6) blur(14px); -webkit-backdrop-filter: saturate(1.6) blur(14px); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- Umfrage: Seite für die Befragten ---------- */
+body.svmode .nav, body.svmode .pchev { display: none !important; }
+body.svmode .projbtn { pointer-events: none; }
+body.svmode .projbtn:disabled { opacity: 1; }
+body.svmode .svbar-in > .svprog + .btn { flex: 0 0 auto; }
+body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+.svpage { display: grid; gap: 14px; }
+.svhero { display: flex; align-items: center; gap: 14px; padding: 6px 2px 0; }
+.svhero img { border-radius: 14px; box-shadow: var(--shadow); flex: none; }
+.svkick { font-size: .78rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--turf); }
+.svhero h1 { margin: 0; font-family: var(--font-display); font-size: 1.7rem; line-height: 1.1; font-weight: 800; }
+.svmsg { margin: 0; padding: 12px 14px; border-radius: var(--r); background: var(--turf-soft); border-left: 4px solid var(--turf); font-size: 1rem; white-space: pre-line; }
+.svhow { margin: 0; padding: 0 0 0 22px; display: grid; gap: 6px; font-size: .95rem; }
+.svpriv { margin: 0; font-size: .85rem; color: var(--muted); }
+.svh { font-size: 1.1rem; margin: 8px 2px -4px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.svh .muted { font-size: .85rem; font-weight: 600; }
+.svlist { display: grid; gap: 10px; }
+.svcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; box-shadow: 0 1px 2px rgba(20, 40, 28, .04); transition: border-color .2s ease, background-color .2s ease; }
+.svcard.done { border-color: color-mix(in srgb, var(--turf) 40%, var(--line)); }
+.svcard.unk { background: var(--surface-2); }
+.svcard.unk .svname, .svcard.unk .svscale { opacity: .55; }
+.svcard.self { border-style: dashed; }
+.svcard.who select { font-size: 1rem; min-height: 46px; }
+.svcard.who input { min-height: 44px; }
+.svtop { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.svname { font-weight: 700; font-size: 1.05rem; min-width: 0; overflow-wrap: anywhere; }
+.svval { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; line-height: 1; color: var(--turf); min-width: 2.2ch; text-align: right; }
+.svcard:not(.done) .svval { color: var(--muted); }
+.svword { font-size: .8rem; color: var(--muted); margin-top: -6px; }
+.svscale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; }
+.svc { min-height: 40px; padding: 0; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); font-weight: 700; font-size: .92rem; border-radius: 6px; font-variant-numeric: tabular-nums; transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+.svc:first-child { border-radius: 10px 6px 6px 10px; }
+.svc:last-child { border-radius: 6px 10px 10px 6px; }
+.svc.on { background: var(--turf); border-color: var(--turf); color: var(--turf-ink); }
+.svc.half { background: linear-gradient(90deg, var(--turf) 50%, var(--surface-2) 50%); border-color: var(--turf); color: var(--ink); }
+.svscale.empty .svc { background: var(--surface); }
+.svfine { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.svhalf { min-height: 36px; min-width: 52px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-weight: 700; color: var(--ink); }
+.svhalf:disabled { opacity: .35; }
+.svq { min-height: 36px; padding: 0 12px; border: 1px dashed var(--line); border-radius: 999px; background: transparent; color: var(--muted); font-size: .84rem; font-weight: 600; }
+.svq.on { border-style: solid; border-color: var(--muted); color: var(--ink); background: var(--surface-2); }
+.svbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+.svbar-in { max-width: 640px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
+.svprog { flex: 1 1 140px; display: grid; gap: 5px; font-size: .9rem; }
+.svprog i { display: block; height: 6px; border-radius: 99px; background: linear-gradient(90deg, var(--turf) var(--p), var(--surface-2) var(--p)); }
+.svneed { flex-basis: 100%; text-align: right; order: 3; }
+.btn.primary.armed { background: var(--warn); border-color: var(--warn); color: #1d1400; }
+.svcard.intro h2 { font-size: 1.2rem; }
+.svcard.intro p { margin: 0; }
+.svtiehint { padding: 8px 10px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); font-size: .9rem; }
+.svresort { display: flex; gap: 10px; align-items: center; position: sticky; top: 64px; z-index: 5; padding: 6px 0; }
+.svorder { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.svtier { display: grid; gap: 4px; }
+.svtier.tie { padding: 6px; border-radius: var(--r); border: 1.5px dashed color-mix(in srgb, var(--warn) 60%, var(--line)); background: color-mix(in srgb, var(--warn) 6%, transparent); }
+.svtiehead { font-size: .76rem; font-weight: 700; color: var(--warn); padding: 0 4px; }
+.svorow { display: grid; grid-template-columns: 2.1em minmax(0, 1fr) 54px auto 2.6ch auto; align-items: center; gap: 8px; padding: 6px 8px 6px 10px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line); }
+.svrank { color: var(--muted); font-weight: 700; font-size: .85rem; }
+.svoname { font-weight: 650; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.svobar { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.svobar i { display: block; height: 100%; width: var(--lvl); background: var(--turf); border-radius: 99px; }
+.svoval { text-align: center; font-size: 1.05rem; }
+.svorow .svhalf { min-width: 38px; min-height: 36px; padding: 0; font-size: 1.1rem; }
+.svunk { margin: 0; }
+.svdone { text-align: center; justify-items: center; padding: 22px 16px; }
+.svdone p { margin: 0; max-width: 34em; }
+.svcheck { width: 56px; height: 56px; border-radius: 50%; background: var(--turf); color: var(--turf-ink); font-size: 1.8rem; display: grid; place-items: center; font-weight: 800; animation: fxPop .6s var(--ease-spring, ease) both; }
+.svcode { margin: 4px 0; width: 100%; text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; padding: 12px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--line); user-select: all; -webkit-user-select: all; }
+.svsend { display: grid; gap: 8px; width: 100%; max-width: 360px; }
+.svsend .btn { width: 100%; text-decoration: none; }
+@media (max-width: 380px) { .svc { font-size: .8rem; min-height: 38px; } .svorow { grid-template-columns: 1.8em minmax(0, 1fr) 30px auto 2.6ch auto; gap: 6px; } }
+
+/* ---------- Umfrage: Verwaltung und Vergleich (Fenster beim Organisator) ---------- */
+.svent { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.svent .emo { font-size: 1rem; }
+.svsteps { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: .92rem; }
+.svpick { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0 10px; max-height: 260px; overflow-y: auto; padding: 4px; border: 1px solid var(--line); border-radius: var(--r-sm); }
+.svsec > summary { cursor: pointer; padding: 8px 10px; border-radius: var(--r-sm); background: var(--surface-2); }
+.svsec[open] > summary { margin-bottom: 8px; }
+.svlinkbox input { width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; color: var(--muted); }
+.svresp li.off { opacity: .55; }
+.svbad { margin: 0; padding-left: 18px; }
+.svopts { gap: 18px; }
+.svopts > span { display: inline-flex; align-items: center; gap: 8px; }
+.svlegend { display: flex; gap: 14px; flex-wrap: wrap; margin: 0; }
+.svlegend span { display: inline-flex; align-items: center; gap: 6px; }
+.lg { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.lg.own { border: 2px solid var(--ink); }
+.lg.grp { width: 4px; height: 14px; border-radius: 2px; background: var(--turf); }
+.lg.dot { width: 7px; height: 7px; background: color-mix(in srgb, var(--muted) 70%, transparent); }
+.lg.new { background: var(--good); box-shadow: 0 0 0 2px color-mix(in srgb, var(--good) 35%, transparent); }
+.svres { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.svres > li { border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 6px; background: var(--surface); }
+.svres > li.weak .svline, .svres > li.weak .svnums { opacity: .55; }
+.svres > li.none { opacity: .7; }
+.svrtop { display: flex; align-items: center; gap: 8px; }
+.svrmid { display: flex; align-items: center; gap: 12px; }
+.svnums { flex: none; font-variant-numeric: tabular-nums; font-size: .95rem; white-space: nowrap; }
+.svnums b { color: var(--turf); font-size: 1.05rem; }
+.svline { position: relative; flex: 1; height: 22px; min-width: 120px; }
+.svline i { position: absolute; top: 50%; transform: translate(-50%, -50%); }
+.svline .axis { left: 0; right: 0; transform: translateY(-50%); height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--line), var(--line)); }
+.svline .dot { width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 65%, transparent); }
+.svline .grp { width: 4px; height: 18px; border-radius: 2px; background: var(--turf); z-index: 2; }
+.svline .own { width: 13px; height: 13px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--surface); z-index: 3; }
+.svline .new { width: 11px; height: 11px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 30%, transparent); z-index: 4; }
+.svd { font-size: .8rem; font-weight: 750; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-variant-numeric: tabular-nums; }
+.svd.big { background: color-mix(in srgb, var(--warn) 18%, var(--surface)); color: var(--warn); }
+.svd.ok { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); }
+.tag.t-split { background: color-mix(in srgb, var(--warn) 16%, var(--surface)); color: var(--warn); }
+.svrsub { margin-top: -2px; }
+.svrpick .seg.pill button { min-height: 32px; }
+.svbulk { padding: 8px 10px; border-radius: var(--r-sm); background: var(--surface-2); }
+.svapply { position: sticky; bottom: calc(-24px - env(safe-area-inset-bottom)); z-index: 6; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 96%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.svapply.on { border-color: var(--good); box-shadow: 0 -6px 20px -12px rgba(0, 0, 0, .35); }
+.svfoot { border-top: 1px solid var(--line); padding-top: 12px; }
 </style>
 </head>
 <body>
@@ -1309,7 +1428,7 @@ const SPORT = {
     { name: 'Grau', color: '#8b9390', ink: '#111413', mark: '🔘' },
     { name: 'Pink', color: '#de5590', ink: '#ffffff', mark: '🩷' },
     // Bunt: Leibchen in vielen Farben; color = Ersatzfarbe für Linien und Punkte, bg = Fläche
-    { name: 'Bunt', color: '#8a52c9', ink: '#ffffff', mark: '🌈', bg: 'linear-gradient(120deg, #e53935 0%, #fb8c00 22%, #f6c700 40%, #43a047 60%, #1e88e5 80%, #8e24aa 100%)' }
+    { name: 'Bunt', color: '#8a52c9', ink: '#ffffff', mark: '🎨', bg: 'linear-gradient(120deg, #e53935 0%, #fb8c00 22%, #f6c700 40%, #43a047 60%, #1e88e5 80%, #8e24aa 100%)' }
   ]
 };
 
@@ -3000,7 +3119,7 @@ function defaultDay(date) {
   };
 }
 function defaultState() {
-  return { app: 'team-generator', version: DATA_VERSION, name: '', me: null, sample: false, welcomed: false, players: [], rules: [], tags: { presets: SPORT.tagPresets.slice(), off: [] }, places: [], settings: defaultSettings(), day: defaultDay(), result: null, matches: [], recs: [], log: [] };
+  return { app: 'team-generator', version: DATA_VERSION, name: '', me: null, sample: false, welcomed: false, players: [], rules: [], tags: { presets: SPORT.tagPresets.slice(), off: [] }, places: [], settings: defaultSettings(), day: defaultDay(), result: null, matches: [], recs: [], log: [], surveys: [] };
 }
 /* Ein Spieltag: Teams, Schnappschuss der Bewertungen, Vorhersage, Ergebnis und Einschätzung.
    status: open = Teams gebildet, Ergebnis fehlt · done = erfasst · skipped = übersprungen ·
@@ -3172,6 +3291,8 @@ function cleanState(raw) {
     label: str(e.label).slice(0, 160), src: e.src === 'own' ? 'own' : 'rec', extra: e.extra && typeof e.extra === 'object' ? { isNew: !!e.extra.isNew, rated: e.extra.rated !== false, autoStrength: typeof e.extra.autoStrength === 'boolean' ? e.extra.autoStrength : null } : null
   }));
 
+  // Umfragen: Spielerliste zum Zeitpunkt der Umfrage und die Antworten (Werte zu später gelöschten Spielern bleiben)
+  s.surveys = cleanSurveys(raw.surveys);
   // Aktuelle Teams: jeder bekannte Spieler höchstens einmal, kein Team leer
   const validTeams = teams => { const c = cleanTeams(teams, id => ids.has(id)); return c && c.length === teams.length && c.flat().length === teams.flat().length ? c : null; };
   const R = raw.result;
@@ -3506,7 +3627,7 @@ function openProject(id) {
   try { S = raw ? cleanState(JSON.parse(raw)) : defaultState(); }
   catch (e) { ui.loadError = { raw, key: PROJ_KEY(id), msg: e && e.message ? e.message : 'unbekannter Fehler' }; ui.noSave = true; S = defaultState(); }
   if (!S.name) S.name = pr.name;
-  Object.assign(ui, { tab: 'day', editId: null, newId: null, res: null, pa: null, mb: null, sel: [], dups: [], undo: null, importPreview: null, arm: null, shot: null, proj: null, search: '', psearch: '' });
+  Object.assign(ui, { svy: null, tab: 'day', editId: null, newId: null, res: null, pa: null, mb: null, sel: [], dups: [], undo: null, importPreview: null, arm: null, shot: null, proj: null, search: '', psearch: '' });
   anaCache = null; predCache.clear();
   return true;
 }
@@ -4196,14 +4317,18 @@ const verdictWord = pct => (pct < 2 ? 'Sehr ausgeglichen' : pct < 5 ? 'Gut ausge
 function shareText() {
   const R = S.result, M = buildModel();
   const det = !isStale(R, M) ? Engine.evaluate(M, assignFrom(M, R.teams), true) : null;
-  const head = `⚽ Teams für ${dateShort(S.day.date)}${S.day.place ? ' – ' + S.day.place : ''}`;
-  const lines = [head];
+  // WhatsApp: *fett*. Kopf: Wochentag und Datum ausgeschrieben, darunter Uhrzeit und Ort (soweit eingetragen)
+  const day = isIso(S.day.date) ? new Date(S.day.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+  const lines = [`⚽ *Teams für ${day || 'heute'}*`];
+  const when = S.day.time ? `⏰ ${S.day.time} Uhr` : '', where = S.day.place ? `📍 ${S.day.place}${S.day.field ? ' · ' + S.day.field : ''}` : '';
+  if (when || where) lines.push([when, where].filter(Boolean).join('   '));
   R.teams.forEach((ids, t) => {
     const c = teamCol(t);
-    const names = ids.map(id => { const i = M.idx.get(id); return disp(byId(id)) + (det && det.gk[t] === i ? ' (TW)' : ''); });
-    lines.push(`${c.mark} ${c.name} (${ids.length}): ${names.join(', ')}`);
+    lines.push('', `${c.mark} *Team ${t + 1} · ${c.name}* (${ids.length})`);
+    ids.forEach(id => { const i = M.idx.get(id); lines.push(disp(byId(id)) + (det && det.gk[t] === i ? ' 🧤' : '')); });
   });
-  if (det) lines.push(`Fairness: ${verdictWord(det.pct).toLowerCase()}`);
+  if (det) lines.push('', `⚖️ Fairness: ${verdictWord(det.pct).toLowerCase()}`);
+  if (det && det.gk.some(x => x != null && x >= 0)) lines.push('🧤 = Torwart');
   return lines.join('\n');
 }
 async function shareTeams() {
@@ -4238,7 +4363,7 @@ function projectExport(st, kind) {
     D.players.forEach(p => { Object.assign(p, { strength: 5, rated: false, attrs: {}, gk: null, autoStrength: null, posFit: {}, conf: null, star: false }); });
     D.matches.forEach(m => { if (m.snap) Object.values(m.snap.pl).forEach(q => { Object.assign(q, { s: 5, a: {}, g: null, au: null, pf: {}, rt: false, cf: null }); }); m.fb.marks = []; });
   };
-  if (kind !== 'project' && kind !== 'all') { D.recs = []; D.log = []; D.day = defaultDay(); D.result = null; D.me = null; }
+  if (kind !== 'project' && kind !== 'all') { D.recs = []; D.log = []; D.day = defaultDay(); D.result = null; D.me = null; D.surveys = []; }
   if (kind === 'shareR' || kind === 'share') {
     // Persönliches bleibt hier: Notizen, Telefon, Geburtsdatum, Spielerfotos, Regelgründe, eigene Reglerwerte
     D.players.forEach(p => { Object.assign(p, { note: '', phone: '', birth: '', photo: '', aliases: [] }); });
@@ -4473,6 +4598,8 @@ const srcIcon = k => { const s = SRC[k] || SRC.rating; return `<span class="srci
 /* ---------- Erklärungen (i-Knopf) ---------- */
 const ciPct = () => pctTxt(SET().ci || 0.8);   // eingestellter Unsicherheitsbereich, für die Erklärtexte
 const INFO = {
+  svAdj: () => 'Manche bewerten alle eher hoch, andere eher niedrig. Die App vergleicht jeden Bewerter mit den anderen – über die Spieler, die beide eingeschätzt haben – und verschiebt seine Werte um den typischen Unterschied. So verzerrt es nichts, wenn jemand nur die Starken oder nur die Schwachen bewertet hat. Gestreckt wird nichts, die Reihenfolge jedes Bewerters bleibt.',
+  svScale: () => 'Die Gruppenwerte werden so verschoben und gestreckt, dass ihr Durchschnitt und ihre Streuung zu deinen bisherigen Bewertungen passen. Die Gruppe bestimmt dann Reihenfolge und Abstände, deine gewohnte Skala bleibt – so ändern sich die Teamstärken nicht insgesamt. Aus: die Werte der Gruppe, wie abgegeben.',
   howCmp: () => `Jede Runde merkt sich, wie ihre Teams entstanden sind: von der App fair berechnet, per Zufall, selbst eingeteilt oder von Kapitänen gewählt. Das wird automatisch übernommen; ändern und den Wähler eintragen kannst du im Ergebnis der Runde. Verglichen wird, wie knapp die Spiele ausgingen: Je kleiner der Tor-Unterschied und je näher der Anteil des Siegers an 50 %, desto ausgeglichener waren die Teams. Das ist beschreibend – an verschiedenen Tagen spielen verschiedene Leute, und mit wenigen Spielen entscheidet der Zufall viel.`,
   dayTime: () => 'Die Spielzeit gesamt zählt für die Kondition (kurz, mittel, lang); Spielfluss und Zuschauer können je nach Einstellungen einzelne Fähigkeiten stärker gewichten. Die Spielzeit pro Spiel ändert die Teams nicht – sie wird beim Ergebnis als Dauer jedes Spiels vorbelegt und für die Prognose genutzt. Beim Ergebnis lassen sich die echten Minuten je Spiel eintragen.',
   teamsHelp: () => `Spieler antippen zum Auswählen (auch mehrere), dann unten tauschen oder in ein anderes Team schieben. Oder direkt ziehen – ${ui.tview === 'pitch' ? 'am Kreis mit der Stärke' : 'am Kürzel'} – auf ein Team oder auf einen Spieler zum Tauschen. Zahlen wie „17 : 67 : 17“ = Anteil der Spielzeit im Tor : im Feld : auf der Bank (in %). „5,3 → 4,9“ = Stärke → Wert heute mit Platz, Tagesform und Position.`,
@@ -5971,6 +6098,7 @@ function viewPlayers() {
     ${(() => { const L = newDone(); return L.length ? `<div class="banner newdone"><p><b>Nicht mehr neu?</b> ${L.length === 1 ? `${esc(disp(L[0]))} ist schon länger dabei (${newDoneWhy(L[0])}).` : `${L.length} Spieler sind schon länger dabei (mindestens ${NEW_DONE} Runden oder seit über einem Jahr).`} <span class="muted">„Neu“ macht die Stärke unsicher und verteilt neue Spieler gleichmäßig auf die Teams.</span></p>
       <div class="ndlist">${L.length > 1 ? '<button type="button" class="btn sm primary" data-act="newOff" data-id="">Bei allen entfernen</button>' : ''}${L.map(p => `<button type="button" class="btn sm${L.length === 1 ? ' primary' : ''}" data-act="newOff" data-id="${p.id}">${L.length === 1 ? '„Neu“ entfernen' : `${esc(disp(p))} <span class="small muted">· ${newDoneWhy(p)}</span>`}</button>`).join('')}</div></div>` : ''; })()}
     <div class="row"><input class="grow" type="search" id="psearch" data-in="psearch" placeholder="${X ? 'Name oder Merkmal suchen' : 'Name suchen'}" value="${esc(ui.psearch)}" aria-label="Spieler suchen"><button type="button" class="btn primary" data-act="newPlayer">Spieler anlegen</button></div>
+    ${S.players.length >= 3 ? svEntryHTML() : ''}
     ${!X ? '' : `<div class="row"><button type="button" class="btn sm" data-act="shotOpen" data-v="players">Aus Screenshots anlegen</button><span class="small muted">z. B. die Mitgliederliste der Gruppe – Bekannte werden erkannt, du prüfst jede Zuordnung. Heute wird nichts angekreuzt.</span></div>
 `}
     <div class="row"><span class="lbl">Sortieren</span>${seg('psort', [...(X ? [['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele'], ['data', 'Datenlage']] : [['name', 'Name'], ['strength', 'Stärke']]), ...(S.players.some(p => p.birth) ? [['age', 'Alter']] : [])], ui.psort, '', X ? '' : 'pill')}</div>
@@ -9752,6 +9880,7 @@ function actionBar() {
 let rendering = false, renderAgain = false, soonT = 0;
 function renderSoon() { clearTimeout(soonT); soonT = setTimeout(render, 160); }
 function render() {
+  if (SV_MODE) { svRender(); return; }
   if (rendering) { renderAgain = true; return; }
   rendering = true;
   try { renderNow(); let n = 0; while (renderAgain && n++ < 5) { renderAgain = false; renderNow(); } } finally { rendering = false; }
@@ -9856,8 +9985,8 @@ function renderNow() {
   const sheet = $('#sheet');
   if (ui.editId && !byId(ui.editId)) ui.editId = null;
   if (ui.res && !matchById(ui.res.id)) ui.res = null;
-  const anySheet = !!(ui.imp || ui.proj || ui.plEd || ui.shot || ui.mb || ui.res || ui.pa || ui.editId);
-  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
+  const anySheet = !!(ui.svy || ui.imp || ui.proj || ui.plEd || ui.shot || ui.mb || ui.res || ui.pa || ui.editId);
+  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.svy ? svSheetHTML() : ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
   sheet.hidden = !anySheet;
   document.body.classList.toggle('sheet-open', anySheet);
   if ($('.sheet')) $('.sheet').scrollTop = sheetScroll;
@@ -10097,7 +10226,7 @@ document.addEventListener('toggle', e => {
   if (d.dataset.rerender) render();
 }, true);
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
+  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.svy && !SV_MODE) { A.svClose(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
   if (e.key === 'Enter' && !e.shiftKey && e.target.id === 'quick') { e.preventDefault(); A.quickAdd(); }
   if (e.key === 'Enter' && e.target.id === 'lateName') { e.preventDefault(); const b = document.querySelector('[data-act="lateGuest"][data-v="5"]'); if (b) A.lateGuest(b); }
   if (e.key === 'Enter' && e.target.id === 'newPreset') { e.preventDefault(); A.newPreset(); }
@@ -10151,10 +10280,509 @@ $('#photoIn').addEventListener('change', e => {
   img.src = url;
 });
 
+/* ============================================================
+   UMFRAGE: Spieler von der Gruppe bewerten lassen
+   Ohne Server: Der Link enthält nach dem # die Namen (nur kodiert, nicht verschlüsselt) – dieser Teil
+   wird nie an einen Server geschickt. Die Befragten schicken einen kurzen Text-Code zurück (z. B. per
+   WhatsApp); hier wird er eingefügt. Einzelwerte liegen nur im Projekt des Organisators.
+   Code: FTU1-<Umfrage>-<wer>-<selbst>-<Werte>-<Prüfsumme>, nur Kleinbuchstaben, Ziffern und „-“,
+   damit WhatsApp nichts formatiert oder als Link erkennt. Ein Zeichen je Wert: a = 1,0 … s = 10,0;
+   z = nicht beurteilt, y = die eigene Zeile.
+   ============================================================ */
+const SV_CH = 'abcdefghijklmnopqrs', SV_MAX_TEXT = 200, SV_DRAFT = id => 'ft-survey-draft-' + id;
+const B32 = 'abcdefghijklmnopqrstuvwxyz234567';
+function b32enc(bytes) {
+  let out = '', bits = 0, val = 0;
+  for (const b of bytes) { val = ((val << 8) | b) & 0xffffff; bits += 8; while (bits >= 5) { out += B32[(val >> (bits - 5)) & 31]; bits -= 5; } }
+  if (bits) out += B32[(val << (5 - bits)) & 31];
+  return out;
+}
+function b32dec(s) {
+  const out = []; let bits = 0, val = 0;
+  for (const ch of s) { const v = B32.indexOf(ch); if (v < 0) throw new Error('Zeichen'); val = ((val << 5) | v) & 0xffffff; bits += 5; if (bits >= 8) { out.push((val >> (bits - 8)) & 255); bits -= 8; } }
+  return new Uint8Array(out);
+}
+const svUtf8 = s => new TextEncoder().encode(s);
+const svText = b => new TextDecoder('utf-8', { fatal: true }).decode(b);
+function svSum(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return (h % 1679616).toString(36).padStart(4, '0'); }
+const svChar = v => (isNum(v) ? SV_CH[clamp(Math.round((v - 1) * 2), 0, 18)] : 'z');
+const svVal = c => { const k = SV_CH.indexOf(c); return k < 0 ? null : 1 + k / 2; };
+const svR2 = v => Math.round(v * 2) / 2;
+const svMed = a => { const s = a.slice().sort((x, y) => x - y), k = s.length; return k ? (k % 2 ? s[(k - 1) / 2] : (s[k / 2 - 1] + s[k / 2]) / 2) : null; };
+const svNewId = () => { const c = 'abcdefghijkmnpqrstuvwxyz23456789'; let s = ''; const r = new Uint32Array(6); try { crypto.getRandomValues(r); } catch (e) { for (let i = 0; i < 6; i++) r[i] = Math.random() * 1e9; } r.forEach(x => { s += c[x % c.length]; }); return s; };
+
+/* ---------- Daten im Projekt ---------- */
+function cleanSurveys(list) {
+  const seen = new Set();
+  return (Array.isArray(list) ? list : []).map(v => {
+    if (!v || typeof v !== 'object' || !/^[a-z0-9]{6}$/.test(str(v.id)) || seen.has(v.id)) return null;
+    const players = (Array.isArray(v.players) ? v.players : []).slice(0, 200).map(x => ({ id: SAFE_ID.test(str(x && x.id)) ? str(x.id) : uid(), name: str(x && x.name).slice(0, 60) || '?' }));
+    if (!players.length) return null;
+    seen.add(v.id);
+    const n = players.length, cv = x => (isNum(x) ? clamp(svR2(+x), 1, 10) : null);
+    const byWho = new Map();
+    (Array.isArray(v.responses) ? v.responses : []).forEach(r => {
+      if (!r || typeof r !== 'object' || !/^(p[0-9a-z]{1,3}|n[a-z2-7]{1,240})$/.test(str(r.who))) return;
+      const x = { who: r.who, name: str(r.name).slice(0, 60) || '?', at: isNum(r.at) ? +r.at : Date.now(), self: cv(r.self), vals: Array.from({ length: n }, (_, k) => cv(Array.isArray(r.vals) ? r.vals[k] : null)), on: r.on !== false, code: str(r.code).slice(0, 600) };
+      const o = byWho.get(x.who); if (!o || x.at >= o.at) byWho.set(x.who, x);   // je Befragtem nur die neueste Antwort
+    });
+    return { id: v.id, created: isNum(v.created) ? +v.created : Date.now(), title: str(v.title).slice(0, 60), text: str(v.text).slice(0, SV_MAX_TEXT), players, opt: { adj: !(v.opt && v.opt.adj === false), scale: !(v.opt && v.opt.scale === false) }, responses: [...byWho.values()] };
+  }).filter(Boolean).slice(-20);
+}
+/* Adresse der App für den Link: online die aktuelle Seite, als Datei geöffnet die hinterlegte Online-Adresse */
+function svBase() {
+  if (/^https?:$/.test(location.protocol)) return location.origin + location.pathname;
+  const c = document.querySelector('link[rel="canonical"]'), h = c && c.href;
+  return h && /^https:\/\//.test(h) && !/DEIN-GITHUB-NAME/.test(h) ? h : '';
+}
+function svLink(sv) {
+  const data = { v: 1, i: sv.id, t: sv.title || S.name || 'Faire Teams', m: sv.text || '', n: sv.players.map(x => x.name) };
+  const base = svBase();
+  return base ? `${base}#survey=${b32enc(svUtf8(JSON.stringify(data)))}` : '';
+}
+const svDate = ts => new Date(ts).toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric', year: 'numeric' });
+const svWhoName = (sv, who) => { if (who[0] === 'p') { const x = sv.players[parseInt(who.slice(1), 36)]; return x ? x.name : '?'; } try { return svText(b32dec(who.slice(1))).slice(0, 60); } catch (e) { return '?'; } };
+
+/* ---------- Antwort-Code ---------- */
+function svMakeCode(sid, who, self, vals) {
+  const body = `FTU1-${sid}-${who}-${svChar(self)}-${vals.join('')}`;
+  return `${body}-${svSum(body)}`;
+}
+/* Beliebigen Text (mehrere Nachrichten, ganzer Chat) nach Codes durchsuchen */
+function svParse(text) {
+  const T = String(text || ''), out = { found: [], bad: [], foreign: 0 };
+  const re = /FTU1-/gi; let m;
+  while ((m = re.exec(T))) {
+    // Zeilenumbrüche, die beim Kopieren in den Code geraten, werden entfernt
+    const raw = T.slice(m.index, m.index + 1200).replace(/\s+/g, '').toLowerCase();
+    const mm = /^ftu1-([a-z0-9]{6})-(p[0-9a-z]{1,3}|n[a-z2-7]{1,240})-([a-sz])-([a-sy-z]{1,200})-([a-z0-9]{4})/.exec(raw);
+    const lineStart = T.lastIndexOf('\n', Math.max(0, m.index - 2)), head = T.slice(lineStart + 1, m.index).trim() || T.slice(Math.max(0, lineStart - 80), lineStart).split('\n').pop().trim();
+    if (!mm) { out.bad.push({ head, why: 'unvollständig' }); continue; }
+    const [, sid, who, sc, vs, sum] = mm, body = `FTU1-${sid}-${who}-${sc}-${vs}`;
+    if (svSum(body) !== sum) { out.bad.push({ head, why: 'Prüfsumme stimmt nicht' }); continue; }
+    out.found.push({ sid, who, self: svVal(sc), vs, code: `${body}-${sum}` });
+  }
+  return out;
+}
+/* Gefundene Codes ins Projekt übernehmen; Rückgabe für die Meldung */
+function svIngest(text) {
+  const P = svParse(text), res = { add: [], upd: [], same: 0, foreign: 0, bad: P.bad, wrongLen: 0, sid: null };
+  P.found.forEach(f => {
+    const sv = (S.surveys || []).find(x => x.id === f.sid);
+    if (!sv) { res.foreign++; return; }
+    const n = sv.players.length;
+    if (f.vs.length !== n) { res.wrongLen++; return; }
+    if (f.who[0] === 'p' && !(parseInt(f.who.slice(1), 36) < n)) { res.wrongLen++; return; }
+    const name = svWhoName(sv, f.who);
+    if (sv.responses.some(r => r.code === f.code)) { res.same++; return; }
+    const r = { who: f.who, name, at: Date.now(), self: f.self, vals: [...f.vs].map(c => svVal(c)), on: true, code: f.code };
+    const i = sv.responses.findIndex(x => x.who === f.who);
+    if (i >= 0) { r.on = sv.responses[i].on; sv.responses[i] = r; res.upd.push(name); } else { sv.responses.push(r); res.add.push(name); }
+    res.sid = sv.id;
+  });
+  return res;
+}
+
+/* ---------- Auswertung ----------
+   1. Strenge ausgleichen: Versatz je Bewerter = Median seiner Abweichungen von den (bereinigten) Werten der anderen,
+      über die Spieler, die er bewertet hat. Nur verschoben, nicht gestreckt; mehrmals wiederholt.
+   2. Je Spieler: Median der bereinigten Stimmen (bei 1–2 Stimmen der Mittelwert), Spannweite, uneinig ja/nein.
+   3. Auf deine Skala übertragen: linear, sodass Mittelwert und Streuung deinen aktuellen Bewertungen entsprechen. */
+function svEval(sv, ownOf) {
+  const n = sv.players.length, R = sv.responses.filter(r => r.on);
+  const V = R.map(r => r.vals.map(x => (isNum(x) ? +x : null)));
+  const off = R.map(() => 0);
+  const adjAt = (r, j) => V[r][j] - off[r];
+  if (sv.opt.adj && R.length >= 2) {
+    // Einer nach dem anderen (nicht alle gleichzeitig) – so pendeln die Werte nicht hin und her
+    for (let it = 0; it < 8; it++) {
+      V.forEach((row, r) => {
+        const d = [];
+        row.forEach((x, j) => { if (x == null) return; const others = []; V.forEach((row2, r2) => { if (r2 !== r && row2[j] != null) others.push(adjAt(r2, j)); }); if (others.length) d.push(x - svMed(others)); });
+        off[r] = d.length >= 3 ? svMed(d) : 0;
+      });
+      const mean = off.reduce((a, b) => a + b, 0) / off.length;
+      off.forEach((v, r) => { off[r] = v - mean; });
+    }
+  }
+  const rows = sv.players.map((pl, j) => {
+    const xs = []; V.forEach((row, r) => { if (row[j] != null) xs.push(clamp(adjAt(r, j), 1, 10)); });
+    xs.sort((a, b) => a - b);
+    const k = xs.length;
+    if (!k) return { j, id: pl.id, name: pl.name, n: 0, xs: [] };
+    const mean = xs.reduce((a, b) => a + b, 0) / k, main = k >= 3 ? svMed(xs) : mean;
+    const q = p => { const pos = (k - 1) * p, lo = Math.floor(pos), hi = Math.ceil(pos); return xs[lo] + (xs[hi] - xs[lo]) * (pos - lo); };
+    const range = xs[k - 1] - xs[0], iqr = k >= 4 ? q(0.75) - q(0.25) : range;
+    return { j, id: pl.id, name: pl.name, n: k, xs, mean, raw: main, min: xs[0], max: xs[k - 1], split: k >= 2 && (range >= 3 || (k >= 4 && iqr >= 1.5)) };
+  });
+  // Selbsteinschätzungen (zählen nie mit)
+  R.forEach(r => { if (r.who[0] === 'p' && r.self != null) { const row = rows[parseInt(r.who.slice(1), 36)]; if (row) row.self = r.self; } });
+  // Auf deine Skala: über Spieler mit Gruppenwert und eigener Bewertung
+  let a = 1, b = 0, scaled = false;
+  if (sv.opt.scale && ownOf) {
+    const pairs = rows.filter(x => x.n).map(x => [x.raw, ownOf(x.id)]).filter(x => isNum(x[1]));
+    if (pairs.length >= 4) {
+      const mG = pairs.reduce((s, x) => s + x[0], 0) / pairs.length, mO = pairs.reduce((s, x) => s + x[1], 0) / pairs.length;
+      const sG = Math.sqrt(pairs.reduce((s, x) => s + (x[0] - mG) ** 2, 0) / pairs.length), sO = Math.sqrt(pairs.reduce((s, x) => s + (x[1] - mO) ** 2, 0) / pairs.length);
+      if (sG > 0.25 && sO > 0.25) { a = sO / sG; b = mO - a * mG; scaled = true; }
+    }
+  }
+  const map = v => clamp(a * v + b, 1, 10);
+  rows.forEach(x => { if (x.n) { x.val = map(x.raw); x.dots = x.xs.map(map); } });
+  return { rows, off, R, scaled, nResp: R.length };
+}
+
+/* ============================================================
+   UMFRAGE-SEITE (für die Befragten)
+   Läuft, wenn die Adresse #survey= enthält: keine Projekte, keine Navigation, nichts wird in die Projektdaten
+   dieses Geräts geschrieben. Nur der Entwurf liegt unter einem eigenen Schlüssel.
+   ============================================================ */
+var SV_MODE = /^#survey=/.test(location.hash);   // var: render() darf schon vorher aufgerufen werden
+const SVP = { data: null, d: null, err: '', arm: false, order: null, dirty: false, copied: false };
+function svDecodeHash() {
+  const raw = location.hash.slice('#survey='.length).replace(/[^a-z2-7]/g, '');
+  const data = JSON.parse(svText(b32dec(raw)));
+  if (!data || data.v !== 1 || !/^[a-z0-9]{6}$/.test(str(data.i)) || !Array.isArray(data.n) || !data.n.length) throw new Error('ungültig');
+  return { i: data.i, t: str(data.t).slice(0, 60) || 'Faire Teams', m: str(data.m).slice(0, SV_MAX_TEXT), n: data.n.slice(0, 200).map(x => str(x).slice(0, 60) || '?') };
+}
+function svSaveDraft() { try { localStorage.setItem(SV_DRAFT(SVP.data.i), JSON.stringify(SVP.d)); } catch (e) { /* privater Modus: dann eben ohne Entwurf */ } }
+function svStart() {
+  document.body.classList.add('svmode');
+  ui.noSave = true;   // nichts in Projektdaten schreiben, keine Meldungen über andere Tabs
+  $('#nav').hidden = true;
+  const pb = $('#projBtn'); pb.removeAttribute('data-act'); pb.disabled = true;
+  $('#projName').textContent = 'Faire Teams';
+  try { SVP.data = svDecodeHash(); } catch (e) { SVP.err = 'Dieser Link ist unvollständig oder beschädigt. Bitte lass ihn dir noch einmal schicken.'; }
+  if (SVP.data) {
+    const n = SVP.data.n.length;
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(SV_DRAFT(SVP.data.i)) || 'null'); } catch (e) { d = null; }
+    const ok = x => x === null || x === 'x' || (isNum(x) && x >= 1 && x <= 10);
+    if (!d || !Array.isArray(d.vals) || d.vals.length !== n) d = { who: '', name: '', self: null, vals: Array(n).fill(null), step: 'rate' };
+    d.vals = d.vals.map(x => (ok(x) ? x : null));
+    if (!ok(d.self) || d.self === 'x') d.self = null;
+    if (!['rate', 'order', 'done'].includes(d.step)) d.step = 'rate';
+    if (d.step === 'done' && !svCanSend(d)) d.step = 'rate';
+    SVP.d = d;
+    $('#sub').textContent = 'Spieler-Bewertung · ' + SVP.data.t;
+    document.title = 'Spieler bewerten – ' + SVP.data.t;
+  } else $('#sub').textContent = 'Spieler-Bewertung';
+  svRender();
+}
+const svMeIdx = d => (/^\d+$/.test(String(d.who)) ? +d.who : -1);
+const svCanSend = d => d.who !== '' && (d.who !== 'x' || str(d.name).length >= 2);
+const svWord = v => (v <= 2.5 ? 'deutlich schwächer' : v <= 4.5 ? 'eher schwächer' : v <= 6.5 ? 'Durchschnitt' : v <= 8.5 ? 'eher stärker' : 'deutlich stärker');
+function svScaleHTML(j, v) {
+  // Zehn Stufen als Leiste: bis zum Wert gefüllt, bei halben Werten die nächste Stufe zur Hälfte
+  const cells = Array.from({ length: 10 }, (_, k) => {
+    const s = k + 1, cls = isNum(v) ? (s <= v ? ' on' : s - 0.5 === v ? ' half' : '') : '';
+    return `<button type="button" class="svc${cls}" data-act="svSet" data-j="${j}" data-v="${s}" aria-label="${s}">${s}</button>`;
+  }).join('');
+  return `<div class="svscale${isNum(v) ? '' : ' empty'}" role="group" aria-label="Stärke 1 bis 10">${cells}</div>`;
+}
+function svCardHTML(j, name, v, self) {
+  const unk = v === 'x', has = isNum(v);
+  return `<div class="svcard${has ? ' done' : unk ? ' unk' : ''}${self ? ' self' : ''}" id="svc_${j}">
+    <div class="svtop"><span class="svname">${esc(name)}</span><span class="svval num">${has ? fmtS(v) : unk ? '?' : '–'}</span></div>
+    <div class="svword">${has ? svWord(v) : unk ? 'kann ich nicht beurteilen' : self ? 'optional – zählt nicht mit' : 'noch offen'}</div>
+    ${svScaleHTML(j, has ? v : null)}
+    <div class="svfine">
+      <button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="-0.5"${has && v > 1 ? '' : ' disabled'} aria-label="einen halben Punkt weniger">− ½</button>
+      <button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="0.5"${has && v < 10 ? '' : ' disabled'} aria-label="einen halben Punkt mehr">+ ½</button>
+      <span class="grow"></span>
+      ${self ? (has ? `<button type="button" class="svq" data-act="svSkip" data-j="${j}">zurücksetzen</button>` : '') : `<button type="button" class="svq${unk ? ' on' : ''}" data-act="svSkip" data-j="${j}" aria-pressed="${unk}">kann ich nicht beurteilen</button>`}
+    </div></div>`;
+}
+function svRender() {
+  const main = $('#main');
+  $('#actionbar').hidden = true; $('#sheet').hidden = true;
+  if (!SVP.data) { main.innerHTML = `<section class="block svpage"><h2>Link funktioniert nicht</h2><p>${esc(SVP.err)}</p></section>`; return; }
+  const D = SVP.data, d = SVP.d, me = svMeIdx(d), n = D.n.length;
+  const idx = D.n.map((_, j) => j).filter(j => j !== me);
+  const doneN = idx.filter(j => d.vals[j] !== null).length, ratedN = idx.filter(j => isNum(d.vals[j])).length;
+  const act = document.activeElement, focusId = act && act.id ? act.id : null;
+  let html = `<section class="svpage">
+    <div class="svhero"><img src="${LOGO_SRC}" alt="" width="56" height="56"><div><div class="svkick">Spieler-Bewertung</div><h1>${esc(D.t)}</h1></div></div>
+    ${D.m ? `<p class="svmsg">${esc(D.m)}</p>` : ''}`;
+  if (d.step === 'rate') {
+    html += `<ol class="svhow"><li><b>Nutze die ganze Skala.</b> 5–6 ist der Schnitt eurer Gruppe – nicht der Durchschnitt aller Fußballer.</li>
+      <li><b>Am wichtigsten ist die Reihenfolge:</b> Wer ist stärker als wer? Danach kannst du sie prüfen.</li>
+      <li>Wen du nicht einschätzen kannst: <b>„kann ich nicht beurteilen“</b>.</li></ol>
+    <p class="svpriv">🔒 Deine Einzelwerte sieht nur, wer dir den Link geschickt hat. Nichts wird im Internet gespeichert – deine Antwort schickst du am Ende selbst zurück.</p>
+    <div class="svcard who"><label class="svname" for="svWho">Wer bist du?</label>
+      <select id="svWho" data-ch="svWho"><option value=""${d.who === '' ? ' selected' : ''}>– bitte wählen –</option>${D.n.map((nm, j) => ({ nm, j })).sort((a, b) => a.nm.localeCompare(b.nm, 'de')).map(x => `<option value="${x.j}"${String(d.who) === String(x.j) ? ' selected' : ''}>${esc(x.nm)}</option>`).join('')}<option value="x"${d.who === 'x' ? ' selected' : ''}>Ich stehe nicht auf der Liste</option></select>
+      ${d.who === 'x' ? `<input type="text" id="svName" data-in="svName" maxlength="40" placeholder="Dein Name" value="${esc(d.name)}" autocomplete="given-name">` : ''}
+      ${me >= 0 ? '<span class="small muted">Du stehst nicht in der Liste unten – dafür gibt es die Selbsteinschätzung.</span>' : ''}</div>
+    ${me >= 0 ? `<h2 class="svh">Wie schätzt du dich selbst ein?</h2>${svCardHTML('self', D.n[me], d.self, true)}` : ''}
+    <h2 class="svh">Deine Mitspieler <span class="muted">${doneN} von ${idx.length}</span></h2>
+    <div class="svlist">${idx.map(j => svCardHTML(j, D.n[j], d.vals[j], false)).join('')}</div>`;
+  } else if (d.step === 'order') {
+    if (!SVP.order) SVP.order = idx.filter(j => isNum(d.vals[j])).sort((a, b) => d.vals[b] - d.vals[a] || D.n[a].localeCompare(D.n[b], 'de'));
+    const ord = SVP.order.filter(j => isNum(d.vals[j]));
+    const tiers = []; ord.forEach(j => { const v = d.vals[j], last = tiers[tiers.length - 1]; if (last && last.v === v) last.js.push(j); else tiers.push({ v, js: [j] }); });
+    const ties = tiers.filter(t => t.js.length > 1).length, unk = idx.filter(j => !isNum(d.vals[j]));
+    let rank = 0;
+    html += `<div class="svcard intro"><h2>So sieht deine Reihenfolge aus – passt das?</h2>
+      <p>Geh die Liste von oben nach unten durch und vergleiche immer zwei Nachbarn: <b>Ist der Obere wirklich stärker?</b> Mit − und + verschiebst du jemanden um einen halben Punkt.</p>
+      ${ties ? `<p class="svtiehint">${ties === 1 ? 'Eine Gruppe ist' : `${ties} Gruppen sind`} gleich bewertet. Ist dort doch einer besser? Dann ihn um ½ anheben – vergleichen fällt meist leichter als Punkte vergeben.</p>` : ''}</div>
+    ${SVP.dirty ? '<div class="svresort"><button type="button" class="btn sm primary" data-act="svResort">Neu sortieren</button><span class="small muted">Du hast Werte geändert.</span></div>' : ''}
+    <ol class="svorder">${tiers.map(t => `<li class="svtier${t.js.length > 1 ? ' tie' : ''}">${t.js.length > 1 ? `<div class="svtiehead"><span>gleich bewertet: ${fmtS(t.v)}</span></div>` : ''}${t.js.map(j => { rank++; const v = d.vals[j]; return `<div class="svorow" style="--lvl:${((v - 1) / 9 * 100).toFixed(0)}%"><span class="svrank num">${rank}</span><span class="svoname">${esc(D.n[j])}</span><span class="svobar" aria-hidden="true"><i></i></span><button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="-0.5"${v > 1 ? '' : ' disabled'} aria-label="${esc(D.n[j])} einen halben Punkt weniger">−</button><b class="svoval num">${fmtS(v)}</b><button type="button" class="svhalf" data-act="svStep" data-j="${j}" data-d="0.5"${v < 10 ? '' : ' disabled'} aria-label="${esc(D.n[j])} einen halben Punkt mehr">+</button></div>`; }).join('')}</li>`).join('')}</ol>
+    ${unk.length ? `<p class="small muted svunk">Nicht beurteilt (${unk.length}): ${unk.map(j => esc(D.n[j])).join(', ')} – <button type="button" class="linkbtn" data-act="svGo" data-v="rate">doch noch bewerten</button></p>` : ''}`;
+  } else {
+    const code = svMakeCode(D.i, me >= 0 ? 'p' + me.toString(36) : 'n' + b32enc(svUtf8(str(d.name).slice(0, 40))), me >= 0 ? d.self : null, D.n.map((_, j) => (j === me ? 'y' : svChar(isNum(d.vals[j]) ? d.vals[j] : null))));
+    const who = me >= 0 ? D.n[me] : str(d.name);
+    const msg = `Faire Teams – Bewertung von ${who} (${ratedN} von ${idx.length} Spielern)\n${code}`;
+    SVP.msg = msg;
+    html += `<div class="svcard svdone"><div class="svcheck" aria-hidden="true">✓</div><h2>Fast geschafft!</h2>
+      <p>Schick diese Nachricht an die Person, die dir den Link geschickt hat. Erst dann kommt deine Bewertung an.</p>
+      <pre class="svcode" id="svCode">${esc(msg)}</pre>
+      <div class="svsend"><a class="btn primary big" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Per WhatsApp senden</a>
+      ${navigator.share ? '<button type="button" class="btn big" data-act="svShare">Teilen …</button>' : ''}
+      <button type="button" class="btn big" data-act="svCopy">${SVP.copied ? 'Kopiert ✓' : 'Kopieren'}</button></div>
+      <p class="small muted">Du kannst den Link später wieder öffnen und deine Werte ändern. Ein neuer Code ersetzt dann den alten.</p>
+      <button type="button" class="linkbtn" data-act="svGo" data-v="rate">Noch etwas ändern</button></div>`;
+  }
+  html += '</section>';
+  // Leiste unten: Fortschritt und nächster Schritt
+  const pct = idx.length ? Math.round(doneN / idx.length * 100) : 0;
+  const open = idx.length - doneN;
+  let bar = '';
+  if (d.step === 'rate') bar = `<div class="svprog"><span><b class="num">${doneN}</b> von ${idx.length} bewertet</span><i style="--p:${pct}%"></i></div><button type="button" class="btn primary" data-act="svGo" data-v="order"${ratedN >= 2 ? '' : ' disabled'}>Weiter: Reihenfolge prüfen</button>`;
+  else if (d.step === 'order') bar = `<button type="button" class="btn" data-act="svGo" data-v="rate">Zurück</button><button type="button" class="btn primary${SVP.arm ? ' armed' : ''}" data-act="svSend">${SVP.arm ? `${open} noch offen – trotzdem fertig?` : 'Fertig – Antwort erstellen'}</button>`;
+  html += d.step === 'done' ? '' : `<div class="svbar"><div class="wrap svbar-in">${bar}</div></div>`;
+  main.innerHTML = html;
+  if (focusId) { const el = document.getElementById(focusId); if (el && el !== document.activeElement) el.focus({ preventScroll: true }); }
+}
+function svSetVal(j, v) {
+  const d = SVP.d;
+  if (j === 'self') d.self = v; else d.vals[+j] = v;
+  SVP.arm = false; SVP.copied = false;
+  if (d.step === 'order') SVP.dirty = true;
+  svSaveDraft(); svRender();
+}
+Object.assign(A, {
+  svSet: el => { svSetVal(el.dataset.j, +el.dataset.v); },
+  svStep: el => { const j = el.dataset.j, cur = j === 'self' ? SVP.d.self : SVP.d.vals[+j]; if (!isNum(cur)) return; svSetVal(j, clamp(cur + +el.dataset.d, 1, 10)); },
+  svSkip: el => { const j = el.dataset.j; if (j === 'self') { svSetVal(j, null); return; } svSetVal(j, SVP.d.vals[+j] === 'x' ? null : 'x'); },
+  svGo: el => {
+    const to = el.dataset.v, d = SVP.d;
+    if (to === 'order') { SVP.order = null; SVP.dirty = false; }
+    if (to === 'rate' && d.step === 'done') SVP.copied = false;
+    d.step = to; SVP.arm = false; svSaveDraft(); svRender(); window.scrollTo(0, 0);
+  },
+  svResort: () => { SVP.order = null; SVP.dirty = false; svRender(); },
+  svSend: () => {
+    const d = SVP.d, me = svMeIdx(d);
+    if (!svCanSend(d)) { d.step = 'rate'; svRender(); window.scrollTo(0, 0); toast('Bitte zuerst oben „Wer bist du?“ auswählen.'); return; }
+    const open = SVP.data.n.filter((_, j) => j !== me && d.vals[j] === null).length;
+    if (open && !SVP.arm) { SVP.arm = true; svRender(); return; }
+    d.step = 'done'; SVP.arm = false; svSaveDraft(); svRender(); window.scrollTo(0, 0);
+  },
+  svCopy: () => {
+    const done = () => { SVP.copied = true; svRender(); toast('Kopiert – jetzt in WhatsApp einfügen und abschicken.'); };
+    const pick = () => { const el = $('#svCode'); if (!el) return; const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Text ist markiert – jetzt kopieren.'); };
+    try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(SVP.msg).then(done, pick); else pick(); } catch (e) { pick(); }
+  },
+  svShare: async () => { try { await navigator.share({ text: SVP.msg }); } catch (e) { /* abgebrochen */ } }
+});
+Object.assign(CH, { svWho: el => { SVP.d.who = el.value; SVP.arm = false; const me = svMeIdx(SVP.d); if (me >= 0 && SVP.d.vals[me] !== null) SVP.d.vals[me] = null; svSaveDraft(); svRender(); } });
+Object.assign(IN, { svName: el => { SVP.d.name = el.value.slice(0, 40); svSaveDraft(); const b = document.querySelector('[data-act="svSend"]'); if (b) b.disabled = !svCanSend(SVP.d); } });
+
+/* ============================================================
+   UMFRAGE VERWALTEN (für den Organisator) – Fenster aus dem Bereich „Spieler“
+   ============================================================ */
+const svList = () => (S.surveys || []).slice().sort((a, b) => b.created - a.created);
+const svCur = () => { const L = svList(); return (ui.svy && L.find(x => x.id === ui.svy.sel)) || L[0] || null; };
+const svOwn = id => { const p = byId(id); return p && ratedOf(p) ? effOf(p).strength : null; };
+function svEntryHTML() {
+  const L = svList(), cur = L[0], nR = cur ? cur.responses.length : 0;
+  return `<div class="svent"><button type="button" class="btn sm" data-act="svOpen"><span class="emo" aria-hidden="true">🗳️</span> Spieler bewerten lassen</button>
+    <span class="small muted">${cur ? `Umfrage vom ${svDate(cur.created)}: ${plural(nR, 'Antwort', 'Antworten')}` : 'Mitspieler schätzen die Spieler ein – du vergleichst mit deinen Werten.'}</span></div>`;
+}
+function svDotsHTML(row, own, pick) {
+  // Linie 1–10: Punkte = Einzelstimmen (ohne Namen), Strich = Gruppenwert, Ring = deine Bewertung
+  const x = v => ((clamp(v, 1, 10) - 1) / 9 * 100).toFixed(1);
+  return `<span class="svline" aria-hidden="true"><i class="axis"></i>${(row.dots || []).map(v => `<i class="dot" style="left:${x(v)}%"></i>`).join('')}${row.n ? `<i class="grp" style="left:${x(row.val)}%"></i>` : ''}${isNum(own) ? `<i class="own" style="left:${x(own)}%"></i>` : ''}${isNum(pick) ? `<i class="new" style="left:${x(pick)}%"></i>` : ''}</span>`;
+}
+function svSheetHTML() {
+  const U = ui.svy, L = svList();
+  const head = (t, extra = '') => `<div class="sheet-head"><h2 id="svTitle">${t}</h2>${extra}<button type="button" class="btn sm primary" data-act="svClose">Fertig</button></div>`;
+  // Neue Umfrage anlegen
+  if (U.view === 'new' || !L.length) {
+    const pl = S.players.filter(p => p.status !== 'archived').slice().sort(sortByLabel);
+    if (!U.pick) { U.pick = {}; pl.forEach(p => { U.pick[p.id] = p.status === 'active'; }); }
+    const nSel = pl.filter(p => U.pick[p.id]).length, st = { paused: 'pausiert', guest: 'Gast' };
+    const noBase = !svBase();
+    return sheetWrap(`${head('Spieler bewerten lassen', L.length ? '<button type="button" class="btn sm ghost" data-act="svView" data-v="">Abbrechen</button>' : '')}
+      <ol class="svsteps"><li><b>Link verschicken</b> – z. B. in eure WhatsApp-Gruppe.</li><li><b>Mitspieler bewerten</b> alle Spieler am Handy (1–10, mit Reihenfolge-Check) und schicken dir einen kurzen Code zurück.</li><li><b>Codes hier einfügen</b> – du siehst die Meinung der Gruppe neben deiner und entscheidest, was du übernimmst.</li></ol>
+      <p class="hint">Kein Konto, kein Server: Die Namen stecken nur im Link. Die Einzelbewertungen siehst nur du. Tipp: Füll die Umfrage am besten auch selbst aus.</p>
+      ${noBase ? '<div class="banner warn"><p>Die App ist als Datei geöffnet. Ein Umfrage-Link funktioniert nur mit der Online-Adresse der App – öffne sie dafür über ihre Internetadresse.</p></div>' : ''}
+      <div class="field"><div class="lblrow"><span class="lbl">Wer soll bewertet werden? (${nSel})</span><span class="grow"></span><button type="button" class="btn sm ghost" data-act="svPickAll" data-v="1">alle</button><button type="button" class="btn sm ghost" data-act="svPickAll" data-v="0">keinen</button></div>
+        <div class="svpick">${pl.map(p => cbx('svPick', !!U.pick[p.id], label(p) + (st[p.status] ? ` · ${st[p.status]}` : ''), `data-id="${p.id}"`)).join('')}</div></div>
+      <div class="field"><label class="lbl" for="svText">Begrüßung (optional, höchstens ${SV_MAX_TEXT} Zeichen)</label>
+        <textarea id="svText" data-in="svText" maxlength="${SV_MAX_TEXT}" rows="2" placeholder="z. B. Hi! Damit die Teams fairer werden: Wie stark schätzt du jeden ein? Dauert 3 Minuten.">${esc(U.text || '')}</textarea></div>
+      <div class="row"><button type="button" class="btn primary" data-act="svCreate"${nSel >= 3 && !noBase ? '' : ' disabled'}>Link erstellen</button>${nSel < 3 ? '<span class="small muted">Mindestens 3 Spieler auswählen.</span>' : ''}</div>`, 'svTitle', 'svClose');
+  }
+  const sv = svCur(); U.sel = sv.id;
+  const link = svLink(sv), E = svEval(sv, svOwn);
+  const ownName = id => { const p = byId(id); return p ? disp(p) : null; };
+  // Antworten
+  const resp = sv.responses.slice().sort((a, b) => b.at - a.at).map(r => {
+    const k = E.R.indexOf(r), off = k >= 0 ? E.off[k] : null, n = r.vals.filter(x => x != null).length;
+    const armed = ui.arm === 'svDel:' + r.who;
+    const strict = !sv.opt.adj || off == null || E.nResp < 2 ? '' : Math.abs(off) < 0.3 ? 'bewertet wie die anderen' : `bewertet im Schnitt ${fmt(Math.abs(off), 1)} ${off > 0 ? 'höher' : 'niedriger'} als die anderen`;
+    return `<li class="${r.on ? '' : 'off'}"><span class="grow"><b>${esc(r.name)}</b>${r.who[0] === 'n' ? ' <span class="small muted">(nicht auf der Liste)</span>' : ''}<br><span class="small muted">${svDate(r.at)} · ${n} von ${sv.players.length - (r.who[0] === 'p' ? 1 : 0)} bewertet${strict ? ' · ' + strict : ''}</span></span>
+      ${sw('svRespOn', r.on, `data-who="${r.who}"`, 'Zählt mit')}<button type="button" class="btn sm ${armed ? 'danger armed' : 'ghost'}" data-act="svRespDel" data-who="${r.who}">${armed ? 'Löschen?' : 'Löschen'}</button></li>`;
+  }).join('');
+  // Ergebnis je Spieler
+  const rowsAll = E.rows.filter(x => byId(x.id)).map(x => {
+    const own = svOwn(x.id), d = x.n && isNum(own) ? x.val - own : null;
+    return { ...x, own, d };
+  });
+  const filt = U.filter || 'all';
+  const rows = rowsAll.filter(x => filt === 'all' || (filt === 'diff' && x.d != null && Math.abs(x.d) >= 1) || (filt === 'split' && x.split))
+    .sort((a, b) => (b.n > 0) - (a.n > 0) || (b.d == null ? -1 : Math.abs(b.d)) - (a.d == null ? -1 : Math.abs(a.d)) || a.name.localeCompare(b.name, 'de'));
+  const picks = U.picks || (U.picks = {});
+  const target = (x, how) => (how === 'grp' ? svR2(x.val) : how === 'mid' ? svR2(isNum(x.own) ? (x.own + x.val) / 2 : x.val) : null);
+  const nPick = Object.keys(picks).filter(id => picks[id] && rowsAll.some(x => x.id === id && x.n)).length;
+  const strong = rowsAll.filter(x => x.n >= 3 && x.d != null && Math.abs(x.d) >= 1);
+  const resTable = !E.nResp ? '<p class="hint">Noch keine Antworten. Sobald Codes eingefügt sind, erscheint hier der Vergleich.</p>' : `
+    <div class="row svopts"><span class="small">${sw('svOpt', sv.opt.adj, 'data-k="adj"', 'Strenge ausgleichen')} Strenge ausgleichen ${ib('svAdj')}</span><span class="small">${sw('svOpt', sv.opt.scale, 'data-k="scale"', 'Auf deine Skala')} Auf deine Skala ${ib('svScale')}</span></div>
+    ${sv.opt.scale && !E.scaled ? '<p class="small muted">Für „Auf deine Skala“ brauchst du mindestens 4 Spieler, die du selbst eingeschätzt hast und die Stimmen haben.</p>' : ''}
+    <div class="row">${seg('svFilter', [['all', 'Alle'], ['diff', `Abweichung ab 1 (${rowsAll.filter(x => x.d != null && Math.abs(x.d) >= 1).length})`], ['split', `uneinig (${rowsAll.filter(x => x.split).length})`]], filt, '', 'pill wrap')}</div>
+    <p class="small muted svlegend"><span><i class="lg own"></i> deine Bewertung</span><span><i class="lg grp"></i> Gruppe</span><span><i class="lg dot"></i> einzelne Stimmen</span>${nPick ? '<span><i class="lg new"></i> neu</span>' : ''}</p>
+    <ul class="svres">${rows.map(x => {
+      const pk = picks[x.id], tv = pk ? target(x, pk) : null, weak = x.n > 0 && x.n < 3;
+      const dTxt = x.d == null ? '' : Math.abs(x.d) < 0.25 ? '<span class="svd ok">passt</span>' : `<span class="svd${Math.abs(x.d) >= 1 ? ' big' : ''}">${x.d > 0 ? '+' : '−'}${fmt(Math.abs(x.d), 1)}</span>`;
+      return `<li class="${weak ? 'weak' : ''}${!x.n ? ' none' : ''}">
+        <div class="svrtop"><b class="grow">${esc(ownName(x.id) || x.name)}</b>${x.split ? tag('uneinig', 't-split', 'Die Stimmen liegen weit auseinander') : ''}${dTxt}</div>
+        ${x.n ? `<div class="svrmid">${svDotsHTML(x, x.own, tv)}<span class="svnums"><span title="deine Bewertung">${isNum(x.own) ? fmtS(x.own) : '–'}</span> → <b title="Gruppe">${fmt(x.val, 1)}</b></span></div>
+        <div class="svrsub small muted">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmtS(x.self)}` : ''}</div>
+        <div class="svrpick">${seg('svPickRow', [['', 'behalten'], ...(isNum(x.own) ? [['mid', `Mitte ${fmtS(target(x, 'mid'))}`]] : []), ['grp', `Gruppe ${fmtS(target(x, 'grp'))}`]], pk || '', `data-id="${x.id}"`, 'pill wrap')}</div>` : '<div class="small muted">Keine Stimmen (alle „kann ich nicht beurteilen“).</div>'}</li>`;
+    }).join('')}</ul>
+    ${strong.length ? `<div class="row svbulk"><span class="small grow">Alle mit mindestens 1 Punkt Abweichung und 3 Stimmen (${strong.length}):</span><button type="button" class="btn sm" data-act="svBulk" data-v="mid">Mitte vormerken</button><button type="button" class="btn sm" data-act="svBulk" data-v="grp">Gruppe vormerken</button></div>` : ''}
+    <div class="svapply${nPick ? ' on' : ''}"><span class="grow small">${nPick ? `${plural(nPick, 'Änderung', 'Änderungen')} vorgemerkt – der grüne Punkt zeigt den neuen Wert.` : 'Je Spieler „Mitte“ oder „Gruppe“ wählen, dann hier übernehmen. Nichts ändert sich automatisch.'}</span>${nPick ? '<button type="button" class="btn sm ghost" data-act="svPickClear">verwerfen</button>' : ''}<button type="button" class="btn sm primary" data-act="svApply"${nPick ? '' : ' disabled'}>Übernehmen</button></div>`;
+  const msgTxt = `${sv.title || S.name}: Bitte schätz ein, wie stark die Spieler sind – damit unsere Teams fairer werden. Dauert ein paar Minuten. Deine Einzelwerte sehe nur ich.\n${link}`;
+  const armedSv = ui.arm === 'svDrop:' + sv.id;
+  return sheetWrap(`${head('Gruppenmeinung')}
+    ${L.length > 1 ? `<div class="row"><span class="lbl">Umfrage</span><select data-ch="svSel" aria-label="Umfrage wählen">${L.map(x => `<option value="${x.id}"${x.id === sv.id ? ' selected' : ''}>vom ${svDate(x.created)} · ${plural(x.responses.length, 'Antwort', 'Antworten')}</option>`).join('')}</select></div>` : ''}
+    <details class="field svsec" data-sec="svLink"${ui.open.svLink || !sv.responses.length ? ' open' : ''}><summary><b>1. Link teilen</b> <span class="small muted">· ${plural(sv.players.length, 'Spieler', 'Spieler')} · vom ${svDate(sv.created)}</span></summary>
+      ${link ? `<div class="svlinkbox"><input type="text" readonly id="svLinkIn" value="${esc(link)}" aria-label="Umfrage-Link"></div>
+      <div class="row"><a class="btn sm primary" href="https://wa.me/?text=${encodeURIComponent(msgTxt)}" target="_blank" rel="noopener">WhatsApp</a>${navigator.share ? '<button type="button" class="btn sm" data-act="svShareLink">Teilen …</button>' : ''}<button type="button" class="btn sm" data-act="svCopyLink">Kopieren</button><a class="btn sm ghost" href="${esc(link)}" target="_blank" rel="noopener">Selbst ausfüllen</a></div>
+      ${link.length > 4000 ? '<p class="small errtxt">Der Link ist sehr lang (viele Spieler). Manche Apps kürzen so lange Links.</p>' : ''}
+      <p class="small muted">Tipp: Füll die Umfrage selbst aus, bevor du dir die Ergebnisse ansiehst – dann zählt deine Meinung unbeeinflusst mit.</p>` : '<p class="small errtxt">Kein Link möglich: Die App ist als Datei geöffnet. Öffne sie über ihre Internetadresse.</p>'}</details>
+    <div class="field"><label class="lbl" for="svPaste">2. Antworten einfügen</label>
+      <textarea id="svPaste" data-in="svPaste" rows="3" placeholder="Nachrichten mit „FTU1-…“ hier einfügen – auch mehrere auf einmal oder ein ganzer Chat.">${esc(U.paste || '')}</textarea>
+      <div class="row"><button type="button" class="btn sm primary" data-act="svRead"${str(U.paste) ? '' : ' disabled'}>Einlesen</button>${U.msg ? `<span class="small ${U.msgBad ? 'errtxt' : ''}">${esc(U.msg)}</span>` : ''}</div>
+      ${U.bad && U.bad.length ? `<ul class="small errtxt svbad">${U.bad.map(b => `<li>${esc(b.head || 'Code')}: ${esc(b.why)} – bitte noch einmal schicken lassen</li>`).join('')}</ul>` : ''}</div>
+    ${sv.responses.length ? `<details class="field svsec" data-sec="svResp"${ui.open.svResp ? ' open' : ''}><summary><b>Antworten (${sv.responses.length})</b> <span class="small muted">· ${plural(E.nResp, 'zählt', 'zählen')} mit</span></summary><ul class="rules svresp">${resp}</ul></details>` : ''}
+    <div class="field"><span class="lbl">3. Vergleich: du und die Gruppe</span>${resTable}</div>
+    <div class="row svfoot"><button type="button" class="btn sm ghost" data-act="svView" data-v="new">Neue Umfrage</button><span class="grow"></span><button type="button" class="btn sm ${armedSv ? 'danger armed' : 'ghost danger'}" data-act="svDrop">${armedSv ? 'Umfrage mit allen Antworten löschen?' : 'Umfrage löschen'}</button></div>`, 'svTitle', 'svClose');
+}
+/* Wert übernehmen. Wird die Stärke aus Fähigkeiten berechnet, wandern alle bewerteten Fähigkeiten gleichmäßig mit
+   (Stärken und Schwächen bleiben erhalten); an den Grenzen 1–10 kann der Zielwert dann knapp verfehlt werden. */
+function svApplyOne(p, v, when) {
+  const real = () => Engine.effective(p, SPORT, S.settings.attrW, S.settings.autoStrength);
+  const extra = { isNew: p.isNew, rated: p.rated, autoStrength: p.autoStrength };
+  const old = p.strength, oldEff = effOf(p).strength, oldAttrs = { ...p.attrs }, top = p.star ? 15 : 10;
+  v = clamp(svR2(v), 1, top);
+  const e0 = real();
+  if (e0.auto && Object.keys(p.attrs).length) {
+    const delta = v - e0.strength;
+    Object.keys(p.attrs).forEach(k => { p.attrs[k] = clamp(svR2(+p.attrs[k] + delta), 1, 10); });
+    p.strength = clamp(svR2((isNum(p.strength) ? +p.strength : 5) + delta), 1, top);
+  } else p.strength = v;
+  markRated(p);
+  const now = effOf(p).strength;
+  S.log.push({ id: uid(), at: Date.now(), src: 'own', kind: 'player', target: p.id, field: 'strength', old, new: p.strength, oldAttrs, extra, label: `${nameAny(p.id)}: Stärke ${fmtV(oldEff)} → ${fmtS(now)} (Umfrage vom ${when})` });
+  return Math.abs(now - v) > 0.26 ? { name: disp(p), want: v, got: now } : null;
+}
+Object.assign(A, {
+  svOpen: () => { ui.svy = { view: '', sel: null, picks: {} }; render(); },
+  svClose: () => { ui.svy = null; render(); },
+  svView: el => { ui.svy.view = el.dataset.v; ui.svy.pick = null; render(); },
+  svPick: el => { const U = ui.svy; U.pick[el.dataset.id] = !U.pick[el.dataset.id]; render(); },
+  svPickAll: el => { const U = ui.svy; Object.keys(U.pick).forEach(k => { U.pick[k] = el.dataset.v === '1'; }); render(); },
+  svCreate: () => {
+    const U = ui.svy, pl = S.players.filter(p => p.status !== 'archived' && U.pick[p.id]).sort(sortByLabel);
+    if (pl.length < 3) return;
+    const sv = { id: svNewId(), created: Date.now(), title: str(S.name).slice(0, 60) || 'Faire Teams', text: str(U.text).slice(0, SV_MAX_TEXT), players: pl.map(p => ({ id: p.id, name: disp(p) })), opt: { adj: true, scale: true }, responses: [] };
+    if (!Array.isArray(S.surveys)) S.surveys = [];
+    S.surveys.push(sv);
+    S.surveys = S.surveys.slice(-20);
+    ui.svy = { view: '', sel: sv.id, picks: {} }; ui.open.svLink = true;
+    render(); toast('Umfrage erstellt – jetzt den Link teilen.');
+  },
+  svShareLink: async () => { const sv = svCur(); if (!sv) return; try { await navigator.share({ text: `${sv.title || S.name}: Bitte schätz ein, wie stark die Spieler sind – damit unsere Teams fairer werden. Deine Einzelwerte sehe nur ich.`, url: svLink(sv) }); } catch (e) { /* abgebrochen */ } },
+  svCopyLink: () => { const sv = svCur(); if (sv) copyText(svLink(sv), 'Link kopiert.'); },
+  svRead: () => {
+    const U = ui.svy, r = svIngest(U.paste);
+    const parts = [];
+    if (r.add.length) parts.push(`${plural(r.add.length, 'Antwort', 'Antworten')} neu (${r.add.join(', ')})`);
+    if (r.upd.length) parts.push(`aktualisiert: ${r.upd.join(', ')}`);
+    if (r.same) parts.push(`${r.same} schon vorhanden`);
+    if (r.foreign) parts.push(`${r.foreign} gehör${r.foreign === 1 ? 't' : 'en'} zu einer anderen Umfrage`);
+    if (r.wrongLen) parts.push(`${r.wrongLen} passt nicht zur Spielerliste`);
+    if (r.bad.length) parts.push(`${r.bad.length} fehlerhaft`);
+    U.msg = parts.length ? parts.join(' · ') + '.' : 'Keine Codes gefunden. Es müssen Nachrichten mit „FTU1-…“ sein.';
+    U.msgBad = !r.add.length && !r.upd.length && !r.same; U.bad = r.bad;
+    if (r.add.length || r.upd.length) { U.paste = ''; U.sel = r.sid; U.picks = {}; }
+    render();
+  },
+  svRespOn: el => { const sv = svCur(), r = sv && sv.responses.find(x => x.who === el.dataset.who); if (r) { r.on = !r.on; render(); } },
+  svRespDel: el => {
+    const sv = svCur(), k = 'svDel:' + el.dataset.who;
+    if (ui.arm !== k) { ui.arm = k; render(); return; }
+    ui.arm = null; remember('Antwort gelöscht');
+    sv.responses = sv.responses.filter(x => x.who !== el.dataset.who); render();
+    toast('Antwort gelöscht.', { label: 'Rückgängig', act: 'undo' });
+  },
+  svOpt: el => { const sv = svCur(); sv.opt[el.dataset.k] = !sv.opt[el.dataset.k]; render(); },
+  svFilter: el => { ui.svy.filter = el.dataset.v; render(); },
+  svPickRow: el => { const P = ui.svy.picks; if (el.dataset.v) P[el.dataset.id] = el.dataset.v; else delete P[el.dataset.id]; render(); },
+  svBulk: el => {
+    const sv = svCur(), E = svEval(sv, svOwn), P = ui.svy.picks;
+    E.rows.forEach(x => { const own = svOwn(x.id); if (byId(x.id) && x.n >= 3 && isNum(own) && Math.abs(x.val - own) >= 1) P[x.id] = el.dataset.v; });
+    render();
+  },
+  svPickClear: () => { ui.svy.picks = {}; render(); },
+  svApply: () => {
+    const sv = svCur(), E = svEval(sv, svOwn), P = ui.svy.picks, when = svDate(sv.created);
+    const todo = E.rows.filter(x => P[x.id] && x.n && byId(x.id));
+    if (!todo.length) return;
+    remember('Werte aus der Umfrage übernommen');
+    const miss = [];
+    todo.forEach(x => {
+      const own = svOwn(x.id), v = P[x.id] === 'grp' ? svR2(x.val) : svR2(isNum(own) ? (own + x.val) / 2 : x.val);
+      const m = svApplyOne(byId(x.id), v, when); if (m) miss.push(m);
+    });
+    ui.svy.picks = {};
+    render();
+    toast(`${plural(todo.length, 'Wert', 'Werte')} übernommen.${miss.length ? ` ${miss.map(m => `${m.name}: erreicht ${fmtS(m.got)} statt ${fmtS(m.want)} (Fähigkeiten an der Grenze)`).join('; ')}.` : ''}`, { label: 'Rückgängig', act: 'undo' });
+  },
+  svDrop: () => {
+    const sv = svCur(), k = 'svDrop:' + sv.id;
+    if (ui.arm !== k) { ui.arm = k; render(); return; }
+    ui.arm = null; remember('Umfrage gelöscht');
+    S.surveys = S.surveys.filter(x => x.id !== sv.id); ui.svy = S.surveys.length ? { view: '', sel: null, picks: {} } : null; render();
+    toast('Umfrage gelöscht.', { label: 'Rückgängig', act: 'undo' });
+  }
+});
+Object.assign(CH, { svSel: el => { ui.svy.sel = el.value; ui.svy.picks = {}; render(); } });
+Object.assign(IN, {
+  svText: el => { ui.svy.text = el.value.slice(0, SV_MAX_TEXT); },
+  svPaste: el => { ui.svy.paste = el.value; const b = document.querySelector('[data-act="svRead"]'); if (b) b.disabled = !str(el.value); }
+});
+// Wird ein Umfrage-Link im selben Tab geöffnet (oder verlassen), neu laden – Umfrage und App laufen getrennt
+window.addEventListener('hashchange', e => { const was = /#survey=/.test(e.oldURL || ''), now = /^#survey=/.test(location.hash); if (was || now) location.reload(); });
+
 $('#logo').innerHTML = `<img src="${LOGO_SRC}" alt="" width="34" height="34">`;
-load();
-linkCurrentTeams();
-render();
+if (SV_MODE) svStart();
+else {
+  load();
+  linkCurrentTeams();
+  render();
+}
 // Vorhersagen, die zu einer anderen Rechenversion gehören, im Hintergrund aus den Schnappschüssen neu rechnen
 setTimeout(() => {
   let n = 0;
