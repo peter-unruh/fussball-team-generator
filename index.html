@@ -1465,6 +1465,61 @@ body.cal-mode .top, body.cal-mode nav, body.cal-mode .nav, body.cal-mode #action
 body.cal-mode main.wrap { max-width: 560px; padding-top: 24px; padding-bottom: 40px; }
 .calpage { display: grid; gap: 14px; }
 .calfoot { text-align: center; }
+
+/* v47 */
+#logo { cursor: pointer; }
+#quote { position: fixed; z-index: 80; top: calc(env(safe-area-inset-top) + 64px); left: 12px; max-width: min(340px, calc(100vw - 24px)); padding: 12px 14px; border-radius: 14px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 12px 30px -8px rgba(0, 0, 0, .45); font-weight: 650; line-height: 1.35; opacity: 0; transform: translateY(-8px) scale(.97); pointer-events: none; transition: opacity .2s ease, transform .25s var(--ease-spring, ease); }
+#quote::before { content: ''; position: absolute; top: -7px; left: 18px; width: 12px; height: 12px; background: inherit; border-left: 1px solid var(--line); border-top: 1px solid var(--line); transform: rotate(45deg); }
+#quote.on { opacity: 1; transform: none; pointer-events: auto; }
+.posinfo { display: block; margin-top: 4px; }
+.rlisthead { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; padding-top: 12px; border-top: 2px solid color-mix(in srgb, var(--turf) 45%, var(--line)); }
+.rlisthead h3 { margin: 0; font-size: 1.05rem; }
+.rulebox.scrolly { max-height: min(60vh, 620px); overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 4px 8px; }
+.plcoord > summary { cursor: pointer; }
+.plcoord[open] { display: grid; gap: 8px; }
+.plcoord p { margin: 0; }
+/* Warte-Szenen */
+.busy .scene { position: relative; width: 180px; height: 100px; color: var(--ink); }
+.scene .ball { position: absolute; font-size: 24px; line-height: 1; width: 24px; height: 24px; text-align: center; will-change: transform; }
+.scene .ground { position: absolute; left: 6px; right: 6px; bottom: 12px; height: 2px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 25%, transparent); }
+.scene .goal { position: absolute; width: 54px; height: 40px; border: 3px solid color-mix(in srgb, var(--ink) 75%, transparent); border-bottom: 0; border-radius: 3px 3px 0 0;
+  background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--ink) 18%, transparent) 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, color-mix(in srgb, var(--ink) 18%, transparent) 0 1px, transparent 1px 6px); }
+.scene .yay { position: absolute; font-family: var(--font-display); font-size: 1rem; color: var(--turf); opacity: 0; letter-spacing: .04em; }
+/* Torschuss */
+.sc-shot .goal { right: 8px; bottom: 12px; animation: scNet 2s ease-in-out infinite; transform-origin: 100% 100%; }
+.sc-shot .boot { position: absolute; left: 4px; bottom: 12px; font-size: 22px; transform-origin: 20% 90%; animation: scBoot 2s ease-in-out infinite; }
+.sc-shot .ball { left: 26px; bottom: 13px; animation: scShot 2s cubic-bezier(.3, .6, .4, 1) infinite; }
+.sc-shot .yay { right: 14px; top: 2px; animation: scYay 2s ease-out infinite; }
+@keyframes scBoot { 0%, 10% { transform: rotate(-35deg); } 18% { transform: rotate(25deg); } 30%, 100% { transform: rotate(0); } }
+@keyframes scShot { 0%, 16% { transform: translate(0, 0) rotate(0); opacity: 1; } 34% { transform: translate(48px, -30px) rotate(260deg); } 50% { transform: translate(104px, -22px) rotate(520deg); } 58% { transform: translate(118px, -6px) rotate(600deg); } 82% { transform: translate(118px, -2px) rotate(620deg); opacity: 1; } 92%, 100% { transform: translate(118px, -2px) rotate(620deg); opacity: 0; } }
+@keyframes scNet { 0%, 52% { transform: none; } 58% { transform: scaleX(1.08) skewY(-2deg); } 68%, 100% { transform: none; } }
+@keyframes scYay { 0%, 55% { opacity: 0; transform: scale(.6); } 62% { opacity: 1; transform: scale(1.15); } 80% { opacity: 1; transform: scale(1); } 92%, 100% { opacity: 0; } }
+/* Jonglieren */
+.sc-juggle .ball { left: 78px; bottom: 34px; animation: scBounce .55s cubic-bezier(.33, 0, .2, 1) infinite alternate; }
+.sc-juggle .knee { position: absolute; left: 74px; bottom: 4px; font-size: 26px; transform-origin: 30% 90%; animation: scKnee 1.1s ease-in-out infinite; }
+.sc-juggle .shadow { position: absolute; left: 70px; bottom: 30px; width: 40px; height: 6px; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--ink) 40%, transparent), transparent); animation: scShadow .55s cubic-bezier(.33, 0, .2, 1) infinite alternate; }
+@keyframes scBounce { from { transform: translateY(0) rotate(0); } to { transform: translateY(-52px) rotate(200deg); } }
+@keyframes scShadow { from { transform: scale(1); opacity: 1; } to { transform: scale(.5); opacity: .4; } }
+@keyframes scKnee { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(4deg); } }
+/* Dribbling */
+.sc-dribble .cone { position: absolute; bottom: 14px; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 16px solid #f07c2a; }
+.sc-dribble .c1 { left: 48px; } .sc-dribble .c2 { left: 84px; } .sc-dribble .c3 { left: 120px; }
+.sc-dribble .ball { left: 10px; bottom: 14px; animation: scDribble 2.4s ease-in-out infinite; }
+@keyframes scDribble { 0% { transform: translate(0, 0) rotate(0); } 17% { transform: translate(26px, -16px) rotate(180deg); } 33% { transform: translate(55px, 0) rotate(360deg); } 50% { transform: translate(82px, -16px) rotate(540deg); } 67% { transform: translate(112px, 0) rotate(720deg); } 83% { transform: translate(140px, -10px) rotate(900deg); } 100% { transform: translate(0, 0) rotate(1260deg); } }
+/* Elfmeter */
+.sc-pen .goal { left: 50%; margin-left: -45px; width: 84px; height: 50px; top: 6px; }
+.sc-pen .keeper { position: absolute; left: 50%; margin-left: -11px; top: 26px; font-size: 22px; animation: scDive 1.8s ease-in-out infinite; }
+.sc-pen .ball { left: 50%; margin-left: -12px; bottom: 0; animation: scPen 1.8s cubic-bezier(.2, .7, .3, 1) infinite; }
+.sc-pen .yay { left: 50%; margin-left: 18px; bottom: 2px; animation: scYay 1.8s ease-out infinite; }
+@keyframes scDive { 0%, 25% { transform: none; } 45% { transform: translate(-30px, 8px) rotate(-60deg); } 75% { transform: translate(-30px, 8px) rotate(-60deg); } 90%, 100% { transform: none; } }
+@keyframes scPen { 0%, 25% { transform: translate(0, 0) scale(1); opacity: 1; } 50% { transform: translate(28px, -64px) scale(.65); } 80% { transform: translate(28px, -64px) scale(.65); opacity: 1; } 92%, 100% { opacity: 0; transform: translate(28px, -64px) scale(.65); } }
+/* Lattenknaller */
+.sc-bar .goal { right: 10px; bottom: 12px; width: 56px; height: 52px; }
+.sc-bar .ball { left: 12px; bottom: 13px; animation: scBar 2s cubic-bezier(.35, .5, .45, 1) infinite; }
+.sc-bar .yay { right: 12px; top: 0; animation: scYayBar 2s ease-out infinite; }
+@keyframes scBar { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 40% { transform: translate(112px, -52px) rotate(540deg); } 62% { transform: translate(60px, 0) rotate(300deg); } 76% { transform: translate(40px, -12px) rotate(200deg); } 88% { transform: translate(28px, 0) rotate(140deg); opacity: 1; } 96%, 100% { transform: translate(28px, 0); opacity: 0; } }
+@keyframes scYayBar { 0%, 36% { opacity: 0; transform: scale(.6); } 44% { opacity: 1; transform: scale(1.15); } 70% { opacity: 1; transform: scale(1); } 84%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .scene * { animation: none !important; } }
 </style>
 </head>
 <body>
@@ -1679,7 +1734,7 @@ const MODEL_DEFAULTS = {
   },
   gkRule: 'ready',
   tol: 10,
-  time: 1,
+  time: 2,
   autoStrength: true
 };
 
@@ -4749,7 +4804,6 @@ function calIcs(c) {
     c.lat != null ? `X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-APPLE-RADIUS=100;X-TITLE="${String(c.place || 'Platz').replace(/"/g, '')}":geo:${c.lat.toFixed(5)},${c.lon.toFixed(5)}` : '',
     c.lat != null ? `GEO:${c.lat.toFixed(5)};${c.lon.toFixed(5)}` : '',
     c.lat != null ? `URL:${placeMapUrl({ lat: c.lat, lon: c.lon })}` : '',
-    c.lat != null ? `DESCRIPTION:${e('Route: ' + placeMapUrl({ lat: c.lat, lon: c.lon }))}` : '',
     'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${e('⚽ ' + (c.title || 'Fußball'))}`, 'TRIGGER:-PT60M', 'END:VALARM',
     'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
 }
@@ -4770,7 +4824,7 @@ function calPageHTML() {
   const c = ui.cal; if (!c) return '<section class="block"><p>Dieser Kalender-Link ist unvollständig.</p></section>';
   const T = calTimes(c), loc = [c.place, c.addr].filter(Boolean).join(', ');
   const when = new Date(c.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + (c.time ? ` · ${c.time}${c.min ? '–' + addMin(c.time, c.min) : ''} Uhr` : '');
-  const g = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('⚽ ' + (c.title || 'Fußball'))}&dates=${T.a}/${T.b}${loc ? '&location=' + encodeURIComponent(loc) : ''}${c.lat != null ? '&details=' + encodeURIComponent('Route: ' + placeMapUrl({ lat: c.lat, lon: c.lon })) : ''}`;
+  const g = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('⚽ ' + (c.title || 'Fußball'))}&dates=${T.a}/${T.b}${loc ? '&location=' + encodeURIComponent(loc) : ''}`;
   return `<section class="block calpage"><h2>Termin</h2>
     <div class="calcard"><b>⚽ ${esc(c.title || 'Fußball')}</b><span>${esc(when)}</span>${c.place ? `<span>📍 ${esc(c.place)}</span>` : ''}${!c.time ? '<span class="small muted">Ohne Uhrzeit – wird als ganztägiger Termin eingetragen.</span>' : ''}</div>
     <div class="calbtns">
@@ -5660,7 +5714,9 @@ function weatherLine(date, time, pl, w, target) {
 async function geoSearch(name, address, onStep) {
   const nm = str(name), ad = str(address);
   const city = ad ? str(ad.split(',').pop()).replace(/^\d{4,5}\s*/, '') : '';
-  const variants = [...new Set([ad, nm && city ? `${nm}, ${city}` : '', nm, nm && ad ? `${nm}, ${ad}` : ''].filter(Boolean))];
+  // „Str.“ ausschreiben und Ortsteile („Lage-Billinghausen“) weglassen – so finden die Kartendienste mehr
+  const adn = ad.replace(/\bStr\.(?=\s|,|$)/gi, 'Straße').replace(/(\d{5}\s+[A-Za-zÄÖÜäöüß]+)-[A-Za-zÄÖÜäöüß]+/, '$1');
+  const variants = [...new Set([adn, ad, nm && city ? `${nm}, ${city}` : '', nm, nm && ad ? `${nm}, ${ad}` : ''].filter(Boolean))];
   const out = [], seen = new Set();
   let reached = false;
   const add = (list, via) => list.forEach(h => { const k = h.lat.toFixed(4) + ',' + h.lon.toFixed(4); if (!seen.has(k) && out.length < 6) { seen.add(k); out.push({ ...h, via }); } });
@@ -5718,10 +5774,26 @@ function placeSheetHTML() {
     ${E.err ? `<p class="errtxt">${esc(E.err)}</p>` : ''}
     ${verdict}
     ${hits && hits.length ? `<ul class="rules">${hits.map((h, k) => `<li><span class="grow small">${esc(h.name)}${h.kind ? ` <span class="muted">(${esc(h.kind)})</span>` : ''}</span><a class="btn sm ghost" href="https://www.google.com/maps/search/?api=1&query=${h.lat},${h.lon}" target="_blank" rel="noopener">Karte</a><button type="button" class="btn sm${E.lat === h.lat && E.lon === h.lon ? ' primary' : ''}" data-act="plPick" data-k="${k}">${E.lat === h.lat && E.lon === h.lon ? 'gewählt' : 'Diesen nehmen'}</button></li>`).join('')}</ul>` : ''}
-    <p class="small">${E.lat != null ? `📍 Lage: ${esc(E.found || `${fmt(E.lat, 4)}, ${fmt(E.lon, 4)}`)} <button type="button" class="linkbtn" data-act="plClear">entfernen</button>` : '<span class="muted">Noch keine Lage gespeichert.</span>'}</p>
+    <details class="field plcoord"${E.coordOpen || (hits && (!hits.length || hits.length > 1)) ? ' open' : ''}><summary><b>Genaue Lage selbst angeben</b></summary>
+      <p class="small">Findet die Suche den Platz nicht genau: In Google Maps lange auf den Platz drücken – oben erscheinen die Koordinaten (z. B. 52.08078, 8.74401), Antippen kopiert sie. Hier einfügen; ein Google-Maps-Link geht auch.</p>
+      <div class="row"><input type="text" class="grow" id="plCoord" placeholder="52.08078, 8.74401" autocomplete="off"><button type="button" class="btn sm primary" data-act="plCoord">Übernehmen</button></div></details>
+    <p class="small">${E.lat != null ? `📍 Lage: ${esc(E.found || `${fmt(E.lat, 4)}, ${fmt(E.lon, 4)}`)} <a class="linkbtn" href="${esc(placeMapUrl({ lat: E.lat, lon: E.lon }))}" target="_blank" rel="noopener">prüfen</a> · <button type="button" class="linkbtn" data-act="plClear">entfernen</button>` : '<span class="muted">Noch keine Lage gespeichert.</span>'}</p>
     <p class="hint">Gesucht wird in OpenStreetMap. Ob Google Maps denselben Ort findet, siehst du über den Link. Der Ort ist nur ein Name mit Lage – Spielfeld, Tore und Wetter trägst du je Spieltag ein, weil sie sich ändern können.</p>`, 'plTitle', 'plClose');
 }
 
+/* Lage aus Koordinaten oder einem Google-Maps-Link lesen (auch 52°04'50.8"N 8°44'38.4"E) */
+function parseCoord(t) {
+  t = str(t).trim(); let m;
+  const ok = (a, b) => (isNum(a) && isNum(b) && Math.abs(a) <= 90 && Math.abs(b) <= 180 && !(a === 0 && b === 0) ? { lat: +(+a).toFixed(6), lon: +(+b).toFixed(6) } : null);
+  if ((m = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(t))) return ok(+m[1], +m[2]);
+  if ((m = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(t))) return ok(+m[1], +m[2]);
+  if ((m = /(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?\s*([NS])[\s,;]+(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?\s*([EOW])/i.exec(t))) {
+    const f = (d, mi, se, h) => (+d + +mi / 60 + +String(se).replace(',', '.') / 3600) * (/[SW]/i.test(h) ? -1 : 1);
+    return ok(f(m[1], m[2], m[3], m[4]), f(m[5], m[6], m[7], m[8]));
+  }
+  if ((m = /(-?\d{1,2}[.,]\d{3,})\s*[,;\s]\s*(-?\d{1,3}[.,]\d{3,})/.exec(t))) return ok(+m[1].replace(',', '.'), +m[2].replace(',', '.'));
+  return null;
+}
 /* ---------- Blatt: Projekte ---------- */
 function projSheetHTML() {
   const P = ui.proj, cur = curProject();
@@ -6382,7 +6454,8 @@ function pitchLayout(entries) {
     perms(L.map((_, j) => j)).forEach(pm => { const c = pm.reduce((a, slot, j) => a + cost(L[j], xs[slot]), 0); if (c < bc - 1e-9) { bc = c; best = pm; } });
     L.forEach((z, j0) => {
       const x = xs[best[j0]], q = ((x - 0.5) / 0.4) ** 2;
-      const rr = SPORT.roleRow[z.x.r], dep = depthOn && isNum(z.x.depth) && isNum(rr) ? clamp(z.x.depth - rr, -1, 1) * 0.035 : 0;
+      // Tiefe aus dem Profil (z. B. Libero hinter der Kette) nur in der Mitte – sonst stünde die Linie schief
+      const rr = SPORT.roleRow[z.x.r], dep = depthOn && x === 0.5 && isNum(z.x.depth) && isNum(rr) ? clamp(z.x.depth - rr, -1, 1) * 0.04 : 0;
       out.push({ e: z.x, x, y: y0 + PITCH_CURVE[li] * q + dep, li });
     });
   };
@@ -6892,7 +6965,7 @@ function editorHTML() {
     <div class="field posfield"><div class="lblrow"><span class="lbl">Position</span>${ib('posPick')}</div>
       <div class="posgrid">
         <div class="poschips">${[['ATT', 'Sturm'], ['MID', 'Mittelfeld'], ['DEF', 'Abwehr'], ['GK', 'Tor']].map(([r, nm]) => `<div class="posgroup z-${ZONE_OF_ROLE[r]}"><span class="small muted">${nm}</span><div class="seg">${SPORT.posCodes.filter(c => c.main === r).sort((a, b) => (POS_COLS[a.side] ?? 2) - (POS_COLS[b.side] ?? 2) || a.row - b.row).map(c => { const on = !!code && code === c; return `<button type="button" class="${on ? 'on' : ''}" data-act="edPos" data-v="${c.codes[0]}" aria-pressed="${on}" title="${esc(c.label)}">${posChipLabel(c)}</button>`; }).join('')}</div></div>`).join('')}
-          <span class="small muted">${code ? `<b>${esc(code.label)}</b>. Nochmals antippen hebt die Auswahl auf.` : 'Antippen – hier oder auf dem Spielfeld – setzt Hauptrolle und Seite; alles lässt sich danach einzeln ändern.'}</span></div>
+          ${code ? `<span class="small posinfo"><b>${esc(code.short)}</b> = ${esc(code.label)} <span class="muted">· nochmal antippen hebt auf</span></span>` : '<span class="small muted">Antippen – hier oder auf dem Spielfeld – setzt Hauptrolle und Seite; alles lässt sich danach einzeln ändern.</span>'}</div>
         ${posMini(p)}
       </div>
       <div class="field"><span class="lbl">Hauptrolle</span>${seg('edRole', [['FLEX', 'keine / flexibel'], ...SPORT.roles.filter(r => r.key !== 'FLEX').map(r => [r.key, r.label])], p.roleMain)}</div>
@@ -6970,9 +7043,10 @@ function viewRules() {
       <div class="field full"><label class="lbl" for="rfNote">Grund (optional)</label><input type="text" id="rfNote" data-in="rfNote" value="${esc(f.note)}" placeholder="z. B. Neuling an die Hand nehmen, Brüder trennen" maxlength="80"></div>
       <div class="full"><button type="button" class="btn primary" data-act="addRule">Regel hinzufügen</button></div>
     </div>
-    <ul class="rules" data-sort="rules">${S.rules.map(r => `<li class="${r.active === false ? 'off' : ''}" data-rid="${r.id}"><span class="rhandle" data-rdrag="${r.id}" title="Zum Sortieren ziehen" aria-hidden="true">${ICON.grip}</span><span class="grow">${ruleText(r)}${ui.ruleEdit === r.id
+    <div class="rlisthead"><h3>Gespeicherte Regeln</h3><span class="muted small num">${S.rules.length}</span></div>
+    <div class="rulebox${S.rules.length > 8 ? ' scrolly' : ''}"><ul class="rules" data-sort="rules">${S.rules.map(r => `<li class="${r.active === false ? 'off' : ''}" data-rid="${r.id}"><span class="rhandle" data-rdrag="${r.id}" title="Zum Sortieren ziehen" aria-hidden="true">${ICON.grip}</span><span class="grow">${ruleText(r)}${ui.ruleEdit === r.id
       ? ` <span class="rnotebox"><input type="text" class="rnote" id="ruleNote" data-id="${r.id}" value="${esc(r.note || '')}" placeholder="Grund, z. B. Brüder trennen" maxlength="80" aria-label="Grund ändern"><button type="button" class="btn sm primary" data-act="ruleNoteSave" data-id="${r.id}">Übernehmen</button><button type="button" class="btn sm ghost" data-act="ruleNoteCancel">Abbrechen</button></span>`
-      : ` <button type="button" class="linkbtn small quiet rnotebtn" data-act="ruleEdit" data-id="${r.id}" title="Grund ändern">${r.note ? `– ${esc(r.note)} ✎` : '+ Grund'}</button>`}${!r.hard && r.type !== 'duo' ? `<span class="rprio">${seg('rulePrio', PRIOS, r.prio || 1, `data-id="${r.id}"`)}</span>` : ''}</span>${sw('ruleActive', r.active !== false, `data-id="${r.id}"`, 'Regel aktiv')}<button type="button" class="mini" data-act="delRule" data-id="${r.id}" aria-label="Regel löschen">${ICON.out}</button></li>`).join('') || '<li class="muted">Noch keine Regeln.</li>'}</ul>
+      : ` <button type="button" class="linkbtn small quiet rnotebtn" data-act="ruleEdit" data-id="${r.id}" title="Grund ändern">${r.note ? `– ${esc(r.note)} ✎` : '+ Grund'}</button>`}${!r.hard && r.type !== 'duo' ? `<span class="rprio">${seg('rulePrio', PRIOS, r.prio || 1, `data-id="${r.id}"`)}</span>` : ''}</span>${sw('ruleActive', r.active !== false, `data-id="${r.id}"`, 'Regel aktiv')}<button type="button" class="mini" data-act="delRule" data-id="${r.id}" aria-label="Regel löschen">${ICON.out}</button></li>`).join('') || '<li class="muted">Noch keine Regeln.</li>'}</ul></div>
   </section>
   <section class="block">
     <div class="block-head"><div class="lblrow"><h2>Merkmale</h2>${ib('tags')}</div></div>
@@ -9159,9 +9233,26 @@ function toast(msg, action) {
   toastT = setTimeout(() => { el.hidden = true; }, action ? 7000 : 3500);
 }
 let busyT = 0;
+/* Szenen fürs Warten – jedes Mal eine andere (nie zweimal dieselbe hintereinander) */
+const BUSY_SCENES = [
+  // Torschuss: Schuh tritt, Ball fliegt im Bogen ins Netz, „TOR!“
+  `<div class="scene sc-shot" aria-hidden="true"><i class="ground"></i><span class="goal"></span><span class="boot">👟</span><span class="ball">⚽</span><b class="yay">TOR!</b></div>`,
+  // Jonglieren: Ball hüpft weich, Schatten wächst und schrumpft
+  `<div class="scene sc-juggle" aria-hidden="true"><i class="shadow"></i><span class="ball">⚽</span><span class="knee">🦵</span></div>`,
+  // Dribbling um Hütchen
+  `<div class="scene sc-dribble" aria-hidden="true"><i class="ground"></i><i class="cone c1"></i><i class="cone c2"></i><i class="cone c3"></i><span class="ball">⚽</span></div>`,
+  // Elfmeter: Torwart springt in die falsche Ecke
+  `<div class="scene sc-pen" aria-hidden="true"><span class="goal"></span><span class="keeper">🧤</span><span class="ball">⚽</span><b class="yay">TOR!</b></div>`,
+  // Lattenknaller: Ball an die Latte, zurück, „Uff!“
+  `<div class="scene sc-bar" aria-hidden="true"><i class="ground"></i><span class="goal"></span><span class="ball">⚽</span><b class="yay">Latte!</b></div>`
+];
+let busyLast = -1;
 function showBusy(budget) {
   const el = $('#busy'), end = Date.now() + budget;
-  const tick = () => { const left = Math.ceil((end - Date.now()) / 1000); el.innerHTML = `<span class="busyball" aria-hidden="true"><span class="bb"><span class="bs">⚽</span></span><i class="bshadow"></i></span><span class="busytxt">${budget > 1500 && left > 0 ? `Suche die fairsten Teams … höchstens noch ${left} s` : 'Suche die fairsten Teams …'}</span>`; };
+  let k = Math.floor(Math.random() * BUSY_SCENES.length); if (k === busyLast) k = (k + 1) % BUSY_SCENES.length; busyLast = k;
+  el.innerHTML = `${BUSY_SCENES[k]}<span class="busytxt"></span>`;
+  const txt = el.querySelector('.busytxt');
+  const tick = () => { const left = Math.ceil((end - Date.now()) / 1000); txt.textContent = budget > 1500 && left > 0 ? `Suche die fairsten Teams … höchstens noch ${left} s` : 'Suche die fairsten Teams …'; };
   el.hidden = false; tick();
   clearInterval(busyT); busyT = setInterval(tick, 250);
 }
@@ -9561,6 +9652,13 @@ const A = {
     clearInterval(tick); E.busy = false; render();
   },
   plPick: el => { const E = ui.plEd, h = E && E.hits && E.hits[+el.dataset.k]; if (!h) return; E.lat = h.lat; E.lon = h.lon; E.found = h.name; render(); },
+  plCoord: () => {
+    const E = ui.plEd, v = ($('#plCoord') || {}).value || '', c = parseCoord(v);
+    if (!E) return;
+    if (!c) { E.coordOpen = true; E.err = /goo\.gl|maps\.app/.test(v) ? 'Kurzlinks kann die App nicht öffnen. Bitte die Koordinaten kopieren: in Google Maps lange auf den Platz drücken und oben auf die Zahlen tippen.' : 'Keine Koordinaten erkannt – z. B. 52.08078, 8.74401.'; render(); return; }
+    E.lat = c.lat; E.lon = c.lon; E.found = `Koordinaten ${c.lat.toFixed(5)}, ${c.lon.toFixed(5)}`; E.err = ''; E.coordOpen = false; render();
+    toast('Lage übernommen – jetzt speichern.');
+  },
   plClear: () => { const E = ui.plEd; if (E) { E.lat = null; E.lon = null; E.found = ''; } render(); },
   plSave: () => {
     const E = ui.plEd; if (!E) return;
@@ -11612,7 +11710,7 @@ function svGotHTML(open) {
   return `<details class="svgot"${open ? ' open' : ''}><summary>📩 Link einfügen</summary>
     <p class="small muted">Du hast einen Link zum Bewerten oder einen Gast-Link bekommen, aber es öffnet sich nur diese Seite – oder du nutzt die App vom Home-Bildschirm? Halte die Nachricht in WhatsApp gedrückt → „Kopieren“ und füge sie hier ein.</p>
     <textarea id="svGotIn" rows="3" placeholder="Nachricht hier einfügen"></textarea>
-    <div class="row"><button type="button" class="btn sm primary" data-act="svGotOpen">Bewertung öffnen</button>${ui.svGotErr ? `<span class="small errtxt">${esc(ui.svGotErr)}</span>` : ''}</div></details>`;
+    <div class="row"><button type="button" class="btn sm primary" data-act="svGotOpen">Link öffnen</button>${ui.svGotErr ? `<span class="small errtxt">${esc(ui.svGotErr)}</span>` : ''}</div></details>`;
 }
 Object.assign(A, {
   svGotOpen: () => {
@@ -11624,7 +11722,234 @@ Object.assign(A, {
   }
 });
 
+/* Sprüche fürs Logo: Antippen zeigt einen davon, zufällig, ohne Wiederholung, bis alle durch sind */
+const QUOTES = [
+  'Der Ball ist rund. Die Ausreden auch.',
+  'Abseits gibt es bei uns nur, wenn es dem anderen Team schadet.',
+  'Wer zuletzt läuft, holt die Bälle.',
+  'Aufwärmen? Wir wärmen uns im Spiel auf.',
+  'Die Waden sind dabei. Der Kopf ist schon beim Duschen.',
+  'Ein Spiel dauert 60 Minuten. Die Diskussion danach 90.',
+  'Gestern noch Kreisliga, heute Weltklasse – im Kopf.',
+  'Fair geteilt ist halb gewonnen.',
+  'Der Torwart ist immer der, der zuletzt „Nicht ich!“ ruft.',
+  'Wer schießt, kann treffen. Wer nicht schießt, kann gut erklären.',
+  'Kondition ist, wenn man am Ende noch meckern kann.',
+  'Ein Doppelpass ist ein Pass, den man zweimal verspringt.',
+  'Hier entscheidet nicht der Schiri. Hier entscheidet die Lautstärke.',
+  'Taktik: Ball zum, der rennt.',
+  'Bei uns gibt es keine Fehlpässe, nur kreative Raumdeckung.',
+  'Das Runde muss ins Eckige – und danach ins Kühle.',
+  'Wer nicht verteidigt, nennt es Pressing.',
+  'Heute nur kurz. Sagt er jede Woche.',
+  'Der beste Laufweg ist der zum Getränkekasten.',
+  'Elfmeter gibt es nur bei Blut oder Einigkeit.',
+  'Sonntag fühlt sich jeder Muskel an wie Montag.',
+  'Ein Tor ist ein Tor. Ein Hackentor ist eine Geschichte.',
+  'Die App ist neutral. Dein Mitspieler nicht.',
+  'Flanken sind Geschenke ohne Empfänger.',
+  'Kein Spieler ist zu alt, solange er noch „Ich hab ihn doch berührt!“ sagen kann.',
+  'Laufen ist Silber, Stehen ist Gold – zumindest für den Torwart.',
+  'Der Ball sucht immer den, der gerade Schnürsenkel bindet.',
+  'Wer das Leibchen trägt, hat verloren. Nur beim Waschen.',
+  'Das Wichtigste am Fußball: dass alle wiederkommen.',
+  'Faire Teams, unfaire Waden.',
+  'Ballbesitz ist schön. Tore sind schöner.',
+  'Nach dem Spiel ist vor dem Muskelkater.',
+  'Die Mittellinie ist für manche eine Landesgrenze.',
+  'Zwei Gegner, ein Pass, null Plan – trotzdem Tor.',
+  'Wer im Tor steht, hat alle Freiheiten. Außer die Freiheit zu gehen.',
+  'Pass mir den Ball – ich hab ein gutes Gefühl.',
+  'Er hat einen linken Fuß. Und einen zum Stehen.',
+  'Die beste Abwehr ist ein Mitspieler, der zurückläuft.',
+  'Hinten hilft, wer vorne nichts trifft.',
+  'Ein Fallrückzieher pro Saison ist Pflicht. Treffen ist Kür.',
+  'Wer sagt „letztes Tor gewinnt“, verliert meistens.',
+  'Wir spielen nicht schlecht, wir spielen überraschend.',
+  'Rasen ist auch nur Kunstrasen mit Persönlichkeit.',
+  'Die Halle verzeiht nichts. Vor allem keine Bande.',
+  'Abklatschen zählt als Teambuilding.',
+  'Wer am lautesten „Hintermann!“ ruft, ist meistens selbst der Hintermann.',
+  'Der Gegner hat auch nur zwei Beine. Manchmal sogar weniger Ahnung.',
+  'Ein guter Pass sieht von außen immer einfacher aus.',
+  'Torwart im Wechsel: Demokratie mit Handschuhen.',
+  'Wer gewinnt, war fairer. Wer verliert, war besser.',
+  'Keiner spielt so gut wie der, der heute nicht da ist.',
+  'Unser System: Alle nach vorne, einer bleibt traurig hinten.',
+  'Muskelkater ist nur Fitness, die sich bemerkbar macht.',
+  'Das ist kein Stolpern, das ist eine Finte mit Verzögerung.',
+  'Wer schwitzt, spielt. Wer redet, auch.',
+  'Der Ball ist geduldig. Der Mitspieler nicht.',
+  'Teamgeist ist, wenn auch der Fehlpass beklatscht wird.',
+  'Die Aufstellung ist perfekt. Bis zum Anpfiff.',
+  'Die Sonne geht unter, der Ehrgeiz nicht.',
+  'Ein Schuss, ein Tor, ein Jubel, drei Wochen Gesprächsstoff.',
+  'Wer nicht köpft, hat trotzdem einen Kopf – zum Nachdenken danach.',
+  'Kein Pass ist zu kurz, wenn er ankommt.',
+  'Erst wird gekickt, dann wird erzählt, wie gut es war.',
+  'Wer pünktlich ist, darf Teams einteilen. Oder fast.',
+  'Die App rechnet. Ihr rennt.',
+  'Weltklasse ist relativ. Kreisklasse auch.',
+  'Den Ball flach halten – im Spiel und in der Kabine.',
+  'Ein Eigentor ist auch ein Tor. Nur mit Publikum.',
+  'Wer Tore schießt, muss nicht verteidigen. Glaubt er.',
+  'Ballgefühl hat jeder. Manche fühlen nur nichts.',
+  'Ein Sprint pro Spiel reicht. Wenn er gut getimt ist.',
+  'Lieber zehn Pässe zu viel als einer zum Gegner.',
+  'Die Bank ist kein Ort. Sie ist eine Haltung.',
+  'Heute wird gezaubert. Morgen wird gekühlt.',
+  'Faul ist, wer kein Foul macht, weil er nicht hinterherkommt.',
+  'Das Spiel hat zwei Halbzeiten. Die Wade nur eine.',
+  'Wer passt, gewinnt Freunde. Wer dribbelt, Zuschauer.',
+  'Am Ende zählt nur eins: Wer holt die Bälle?',
+  'Ein Kopfball ist eine Idee mit Stirn.',
+  'Bei Regen spielen nur die Harten. Und die, die es versprochen haben.',
+  'Ein Tor ohne Jubel ist wie Pommes ohne Salz.',
+  'Hobbykicker sind Profis im Erklären.',
+  'Lauf, als ob dich die App beobachtet.',
+  'Gleich starke Teams – ungleich laute Spieler.',
+  'Den Letzten beißen die Hunde. Den Ersten die Erwartungen.',
+  'Die Schienbeinschoner sind im Auto. Das Auto auch.',
+  'Wer meckert, hat noch Luft.',
+  'Ein Spiel ist erst verloren, wenn die Halle zumacht.',
+  'Wenn alle stürmen, ist der Torwart der Stratege.',
+  'Pressing heißt: Alle laufen, einer weiß warum.',
+  'Taktiktafel: abwischbar. Wie die Taktik.',
+  'Die Dusche nach dem Spiel ist die eigentliche Siegerehrung.',
+  'Ein guter Mitspieler ruft nicht „Hier!“, er steht da.',
+  'Nur wer fällt, kann wieder aufstehen. Am besten ohne Schwalbe.',
+  'Er spielt immer auf Ballhöhe – leider auch auf Ballgeschwindigkeit.',
+  'Zwei linke Füße sind auch ein Paar.',
+  'Wer nicht weiß, wohin, spielt quer.',
+  'Bei Unentschieden gewinnen alle. Vor allem das Bier.',
+  'Kein Mensch erinnert sich an Fehlpässe. Außer der, der sie bekommen hat.',
+  'Fußball ist einfach: Ball, Tor, rein. Der Rest ist Diskussion.',
+  'Das Leibchen riecht nach Erfahrung.',
+  'Ein Spieler mehr ist ein Wechsler mehr. Oder ein Mitläufer.',
+  'Wer im Tor steht, sieht das ganze Spiel. Und alle Fehler.',
+  'Der Torjäger jagt. Der Rest hechelt.',
+  'Wer den Ball hat, hat die Verantwortung. Also schnell abspielen.',
+  'Die Mauer steht. Bis einer niest.',
+  'Die beste Statistik: Alle kommen nächste Woche wieder.',
+  'Nach 20 Minuten spielt jeder Mittelfeld.',
+  'Ruhig bleiben – der Ball hat auch keinen Stress.',
+  'Ein Tunnel ist eine Einladung, die man nicht ablehnt.',
+  'Unser Trainer ist ein Algorithmus. Er meckert nie.',
+  'Rote Karten gibt es nicht. Nur rote Köpfe.',
+  'Die erste Halbzeit gehört den Beinen, die zweite dem Willen.',
+  'Wer am Rand steht, sieht alles besser. Und sagt es auch.',
+  'Fußball ist das einzige Spiel, bei dem man mit dem Kopf denkt und mit den Füßen redet.',
+  'Ein Rückpass zum Torwart ist Vertrauen in Reinform.',
+  'Der Platz ist zu klein für Ausreden.',
+  'Der beste Konter ist der, den keiner hat kommen sehen. Auch wir nicht.',
+  'Nicht jeder Schuss ist ein Torschuss. Manche sind Weckrufe.',
+  'Die Socken sind heute die besten Spieler – die halten wenigstens die Position.',
+  'Mittwochs Fußball, donnerstags Heldengeschichten.',
+  'Ein Spiel ohne Pfosten ist ein Spiel ohne Drama.',
+  'Wer abspielt, wird angespielt. Meistens.',
+  'Kopf hoch – sonst siehst du den Pass nicht.',
+  'Jeder Spieler ist wichtig. Besonders der mit dem Ball.',
+  'Wenn der Ball am Pfosten klingt, singt das Herz.',
+  'Gute Teams gewinnen. Faire Teams machen Spaß.',
+  'Die Stärke 10 hat hier noch keiner. Außer im Kopf.',
+  'Ein Spieler ist nur so gut wie sein letzter Pass. Zum Glück vergisst man schnell.',
+  'Heute gilt: Wer trifft, darf sich etwas wünschen. Zum Beispiel Wasser.',
+  'Wer in der Abwehr spielt, rettet Leben. Zumindest Spielstände.',
+  'Fußball ohne Gegner ist Training. Fußball ohne Freunde ist traurig.',
+  'Der lange Ball ist die Liebeserklärung an den Stürmer.',
+  'Ein guter Torwart hält. Ein sehr guter hält auch den Mund.',
+  'Die Halle hat vier Wände. Alle davon sind Mitspieler.',
+  'Er macht nicht viele Tore, aber wenn, dann erzählt er sie oft.',
+  'Wer langsam ist, muss klug sein. Wer klug ist, spielt Pässe.',
+  'Spielverständnis ist, zu wissen, wann man besser nicht dribbelt.',
+  'Erst die Teams, dann die Tore, dann die Pizza.',
+  'Für die App sind alle gleich. Für die Waden nicht.',
+  'Ein Sieg ist schön, ein knapper Sieg ist besser für die Gruppe.',
+  'Der Ball kennt keine Namen. Nur Schuhgrößen.',
+  'Wer zuerst „Abstoß!“ ruft, hat recht.',
+  'Ballverliebt ist nicht verliebt in den Ball, sondern in sich selbst.',
+  'Wer über Kunstrasen meckert, hat noch nie auf Asche gespielt.',
+  'Das Spiel ist erst zu Ende, wenn der letzte Ball gefunden ist.',
+  'Manchmal ist der beste Pass der, den man nicht spielt.',
+  'Torwartfehler sind kollektive Erinnerungen.',
+  'Wechselt der Torwart, wechselt das Glück.',
+  'Ein Dribbling über drei Mann ist eine Kunst. Über zwei Mitspieler auch.',
+  'Wer fair spielt, spielt öfter mit.',
+  'Ein Hattrick in der Freizeitliga zählt doppelt – beim Erzählen dreifach.',
+  'Ein Freistoß ist eine Bitte um Ruhe.',
+  'Aus Spaß wird Ernst, aus Ernst wird Wade.',
+  'Wer sich nie verletzt, hat sich nie bewegt.',
+  'Echte Freunde passen auch, wenn sie selbst frei stehen.',
+  'Fußball ist Schach, nur mit mehr Schwitzen.',
+  'Er hat Übersicht. Leider über das falsche Spiel.',
+  'Spielmacher ist, wer das Spiel macht. Spielverderber auch.',
+  'Grätschen ist auch eine Form von Zuneigung.',
+  'Die App hat es so gewollt.',
+  'Kalte Füße hat nur, wer nicht läuft.',
+  'Ein Tor ist nicht alles. Aber ohne Tor ist alles nichts.',
+  'Der Schiedsrichter fehlt. Die Gerechtigkeit auch, aber das merkt keiner.',
+  'Lieber gemeinsam verloren als allein gewonnen. Fast.',
+  'Ein Elfmeter ist ein Duell. Meist gegen sich selbst.',
+  'Keiner hat den Ball so lieb wie der, der ihn nie abgibt.',
+  'Wer pünktlich zum Spiel kommt, findet die besten Leibchen.',
+  'Der Ball rollt, die Zeit läuft, die Waden brennen.',
+  'Wer die Teams macht, macht sich Feinde. Deshalb macht es jetzt die App.',
+  'Unser Kader: klein, aber laut.',
+  'Er hat einen Schuss wie ein Pferd. Leider auch die Zielgenauigkeit.',
+  'Auf dem Platz sind alle gleich. Nach dem Platz auch – müde.',
+  'Fußball verbindet. Vor allem Bänder.',
+  'Ein gutes Spiel braucht zwei Teams, einen Ball und mindestens eine Ausrede.',
+  'Der erste Ballkontakt verrät alles. Der zweite rettet manches.',
+  'Wer auf Abseits spielt, braucht starke Nerven und schwache Gegner.',
+  'Der Ball muss laufen. Wir auch, aber langsamer.',
+  'Wer den Ball verliert, holt ihn sich zurück. Das ist Charakter.',
+  'Heute spielt die Mannschaft. Morgen spielt der Rücken.',
+  'Kein Trainer, kein Problem. Nur Meinungen.',
+  'Fünf gegen fünf ist Familie. Elf gegen elf ist Politik.',
+  'Gewinnen ist schön. Gleich gute Teams sind schöner.',
+  'Das Leder ist aus Kunststoff. Die Leidenschaft nicht.',
+  'Wer sich auswechselt, zeigt Größe. Oder Seitenstechen.',
+  'Ein Pfostenschuss ist ein Tor in einer besseren Welt.',
+  'Die Ecke war gut gemeint.',
+  'Fußball ist Kopfsache. Leider haben wir nur Füße mitgebracht.',
+  'Wir verlieren nie. Entweder wir gewinnen, oder wir lernen.',
+  'Jede Woche das schönste Spiel der Saison.',
+  'Hier wird nicht gefoult. Hier wird intensiv kommuniziert.',
+  'Das wichtigste Equipment: gute Laune und ein Ball, der Luft hat.',
+  'Die Pumpe ist das wahre Herz der Mannschaft.',
+  'Lieber ein schönes Spiel als ein schönes Ergebnis. Lieber beides.',
+  'Wer die Bälle mitbringt, hat das letzte Wort.',
+  'Anpfiff ist, wenn alle da sind. Also gleich. Vielleicht.',
+  'Ein Team, ein Ball, viele Meinungen.',
+  'Das Spiel lebt vom Wechsel – sagt jeder, der gerade raus muss.',
+  'Heute läuft’s. Notfalls der Ball allein.',
+  'Wer zuerst kommt, wird zuerst eingeteilt.'
+];
+let quoteT = 0;
+function quoteNext() {
+  let bag = [];
+  try { bag = JSON.parse(localStorage.getItem('ft-qbag') || '[]'); } catch (e) { bag = []; }
+  if (!Array.isArray(bag) || !bag.length || bag.some(i => !(i >= 0 && i < QUOTES.length))) {
+    bag = QUOTES.map((_, i) => i);
+    for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+  }
+  const k = bag.pop();
+  try { localStorage.setItem('ft-qbag', JSON.stringify(bag)); } catch (e) { /* egal */ }
+  return QUOTES[k];
+}
+function quoteHide() { const q = document.getElementById('quote'); if (q) q.classList.remove('on'); clearTimeout(quoteT); }
+function quoteShow() {
+  let q = document.getElementById('quote');
+  if (!q) { q = document.createElement('div'); q.id = 'quote'; q.setAttribute('role', 'status'); q.addEventListener('click', quoteHide); document.body.appendChild(q); }
+  if (q.classList.contains('on')) { quoteHide(); return; }
+  q.textContent = quoteNext();
+  void q.offsetWidth; q.classList.add('on');
+  clearTimeout(quoteT); quoteT = setTimeout(quoteHide, Math.max(4500, q.textContent.length * 70));
+}
+
 $('#logo').innerHTML = `<img src="${LOGO_SRC}" alt="" width="34" height="34">`;
+$('#logo').title = 'Antippen für einen Spruch';
+$('#logo').addEventListener('click', e => { e.stopPropagation(); quoteShow(); });
 /* ============================================================
    GAST-LINK: Die Gruppe bildet faire Teams, ohne die Bewertungen zu sehen
    Im Link (nach dem #, nie an einen Server): je Spieler Name, Stärke (Bewertungen + Ergebnisse), Torwart-Stärke
