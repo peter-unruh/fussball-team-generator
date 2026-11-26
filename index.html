@@ -1259,6 +1259,15 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svsec > .row { margin: 0 0 12px; }
 .svsec > p { margin: 0 0 8px; }
 .svlinkbox input { min-height: 42px; }
+.svline .dot.me { background: var(--turf); box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 3px var(--turf); z-index: 2; }
+.lg.dot.me { background: var(--turf); }
+.svwho { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; text-align: left; color: var(--ink); min-width: 0; }
+.svwho .avatar { width: 26px; height: 26px; font-size: .72rem; flex: none; }
+.svwho b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.svwho:hover b { text-decoration: underline; }
+.svconf { gap: 6px 10px; }
+.svconf .chip { min-height: 28px; }
+.svprof { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-top: 2px; }
 
 /* ---------- Gast-Projekt: keine Einzelwerte zeigen ---------- */
 body.is-guest .tp .sv, body.is-guest .team-head .tval { display: none !important; }
@@ -1268,6 +1277,17 @@ body.is-guest .tp .sv, body.is-guest .team-head .tval { display: none !important
 .gcode { max-height: 160px; overflow: auto; }
 body.no-help .xhelp { display: none !important; }
 @media (max-width: 640px) { .toolbar .tgroup .btn, .toolbar.simpletb .btn { padding: 10px 4px 8px; min-height: 64px; gap: 5px; } }
+.ptools { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; }
+.ptool { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 66px; padding: 10px 4px 8px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); font-weight: 650; font-size: .86rem; line-height: 1.2; text-align: center; }
+.ptool small { font-weight: 500; font-size: .72rem; color: var(--muted); }
+.ptool:hover { border-color: var(--muted); }
+.psrow .btn { flex: none; }
+.stx-ok { color: color-mix(in srgb, var(--good) 70%, var(--muted)); }
+.stx-warn { color: var(--warn); }
+.bstr > span.mini, .bstr > button.mini { flex: none; }
+.bstr > span.mini { width: 30px; display: inline-block; }
+body.no-help .htail { display: none; }
+.impopts { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; }
 </style>
 </head>
 <body>
@@ -4455,6 +4475,7 @@ function backupReminder() {
 }
 /* Import erst prüfen und zeigen, dann auf Wunsch übernehmen (mit Rückgängig). */
 function previewImport(text) {
+  ui.impOpt = {};
   let data;
   try { data = JSON.parse(text); } catch (e) { toast('Die Datei enthält keine lesbaren Daten.'); return; }
   // Neues Format: ein oder mehrere Projekte
@@ -4464,14 +4485,14 @@ function previewImport(text) {
     ui.importTheme = data.device && ['auto', 'light', 'dark'].includes(data.device.theme) ? data.device.theme : null;
     if (list.length > 1 || data.content === 'all') { ui.importMulti = list; ui.importPreview = null; ui.tab = 'settings'; ui.open.stData = true; render(); return; }
     data = null; const st = list[0];
-    if (!S.players.length && !S.matches.length) { ui.importPreview = st; A.importConfirm(); return; }
+    if (!S.players.length && !S.matches.length) { ui.importPreview = st; ui.tab = 'settings'; ui.open.stData = true; render(); return; }
     ui.importPreview = st; ui.tab = 'settings'; ui.open.stData = true; render(); return;
   }
   let st = null;
   try { st = data && data.app === 'team-generator' ? cleanState(data) : fromPreviousVersion(data); } catch (e) { st = null; }
   if (!st) { toast('Das ist keine Datei aus dieser App.'); return; }
   // Leeres Projekt (z. B. gerade neu angelegt): nichts zu überschreiben → direkt übernehmen
-  if (!S.players.length && !S.matches.length) { ui.importPreview = st; A.importConfirm(); return; }
+  if (!S.players.length && !S.matches.length) { ui.importPreview = st; ui.tab = 'settings'; ui.open.stData = true; render(); return; }
   ui.importPreview = st;
   ui.tab = 'settings'; ui.open.stData = true;
   render();
@@ -5976,7 +5997,7 @@ function viewTeams() {
   const fresh = R.sig === sigOf(buildInput());
   // Seit dem Bilden geändert? (Einstellungen, Bewertungen, Tagesangaben – oder „Teams bilden nach“)
   const basNow = expert() ? SET().basis || 'mix' : 'rating', basThen = R.basis || (expert() ? 'mix' : 'rating');
-  const changedHint = !R.self && !R.random && (!fresh || basNow !== basThen) ? `<section class="banner"><p><b>Seit dem Bilden wurde etwas geändert</b> – ${basNow !== basThen ? `diese Teams wurden mit „${esc((BASES.find(b => b[0] === basThen) || ['', basThen])[1])}“ gebildet, jetzt gilt „${esc((BASES.find(b => b[0] === basNow) || ['', basNow])[1])}“ (Einstellung „Teams bilden nach“ oder Wechsel zwischen einfachem und erweitertem Modus)` : 'Einstellungen, Bewertungen oder Angaben zum Spieltag'}.${R.vars && R.vars.length > 1 && !fresh ? ' Die Varianten sind solange ausgeblendet.' : ''} ${basNow !== basThen ? 'Die Fairness oben ist noch mit der alten Grundlage gerechnet.' : 'Die Fairness oben ist schon mit dem neuen Stand gerechnet.'} Neu berechnet könnten die Teams fairer werden${R.manual ? ' – deine Handänderungen gehen dabei verloren' : ''}.</p><button type="button" class="btn sm primary" data-act="generate">Neu berechnen</button></section>` : '';
+  const changedHint = !R.self && !R.random && (!fresh || basNow !== basThen) ? `<section class="banner"><p><b>Seit dem Bilden wurde etwas geändert.</b><span class="htail"> ${basNow !== basThen ? `diese Teams wurden mit „${esc((BASES.find(b => b[0] === basThen) || ['', basThen])[1])}“ gebildet, jetzt gilt „${esc((BASES.find(b => b[0] === basNow) || ['', basNow])[1])}“ (Einstellung „Teams bilden nach“ oder Wechsel zwischen einfachem und erweitertem Modus)` : 'Einstellungen, Bewertungen oder Angaben zum Spieltag'}.${R.vars && R.vars.length > 1 && !fresh ? ' Die Varianten sind solange ausgeblendet.' : ''} ${basNow !== basThen ? 'Die Fairness oben ist noch mit der alten Grundlage gerechnet.' : 'Die Fairness oben ist schon mit dem neuen Stand gerechnet.'} Neu berechnet könnten die Teams fairer werden${R.manual ? ' – deine Handänderungen gehen dabei verloren' : ''}.</span></p><button type="button" class="btn sm primary" data-act="generate">Neu berechnen</button></section>` : '';
   const st = R.stats || {};
   const bas = basisNow(), basTxt = bas === 'mix' ? 'Stärken: Bewertungen + Ergebnisse. ' : bas === 'data' ? 'Stärken: nur aus Ergebnissen. ' : '';
   const searchTxt = basTxt + (R.self ? 'Selbst eingeteilt – so bewertet die App deine Aufteilung.' : R.random ? 'Rein zufällig eingeteilt (nur feste Torhüter und gleiche Teamgrößen berücksichtigt) – so fair ist die Aufteilung laut Bewertungen.' : st.exact
@@ -6133,18 +6154,15 @@ function viewPlayers() {
   const stCls = { paused: 't-paused', guest: 't-guest', archived: 't-paused' }, maxS = Math.max(10, ...list.map(x => x.e.strength));
   const X = expert(), spreadHtml = X ? ratingSpread() : '';
   return `<section class="block">
-    <div class="block-head"><h2>Spieler</h2><span class="muted num" title="Schnitt der aktiven Spieler; 5–6 ist gut. Streuung: wie weit die Stärken auseinanderliegen; 1,5–2,5 ist üblich.">${S.players.length} · Schnitt ${fmt(groupAvg(), 1)}${X && ui._spread ? ` · Streuung ${fmt(ui._spread.sd, 1)}` : ''}</span></div>
+    <div class="block-head"><h2>Spieler</h2><span class="muted num" title="Schnitt der aktiven Spieler; 5–6 ist gut. Streuung: wie weit die Stärken auseinanderliegen; 1,5–2,5 ist üblich.">${plural(S.players.length, 'Spieler', 'Spieler')} · Schnitt <span class="${groupAvg() >= 4.2 && groupAvg() <= 6.8 ? 'stx-ok' : 'stx-warn'}">${fmt(groupAvg(), 1)}</span>${X && ui._spread ? ` · Streuung <span class="${ui._spread.sd >= 1.2 && ui._spread.sd <= 3 ? 'stx-ok' : 'stx-warn'}">${fmt(ui._spread.sd, 1)}</span>` : ''}</span></div>
     ${spreadHtml}
-    ${(() => { const L = newDone(); return L.length ? `<div class="banner newdone"><p><b>Nicht mehr neu?</b> ${L.length === 1 ? `${esc(disp(L[0]))} ist schon länger dabei (${newDoneWhy(L[0])}).` : `${L.length} Spieler sind schon länger dabei (mindestens ${NEW_DONE} Runden oder seit über einem Jahr).`} <span class="muted">„Neu“ macht die Stärke unsicher und verteilt neue Spieler gleichmäßig auf die Teams.</span></p>
+    ${(() => { const L = newDone(); return L.length ? `<div class="banner newdone"><p><b>Nicht mehr neu?</b> ${L.length === 1 ? `${esc(disp(L[0]))} ist schon länger dabei (${newDoneWhy(L[0])}).` : `${L.length} Spieler sind schon länger dabei (mindestens ${NEW_DONE} Runden oder seit über einem Jahr).`} <span class="muted htail">„Neu“ macht die Stärke unsicher und verteilt neue Spieler gleichmäßig auf die Teams.</span></p>
       <div class="ndlist">${L.length > 1 ? '<button type="button" class="btn sm primary" data-act="newOff" data-id="">Bei allen entfernen</button>' : ''}${L.map(p => `<button type="button" class="btn sm${L.length === 1 ? ' primary' : ''}" data-act="newOff" data-id="${p.id}">${L.length === 1 ? '„Neu“ entfernen' : `${esc(disp(p))} <span class="small muted">· ${newDoneWhy(p)}</span>`}</button>`).join('')}</div></div>` : ''; })()}
-    <div class="row"><input class="grow" type="search" id="psearch" data-in="psearch" placeholder="${X ? 'Name oder Merkmal suchen' : 'Name suchen'}" value="${esc(ui.psearch)}" aria-label="Spieler suchen"><button type="button" class="btn primary" data-act="newPlayer">Spieler anlegen</button></div>
-    ${S.players.length >= 3 ? svEntryHTML() : ''}
-    ${S.players.length >= 2 && !isGuest() ? guestEntryHTML() : ''}
-    ${!X ? '' : `<div class="row"><button type="button" class="btn sm" data-act="shotOpen" data-v="players">Aus Screenshots anlegen</button><span class="small muted">z. B. die Mitgliederliste der Gruppe – Bekannte werden erkannt, du prüfst jede Zuordnung. Heute wird nichts angekreuzt.</span></div>
-`}
+    ${playerToolsHTML(X)}
     <div class="row"><span class="lbl">Sortieren</span>${seg('psort', [...(X ? [['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele'], ['data', 'Datenlage']] : [['name', 'Name'], ['strength', 'Stärke']]), ...(S.players.some(p => p.birth) ? [['age', 'Alter']] : [])], ui.psort, '', X ? '' : 'pill')}</div>
     ${pausedN || guestN || archN ? `<div class="row tchips"><span class="lbl">Zeigen</span>${[['showPausedPl', 'Pausierte', pausedN, ui.showPausedPl !== false], ['showGuestPl', 'Gäste', guestN, !!ui.showGuestPl], ['showArch', 'Archivierte', archN, !!ui.showArch]].filter(x => x[2]).map(([k, l, n, on]) => `<button type="button" class="showchip${on ? ' on' : ''}" data-act="plShow" data-k="${k}" aria-pressed="${on}"><span class="tbox" aria-hidden="true"></span>${l} <span class="cnt">${n}</span></button>`).join('')}</div>` : ''}
     ${ui.psort === 'data' ? '<p class="hint">Oben stehen die Spieler mit den wenigsten Angaben.</p>' : ''}
+    <div class="row psrow"><input class="grow" type="search" id="psearch" data-in="psearch" placeholder="${X ? 'Name oder Merkmal suchen' : 'Name suchen'}" value="${esc(ui.psearch)}" aria-label="Spieler suchen"><button type="button" class="btn primary" data-act="newPlayer">+ Spieler</button></div>
     ${ui.psort === 'role' && list.length ? `<div class="field">${posBoard(list.map(x => x.p), { legend: true })}</div>` : ''}
     ${ui.psort === 'strength' && X ? '<ul class="hint hintlist"><li>Balken von rechts, Skala 0–10. Die dunkle Linie ist die Stärke.</li><li>Hell davor und danach: Bereich, in dem die Stärke ebenso liegen könnte.</li><li>Breiter mit „unsicher“ im Profil und ohne eigene Einschätzung (z. B. unbekannte Gäste); schmaler mit jeder bewerteten Fähigkeit und mit jedem Spiel, das in die Auswertung eingeht.</li></ul>' : ''}
     ${ui.psort === 'games' ? '<p class="hint">Gezählt werden Spiele mit Ergebnis in den letzten 12 Monaten.</p>' : ''}
@@ -6178,7 +6196,8 @@ function bulkHTML(list) {
       const e = effOf(p), dev = e.auto && p.rated ? Math.abs(e.manual - e.derived) : 0, cls = dev >= 2.5 ? 'st-bad' : dev >= 1.5 ? 'st-warn' : 'st-good';
       const slider = `<span class="bstr"><input type="range" min="1" max="${p.star ? 15 : 10}" step="0.5" id="bk_str_${p.id}"${p.rated ? '' : ' class="unr"'} data-in="bulkStr" data-ch="bulkStrDone" ${id} value="${p.rated ? p.strength : 5}" aria-label="Stärke von ${esc(label(p))}"><output class="num" id="bo_${p.id}">${p.rated ? fmtS(p.strength) : '–'}</output></span>`;
       const un = p.rated ? `<button type="button" class="mini" data-act="unrate" ${id} title="Einschätzung zurücknehmen (wieder „nicht eingeschätzt“)" aria-label="Einschätzung zurücknehmen">${ICON.out}</button>` : '';
-      return e.auto ? `${slider}${un}<span class="small bsub">berechnet <b>${fmtS(e.strength)}</b> aus ${e.given} Fähigkeiten · eigene Einschätzung ${p.rated ? `<b class="${cls}">${fmtS(e.manual)}${dev >= 1.5 ? ` – ${fmt(dev, 1)} Punkte daneben` : ' – passt dazu'}</b>` : 'noch keine'}${e.given < 8 ? ` · zählt für die ${8 - e.given} nicht bewerteten` : ' · zählt nicht, alle 8 bewertet'}</span>` : slider + un;
+      const sl2 = slider.replace(/<\/span>$/, (un || '<span class="mini" aria-hidden="true"></span>') + '</span>');
+      return e.auto ? `${sl2}<span class="small bsub">berechnet <b>${fmtS(e.strength)}</b> aus ${e.given} Fähigkeiten · eigene Einschätzung ${p.rated ? `<b class="${cls}">${fmtS(e.manual)}${dev >= 1.5 ? ` – ${fmt(dev, 1)} Punkte daneben` : ' – passt dazu'}</b>` : 'noch keine'}${e.given < 8 ? ` · zählt für die ${8 - e.given} nicht bewerteten` : ' · zählt nicht, alle 8 bewertet'}</span>` : sl2;
     }
     if (f === 'auto') { const e = effOf(p); return e.given ? `${sw('edAuto', e.autoOn, id, 'Stärke aus Fähigkeiten berechnen')} <span class="small muted">berechnet ${fmt(e.derived, 1)} · eigene ${p.rated ? fmtS(e.manual) : '–'} · es zählt <b>${fmtS(e.strength)}</b></span>` : '<span class="small muted">keine Fähigkeit bewertet</span>'; }
     if (f === 'conf') { const e = effOf(p); return seg('edConf', [['', `auto: ${CONF[autoConf(p, e)].label}`], ...CONF_KEYS.map(k => [k, CONF[k].label, CONF[k].hint])], p.conf || '', id); }
@@ -6255,6 +6274,7 @@ function editorSimpleHTML(p) {
       <div class="bigval"><span class="num" id="edVal">${fmtS(e.strength)}</span><span id="edAnchor">${strengthAnchor(e.strength)}</span></div>
       <div class="rangerow"><input type="range" min="1" max="10" step="0.5" id="edStrength"${ratedOf(p) ? '' : ' class="unr"'} data-in="edStrength" data-ch="edStrengthDone" value="${clamp(e.manual, 1, 10)}" aria-label="Stärke"><span class="num" id="edManual">${fmtS(e.manual)}</span></div>
       <div class="refs"><span class="muted">Im Vergleich:</span>${weaker.map(ref).join('')}<span class="me">${esc(disp(p))} ${fmtS(e.strength)}</span>${stronger.map(ref).join('')}</div>
+      ${svProfileHTML(p)}
       ${ratedOf(p) ? (bestStrength(p).auto ? '<p class="hint">Aus den Fähigkeiten berechnet, die im erweiterten Modus bewertet wurden. Der Regler setzt die Stärke von Hand.</p>' : '') : '<p class="hint">Noch nicht eingeschätzt – zählt wie 5.</p>'}
     </div>
     <div class="row"><span class="grow"><b>Torwart</b> <span class="small muted">– steht fest im Tor</span></span>${sw('edKeeper', p.roleMain === 'GK', '', 'Torwart')}</div>
@@ -6309,6 +6329,7 @@ function editorHTML() {
       ${lbl(`Stärke${e.auto ? ' (aus Fähigkeiten berechnet)' : ''}`, 'strength')}
       <div class="bigval"><span class="num" id="edVal">${fmtS(e.strength)}</span><span id="edAnchor">${strengthAnchor(e.strength)}</span></div>
       <div class="refs"><span class="muted">Schnitt ${fmt(groupAvg(), 1)} · im Vergleich:</span>${weaker.map(ref).join('')}<span class="me">${esc(disp(p))} ${fmtS(e.strength)}</span>${stronger.map(ref).join('')}</div>
+      ${svProfileHTML(p)}
       <label class="lbl" for="edStrength">${e.auto ? (p.rated ? 'Grobe Einschätzung (zählt für nicht bewertete Fähigkeiten)' : 'Grobe Einschätzung – noch nicht gesetzt: nicht bewertete Fähigkeiten zählen wie der Schnitt der bewerteten') : 'Einschätzen'}</label>
       <div class="rangerow"><input type="range" min="1" max="${p.strength > 10 || p.star ? 15 : 10}" step="0.5" id="edStrength"${p.rated ? '' : ' class="unr"'} data-in="edStrength" data-ch="edStrengthDone" value="${e.manual}"><span class="num" id="edManual">${fmtS(e.manual)}</span></div>
       ${p.rated ? `<div class="row"><button type="button" class="linkbtn small" data-act="unrate">Einschätzung zurücknehmen</button><span class="small muted">wieder „nicht eingeschätzt“</span></div>` : ''}
@@ -6317,7 +6338,7 @@ function editorHTML() {
         : !p.rated && e.auto ? `<p class="hint">Die Stärke kommt aus ${e.given} bewerteten Fähigkeiten und gilt damit als eingeschätzt.${e.given < 8 ? ` Die grobe Einschätzung (${fmtS(e.manual)}) zählt nur für die ${8 - e.given} nicht bewerteten.` : ' Die grobe Einschätzung zählt dann gar nicht.'}</p>` : ''}
       ${e.given ? `<div class="row"><span class="grow">Stärke aus Fähigkeiten berechnen <span class="small muted">– ergibt ${fmt(e.derived, 1)}${p.autoStrength == null ? `, Standard: ${S.settings.autoStrength ? 'an' : 'aus'}` : ''}</span></span>${ib('auto')}${sw('edAuto', e.autoOn, '', 'Stärke aus Fähigkeiten berechnen')}</div>` : ''}
       <div class="field"><div class="lblrow"><span class="lbl">Wie sicher bist du bei dieser Einschätzung?</span>${ib('conf')}</div>
-        ${seg('edConf', [['', `automatisch: ${CONF[autoConf(p, e)].label}`], ...CONF_KEYS.map(k => [k, CONF[k].label, CONF[k].hint])], p.conf || '')}
+        ${seg('edConf', [['', `automatisch: ${CONF[autoConf(p, e)].label}`], ...CONF_KEYS.map(k => [k, CONF[k].label, CONF[k].hint])], p.conf || '')}${!p.conf && confWhy(p) ? `<span class="small muted">Automatisch „${CONF[autoConf(p, e)].label}“ ${confWhy(p)}.${p.isNew ? ' Kennt ihr ihn inzwischen gut: oben „Neu in der Gruppe“ ausschalten oder hier selbst wählen.' : ''}</span>` : ''}
         <span class="small muted">${p.conf ? CONF[p.conf].hint + '. ' : ''}Je unsicherer, desto gleichmäßiger wird er mit anderen Unsicheren verteilt und desto schneller passen die Ergebnisse die Schätzung an.</span></div>
     </div>
     <div class="field posfield"><div class="lblrow"><span class="lbl">Position</span>${ib('posPick')}</div>
@@ -6555,7 +6576,7 @@ function viewSettings() {
     <div class="row"><input type="text" class="grow" id="setPlaceNew" placeholder="Neuer Ort, z. B. Halle Nord" maxlength="60" aria-label="Neuer Ort"><button type="button" class="btn sm" data-act="placeAdd" data-k="setPlace" data-ch="setPlace">+ Ort anlegen</button></div>`)}
   ` : ''}
   ${rvBlock('stData', false, '💾 Daten und Projekte', '', '<button type="button" class="btn sm ghost" data-act="projOpen">Projekte verwalten</button>', `
-    ${pi ? `<div class="banner warn"><p><b>Import prüfen${pi.name ? ` – „${esc(pi.name)}“` : ''}:</b> ${pi.players.length} Spieler, ${pi.rules.length} Regeln${pi.matches.length ? `, ${plural(pi.matches.length, 'Runde', 'Runden')} (${pi.matches.filter(m => m.status === 'done').length} mit Ergebnis)` : ''}${pi.players.length && pi.players.every(x => !x.rated) ? ' – ohne Bewertungen' : ''}. „Ersetzen“ überschreibt das geöffnete Projekt (${S.players.length} Spieler), „Als neues Projekt“ lässt es unberührt.</p><button type="button" class="btn sm primary" data-act="importAsNew">Als neues Projekt</button><button type="button" class="btn sm" data-act="impOpen">Nur Teile übernehmen …</button><button type="button" class="btn sm${ui.arm === 'importReplace' ? ' danger armed' : ''}" data-act="importConfirm">${ui.arm === 'importReplace' ? 'Wirklich ersetzen?' : 'Dieses Projekt ersetzen'}</button>${ui.arm === 'importReplace' ? `<p class="small errtxt">Ersetzen löscht alles im geöffneten Projekt: ${plural(S.players.length, 'Spieler', 'Spieler')} und ${plural(S.matches.length, 'Runde', 'Runden')} werden durch die Datei (${plural(pi.players.length, 'Spieler', 'Spieler')}, ${plural(pi.matches.length, 'Runde', 'Runden')}) ersetzt.${S.matches.length > pi.matches.length ? ` <b>${S.matches.length - pi.matches.length} Runden gingen dabei verloren.</b> Willst du nur Ergebnisse ergänzen, nimm „Nur Teile übernehmen“.` : ''} Vorher wird automatisch gesichert.</p>` : ''}<button type="button" class="btn sm ghost" data-act="importCancel">Abbrechen</button></div>` : ''}
+    ${pi ? `<div class="banner warn"><p><b>Import prüfen${pi.name ? ` – „${esc(pi.name)}“` : ''}:</b> ${pi.players.length} Spieler, ${pi.rules.length} Regeln${pi.matches.length ? `, ${plural(pi.matches.length, 'Runde', 'Runden')} (${pi.matches.filter(m => m.status === 'done').length} mit Ergebnis)` : ''}${pi.players.length && pi.players.every(x => !x.rated) ? ' – ohne Bewertungen' : ''}. „Ersetzen“ überschreibt das geöffnete Projekt (${S.players.length} Spieler), „Als neues Projekt“ lässt es unberührt.</p><div class="impopts"><span class="lbl">Übernehmen:</span>${[['ratings', 'Bewertungen'], ['matches', 'Runden und Ergebnisse'], ['rules', 'Paarregeln'], ['places', 'Orte'], ['surveys', 'Umfragen'], ['info', 'Telefon, Geburtstag, Notizen, Fotos'], ['settings', 'Einstellungen']].map(([k, l]) => cbx('impOpt', (ui.impOpt || {})[k] !== false, l, `data-k="${k}"`)).join('')}</div><button type="button" class="btn sm primary" data-act="importAsNew">Als neues Projekt</button><button type="button" class="btn sm" data-act="impOpen">Nur Teile übernehmen …</button><button type="button" class="btn sm${ui.arm === 'importReplace' ? ' danger armed' : ''}" data-act="importConfirm">${ui.arm === 'importReplace' ? 'Wirklich ersetzen?' : S.players.length || S.matches.length ? 'Dieses Projekt ersetzen' : 'Hier übernehmen'}</button>${ui.arm === 'importReplace' ? `<p class="small errtxt">Ersetzen löscht alles im geöffneten Projekt: ${plural(S.players.length, 'Spieler', 'Spieler')} und ${plural(S.matches.length, 'Runde', 'Runden')} werden durch die Datei (${plural(pi.players.length, 'Spieler', 'Spieler')}, ${plural(pi.matches.length, 'Runde', 'Runden')}) ersetzt.${S.matches.length > pi.matches.length ? ` <b>${S.matches.length - pi.matches.length} Runden gingen dabei verloren.</b> Willst du nur Ergebnisse ergänzen, nimm „Nur Teile übernehmen“.` : ''} Vorher wird automatisch gesichert.</p>` : ''}<button type="button" class="btn sm ghost" data-act="importCancel">Abbrechen</button></div>` : ''}
     <p class="hint">Alles liegt nur in diesem Browser. Ab und zu als Datei sichern – auch zum Übertragen auf ein anderes Gerät. ${backupLine()}</p>
     ${ui.importMulti ? `<div class="banner warn"><p><b>Datei mit ${plural(ui.importMulti.length, 'Projekt', 'Projekten')}:</b> ${ui.importMulti.map(x => `„${esc(x.name)}“ (${x.players.length} Spieler, ${x.matches.length} Runden)`).join(', ')}.</p>
       <div class="row"><button type="button" class="btn sm primary" data-act="importMultiAdd">Als neue Projekte hinzufügen</button><button type="button" class="btn sm ${ui.arm === 'importAll' ? 'danger armed' : ''}" data-act="importMultiReplace">${ui.arm === 'importAll' ? 'Wirklich alle bisherigen Projekte ersetzen?' : 'Alle Projekte ersetzen'}</button><button type="button" class="btn sm ghost" data-act="importCancel">Abbrechen</button></div>
@@ -7843,7 +7864,7 @@ function teamsResultBlock(R) {
   if (!m) return '';
   const where = `${dateShort(m.date)}${m.place ? ' · ' + esc(m.place) : ''}`;
   if (m.status === 'open') {
-    return `<section class="banner"><p>${expert() ? `<b>Als Runde gespeichert</b> (${where}). Jede Änderung an den Teams wird übernommen, bis du das Ergebnis einträgst. ${ib('result')}` : 'Nach dem Spiel hier das Ergebnis eintragen.'}</p><button type="button" class="btn sm primary" data-act="resOpen" data-id="${m.id}">Ergebnis eintragen</button></section>`;
+    return `<section class="banner"><p>${expert() ? `<b>Als Runde gespeichert</b> (${where}).<span class="htail"> Jede Änderung an den Teams wird übernommen, bis du das Ergebnis einträgst.</span> ${ib('result')}` : 'Nach dem Spiel hier das Ergebnis eintragen.'}</p><button type="button" class="btn sm primary" data-act="resOpen" data-id="${m.id}">Ergebnis eintragen</button></section>`;
   }
   const diff = teamsDist(m.teams, R.teams) > 0 || m.teams.flat().length !== R.teams.flat().length;
   return `<section class="banner ok"><p><b>${m.status === 'done' ? 'Ergebnis' : STATUS_TXT[m.status]}</b> (${where}): ${esc(resultText(m) || '–')}.${diff ? ' <span class="muted">Die Teams hier wurden danach geändert; die Runde behält ihre Aufstellung.</span>' : ''}</p>
@@ -9285,7 +9306,7 @@ const A = {
     ui.arm = null;
     backupNow('vor „Projekt ersetzen“');
     remember('Import');
-    S = ui.importPreview; S.welcomed = true; ui.importPreview = null; ui.dups = [];
+    S = impFiltered(ui.importPreview); S.welcomed = true; ui.importPreview = null; ui.dups = [];
     render();
     toast(`${S.players.length} Spieler übernommen.`, { label: 'Rückgängig', act: 'undo' });
   },
@@ -9333,9 +9354,10 @@ const A = {
   shotGrp: el => { const sh = ui.shot, gi = +el.dataset.k, v = el.dataset.v; if (!sh) return; sh.groups[gi].st = v; sh.groups[gi].guessed = false; sh.rows.forEach(r => { if (r.grp !== gi) return; if (v === 'skip') r.pid = '__skip'; else { r.st = v; if (r.pid === '__skip' && !r.isDu) r.pid = r.cands[0] && r.cands[0].score >= 0.6 ? r.cands[0].p.id : r.onlyPhone || r.doubt ? '__skip' : '__new'; } }); shotMarks(); render(); },
   shotApply: () => applyShot(),
   importAsNew: () => {
-    const st = ui.importPreview; if (!st) return;
+    const st0 = ui.importPreview; if (!st0) return;
+    const st = impFiltered(st0);
     ui.importPreview = null;
-    if (!newProject(st.name || 'Importierte Runde', { ...st, welcomed: true })) { ui.importPreview = st; render(); return; }
+    if (!newProject(st.name || 'Importierte Runde', { ...st, welcomed: true })) { ui.importPreview = st0; render(); return; }
     render(); toast(`Als neues Projekt „${curProject().name}“ angelegt.`);
   },
   // Projekte
@@ -9932,6 +9954,7 @@ function render() {
   try { playEffects(FX.any); } catch (e) { console.error(e); }
   chartScroll();
   try { tidyHelp(); } catch (e) { console.error(e); }
+  if (ui.svy && !ui.editId && ui._svScroll != null) { const sh = $('.sheet'); if (sh) sh.scrollTop = ui._svScroll; ui._svScroll = null; }
 }
 /* Wischbare Verläufe: beim ersten Zeigen ganz rechts (neueste Spiele), danach bleibt die Stelle beim Neuzeichnen */
 function chartScroll() {
@@ -10033,7 +10056,7 @@ function renderNow() {
   if (ui.editId && !byId(ui.editId)) ui.editId = null;
   if (ui.res && !matchById(ui.res.id)) ui.res = null;
   const anySheet = !!(ui.gshare || ui.gsend || ui.svy || ui.imp || ui.proj || ui.plEd || ui.shot || ui.mb || ui.res || ui.pa || ui.editId);
-  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.gshare ? shareSheetHTML() : ui.gsend ? guestSendHTML() : ui.svy ? svSheetHTML() : ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
+  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.gshare ? shareSheetHTML() : ui.gsend ? guestSendHTML() : ui.svy && !ui.editId ? svSheetHTML() : ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
   sheet.hidden = !anySheet;
   document.body.classList.toggle('sheet-open', anySheet);
   if ($('.sheet')) $('.sheet').scrollTop = sheetScroll;
@@ -10273,7 +10296,7 @@ document.addEventListener('toggle', e => {
   if (d.dataset.rerender) render();
 }, true);
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.svy && !SV_MODE) { A.svClose(); return; } if (ui.gshare) { A.gsClose(); return; } if (ui.gsend) { A.gSendClose(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
+  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.svy && !SV_MODE && !ui.editId) { A.svClose(); return; } if (ui.gshare) { A.gsClose(); return; } if (ui.gsend) { A.gSendClose(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
   if (e.key === 'Enter' && !e.shiftKey && e.target.id === 'quick') { e.preventDefault(); A.quickAdd(); }
   if (e.key === 'Enter' && e.target.id === 'lateName') { e.preventDefault(); const b = document.querySelector('[data-act="lateGuest"][data-v="5"]'); if (b) A.lateGuest(b); }
   if (e.key === 'Enter' && e.target.id === 'newPreset') { e.preventDefault(); A.newPreset(); }
@@ -10355,6 +10378,7 @@ function svSum(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^
 const svChar = v => (isNum(v) ? SV_CH[clamp(Math.round((v - 1) * 2), 0, 18)] : 'z');
 const svVal = c => { const k = SV_CH.indexOf(c); return k < 0 ? null : 1 + k / 2; };
 const svR2 = v => Math.round(v * 2) / 2;
+const svR1 = v => Math.round(v * 10) / 10;   // übernommene Werte: eine Nachkommastelle wie berechnete Stärken
 const svMed = a => { const s = a.slice().sort((x, y) => x - y), k = s.length; return k ? (k % 2 ? s[(k - 1) / 2] : (s[k / 2 - 1] + s[k / 2]) / 2) : null; };
 const svNewId = () => { const c = 'abcdefghijkmnpqrstuvwxyz';   // nur Buchstaben: kürzerer Link
    let s = ''; const r = new Uint32Array(6); try { crypto.getRandomValues(r); } catch (e) { for (let i = 0; i < 6; i++) r[i] = Math.random() * 1e9; } r.forEach(x => { s += c[x % c.length]; }); return s; };
@@ -10476,7 +10500,7 @@ function svIngest(text) {
       über die Spieler, die er bewertet hat. Nur verschoben, nicht gestreckt; mehrmals wiederholt.
    2. Je Spieler: Median der bereinigten Stimmen (bei 1–2 Stimmen der Mittelwert), Spannweite, uneinig ja/nein.
    3. Auf deine Skala übertragen: linear, sodass Mittelwert und Streuung deinen aktuellen Bewertungen entsprechen. */
-function svEval(sv, ownOf) {
+function svEval(sv, ownOf, meWho) {
   const n = sv.players.length, R = sv.responses.filter(r => r.on);
   const V = R.map(r => r.vals.map(x => (isNum(x) ? +x : null)));
   const off = R.map(() => 0);
@@ -10494,14 +10518,15 @@ function svEval(sv, ownOf) {
     }
   }
   const rows = sv.players.map((pl, j) => {
-    const xs = []; V.forEach((row, r) => { if (row[j] != null) xs.push(clamp(adjAt(r, j), 1, 10)); });
+    const xs = []; let mine = null;
+    V.forEach((row, r) => { if (row[j] != null) { const v = clamp(adjAt(r, j), 1, 10); xs.push(v); if (meWho && R[r].who === meWho) mine = v; } });
     xs.sort((a, b) => a - b);
     const k = xs.length;
     if (!k) return { j, id: pl.id, name: pl.name, n: 0, xs: [] };
     const mean = xs.reduce((a, b) => a + b, 0) / k, main = k >= 3 ? svMed(xs) : mean;
     const q = p => { const pos = (k - 1) * p, lo = Math.floor(pos), hi = Math.ceil(pos); return xs[lo] + (xs[hi] - xs[lo]) * (pos - lo); };
     const range = xs[k - 1] - xs[0], iqr = k >= 4 ? q(0.75) - q(0.25) : range;
-    return { j, id: pl.id, name: pl.name, n: k, xs, mean, raw: main, min: xs[0], max: xs[k - 1], split: k >= 2 && (range >= 3 || (k >= 4 && iqr >= 1.5)) };
+    return { j, id: pl.id, name: pl.name, n: k, xs, mine, mean, raw: main, min: xs[0], max: xs[k - 1], split: k >= 2 && (range >= 3 || (k >= 4 && iqr >= 1.5)) };
   });
   // Selbsteinschätzungen (zählen nie mit)
   R.forEach(r => { if (r.who[0] === 'p' && r.self != null) { const row = rows[parseInt(r.who.slice(1), 36)]; if (row) row.self = r.self; } });
@@ -10516,7 +10541,7 @@ function svEval(sv, ownOf) {
     }
   }
   const map = v => clamp(a * v + b, 1, 10);
-  rows.forEach(x => { if (x.n) { x.val = map(x.raw); x.dots = x.xs.map(map); } });
+  rows.forEach(x => { if (x.n) { x.val = map(x.raw); x.dots = x.xs.map(map); if (x.mine != null) x.mine = map(x.mine); const m = x.dots.reduce((a, b) => a + b, 0) / x.n; x.sd = Math.sqrt(x.dots.reduce((a, b) => a + (b - m) ** 2, 0) / x.n); } });
   return { rows, off, R, scaled, nResp: R.length };
 }
 
@@ -10708,10 +10733,11 @@ function svDotsHTML(row, own, pick) {
   // Strich = Gruppe, grüner Punkt = vorgemerkter neuer Wert – so verdeckt nichts die Stimmen.
   const x = v => ((clamp(v, 1, 10) - 1) / 9 * 100).toFixed(1);
   const bins = new Map(); (row.dots || []).forEach(v => { const b = svR2(v); bins.set(b, (bins.get(b) || 0) + 1); });
+  const meBin = row.mine != null ? svR2(row.mine) : null;
   const MAXS = 5, H = Math.min(MAXS, Math.max(1, ...bins.values()));
   let dots = '';
   bins.forEach((n, b) => {
-    for (let k = 0; k < Math.min(n, MAXS); k++) dots += `<i class="dot" style="left:${x(b)}%;bottom:${31 + k * 7}px"></i>`;
+    for (let k = 0; k < Math.min(n, MAXS); k++) dots += `<i class="dot${k === 0 && b === meBin ? ' me' : ''}" style="left:${x(b)}%;bottom:${31 + k * 7}px"></i>`;
     if (n > MAXS) dots += `<b class="dotn" style="left:${x(b)}%;bottom:${31 + MAXS * 7}px">${n}</b>`;
   });
   const tip = [...bins.entries()].sort((a, b) => a[0] - b[0]).map(([b, n]) => `${fmtS(b)}: ${n}×`).join(' · ');
@@ -10739,7 +10765,7 @@ function svSheetHTML() {
       <div class="row"><button type="button" class="btn primary" data-act="svCreate"${nSel >= 3 && !noBase ? '' : ' disabled'}>Link erstellen</button>${nSel < 3 ? '<span class="small muted">Mindestens 3 Spieler auswählen.</span>' : ''}</div>`, 'svTitle', 'svClose');
   }
   const sv = svCur(); U.sel = sv.id;
-  const link = svLink(sv), E = svEval(sv, svOwn);
+  const meWho = svMe(sv), link = svLink(sv), E = svEval(sv, svOwn, meWho);
   const ownName = id => { const p = byId(id); return p ? disp(p) : null; };
   // Antworten
   const resp = sv.responses.slice().sort((a, b) => b.at - a.at).map(r => {
@@ -10752,8 +10778,7 @@ function svSheetHTML() {
   // Ergebnis je Spieler
   const rowsAll = E.rows.filter(x => byId(x.id)).map(x => {
     const own = svOwn(x.id), d = x.n && isNum(own) ? x.val - own : null;
-    const agree = x.n >= 4 && !x.split && x.dots[x.dots.length - 1] - x.dots[0] <= 1.5;
-    return { ...x, own, d, agree };
+    return { ...x, own, d };
   });
   const filt = U.filter || 'all', adjOn = sv.opt.adj && sv.opt.scale, so = U.sort || 'diff';
   const nm = x => ownName(x.id) || x.name, strOf = x => (x.n ? x.val : isNum(x.own) ? x.own : -1);
@@ -10764,42 +10789,42 @@ function svSheetHTML() {
   };
   const rows = rowsAll.filter(x => filt === 'all' || (filt === 'diff' && x.d != null && Math.abs(x.d) >= 1) || (filt === 'split' && x.split)).sort(sorters[so] || sorters.diff);
   const picks = U.picks || (U.picks = {});
-  const target = (x, how) => (how === 'grp' ? svR2(x.val) : how === 'mid' ? svR2(isNum(x.own) ? (x.own + x.val) / 2 : x.val) : null);
+  const target = (x, how) => (how === 'grp' ? svR1(x.val) : how === 'mid' ? svR1(isNum(x.own) ? (x.own + x.val) / 2 : x.val) : null);
   const confs = U.conf || (U.conf = {});
   const nVal = Object.keys(picks).filter(id => picks[id] && rowsAll.some(x => x.id === id && x.n)).length, nConf = Object.keys(confs).filter(id => byId(id)).length, nPick = nVal + nConf;
-  // Sicherheit: Bei uneinigen Stimmen „unsicher“, bei sehr einigen „sicher“ anbieten (wirkt im erweiterten Modus:
-  // Unsicherheit der Teamstärke und wie schnell Ergebnisse die Stärke verschieben)
-  const CL = { sure: 'sicher', unsure: 'unsicher' };
+  // Sicherheit: aktueller Stand (auch automatisch) und Vorschlag laut Umfrage. Wirkt im erweiterten Modus auf die
+  // Unsicherheit der Teamstärke und darauf, wie schnell Ergebnisse die Stärke verschieben.
+  const CLx = { sure: 'sicher', rather: 'eher sicher', unsure: 'unsicher', very: 'sehr unsicher' };
   const confRow = x => {
-    // „sicher“ nur, wenn die einige Gruppe zu deinem (künftigen) Wert passt – sonst wäre es ein Widerspruch
-    const want = x.split ? 'unsure' : x.agree && (x.d == null || Math.abs(x.d) < 1 || picks[x.id] === 'grp') ? 'sure' : null, p = byId(x.id);
-    if (!want || !p) return '';
-    const cur = confOf(p), CLx = { sure: 'sicher', rather: 'eher sicher', unsure: 'unsicher', very: 'sehr unsicher' };
-    if (want === 'unsure' ? cur === 'unsure' || cur === 'very' : cur === 'sure') return `<div class="small muted svconf">Sicherheit: schon „${CLx[cur]}“</div>`;
-    const on = confs[x.id] === want;
-    return `<div class="svconf"><button type="button" class="chip${on ? ' on' : ''}" data-act="svConf" data-id="${x.id}" data-v="${want}" aria-pressed="${on}">${on ? '✓ ' : ''}als „${CL[want]}“ einstufen</button><span class="small muted">${x.split ? 'die Gruppe ist sich uneinig' : 'die Gruppe ist sich einig'} · bisher „${CLx[cur]}“</span></div>`;
+    const p = byId(x.id); if (!p) return '';
+    const cur = confOf(p), want = svConfSuggest(x), on = !!want && confs[x.id] === want;
+    const now = `Sicherheit: <b>„${CLx[cur]}“</b>${p.conf ? '' : ` (automatisch${confWhy(p) ? ', ' + confWhy(p) : ''})`}`;
+    if (!want) return `<div class="small svconf"><span>${now}</span><span class="muted">· Vorschlag ab 3 Stimmen</span></div>`;
+    if (want === cur) return `<div class="small svconf"><span>${now}</span><span class="svd ok">passt zur Umfrage</span></div>`;
+    return `<div class="small svconf"><span>${now} → laut Umfrage „${CLx[want]}“</span><button type="button" class="chip${on ? ' on' : ''}" data-act="svConf" data-id="${x.id}" data-v="${want}" aria-pressed="${on}">${on ? '✓ vorgemerkt' : 'übernehmen'}</button></div>`;
   };
   const strong = rowsAll.filter(x => x.n >= 3 && x.d != null && Math.abs(x.d) >= 1);
-  const splitN = rowsAll.filter(x => x.split && byId(x.id) && !['unsure', 'very'].includes(confOf(byId(x.id)))).length;
+  const confN = rowsAll.filter(x => { const w = svConfSuggest(x), p = byId(x.id); return w && p && w !== confOf(p); }).length, voted = rowsAll.filter(x => x.n).length;
   const resTable = !E.nResp ? '<p class="hint">Noch keine Antworten. Sobald Codes eingefügt sind, erscheint hier der Vergleich.</p>' : `
     <div class="row svopts"><span class="small">${sw('svOpt', adjOn, 'data-k="both"', 'Werte angleichen')} Werte angleichen (empfohlen) ${ib('svAdj')}</span>${!adjOn ? '<span class="small muted">aus: Median der Stimmen, wie abgegeben</span>' : ''}</div>
     ${adjOn && !E.scaled ? '<p class="small muted">Auf deine Skala übertragen wird erst, wenn mindestens 4 Spieler Stimmen haben, die du selbst eingeschätzt hast.</p>' : ''}
     <div class="row svctl"><span class="lbl">Zeigen</span>${seg('svFilter', [['all', 'Alle'], ['diff', `Abweichung ab 1 (${rowsAll.filter(x => x.d != null && Math.abs(x.d) >= 1).length})`], ['split', `uneinig (${rowsAll.filter(x => x.split).length})`]], filt, '', 'pill wrap')}</div>
     <div class="row svctl"><span class="lbl">Sortieren</span>${seg('svSort', [['diff', 'Abweichung'], ['name', 'Name'], ['str', 'Stärke']], U.sort || 'diff', '', 'pill')}</div>
-    <p class="small muted svlegend"><span><i class="lg own"></i> deine Bewertung</span><span><i class="lg grp"></i> Gruppe</span><span><i class="lg dot"></i> einzelne Stimmen</span>${nPick ? '<span><i class="lg new"></i> neu</span>' : ''}</p>
+    <p class="small muted svlegend"><span><i class="lg own"></i> deine Bewertung</span><span><i class="lg grp"></i> Gruppe</span><span><i class="lg dot"></i> einzelne Stimmen</span>${meWho && sv.responses.some(r => r.who === meWho && r.on) ? '<span><i class="lg dot me"></i> deine Stimme</span>' : ''}${nPick ? '<span><i class="lg new"></i> neu</span>' : ''}</p>
     <ul class="svres">${rows.map(x => {
       const pk = picks[x.id], tv = pk ? target(x, pk) : null, weak = x.n > 0 && x.n < 3;
       const dTxt = x.d == null ? '' : Math.abs(x.d) < 0.25 ? '<span class="svd ok">passt</span>' : `<span class="svd${Math.abs(x.d) >= 1 ? ' big' : ''}">${x.d > 0 ? '+' : '−'}${fmt(Math.abs(x.d), 1)}</span>`;
       return `<li class="${weak ? 'weak' : ''}${!x.n ? ' none' : ''}">
-        <div class="svrtop"><b class="grow">${esc(ownName(x.id) || x.name)}</b>${x.split ? tag('uneinig', 't-split', 'Die Stimmen liegen weit auseinander') : ''}${dTxt}</div>
+        <div class="svrtop"><button type="button" class="svwho grow" data-act="svEdit" data-id="${x.id}" title="Profil öffnen">${avatar(byId(x.id))}<b>${esc(ownName(x.id) || x.name)}</b></button>${x.split ? tag('uneinig', 't-split', 'Die Stimmen liegen weit auseinander') : ''}${dTxt}</div>
         ${x.n ? `<div class="svrmid">${svDotsHTML(x, x.own, tv)}<span class="svnums"><span title="deine Bewertung">${isNum(x.own) ? fmtS(x.own) : '–'}</span> → <b title="Gruppe">${fmt(x.val, 1)}</b></span></div>
         <div class="svrsub small">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmtS(x.self)}` : ''}</div>
         <div class="svrpick">${seg('svPickRow', [['', isNum(x.own) ? `behalten ${fmtS(x.own)}` : 'behalten'], ...(isNum(x.own) ? [['mid', `Mitte ${fmtS(target(x, 'mid'))}`]] : []), ['grp', `Gruppe ${fmtS(target(x, 'grp'))}`]], pk || '', `data-id="${x.id}"`, 'pill wrap')}</div>
         ${confRow(x)}` : '<div class="small muted">Keine Stimmen (alle „kann ich nicht beurteilen“).</div>'}</li>`;
     }).join('')}</ul>
-    ${strong.length || splitN ? `<div class="svbulk"><b class="small">Schnellauswahl</b> <span class="small muted">– wählt nur vor, geändert wird erst mit „Übernehmen“</span>
-      ${strong.length ? `<div class="row"><span class="small grow">${plural(strong.length, 'Spieler weicht', 'Spieler weichen')} um 1 Punkt oder mehr ab (mit mind. 3 Stimmen):</span><button type="button" class="btn sm" data-act="svBulk" data-v="mid">alle auf Mitte</button><button type="button" class="btn sm" data-act="svBulk" data-v="grp">alle auf Gruppe</button></div>` : ''}
-      ${splitN ? `<div class="row"><span class="small grow">${plural(splitN, 'Spieler ist', 'Spieler sind')} umstritten:</span><button type="button" class="btn sm" data-act="svBulkConf">alle als „unsicher“</button></div>` : ''}</div>` : ''}
+    ${voted ? `<div class="svbulk"><b class="small">Schnellauswahl</b> <span class="small muted">– wählt nur vor, geändert wird erst mit „Übernehmen“</span>
+      <div class="row"><span class="small grow">Alle ${plural(voted, 'Spieler', 'Spieler')} mit Stimmen:</span><button type="button" class="btn sm" data-act="svBulk" data-v="grp" data-s="all">alle auf Gruppe</button>${rowsAll.some(x => x.n && isNum(x.own)) ? '<button type="button" class="btn sm" data-act="svBulk" data-v="mid" data-s="all">alle auf Mitte</button>' : ''}</div>
+      ${strong.length ? `<div class="row"><span class="small grow">Nur die ${plural(strong.length, 'Spieler', 'Spieler')} mit mindestens 1 Punkt Abweichung (ab 3 Stimmen):</span><button type="button" class="btn sm" data-act="svBulk" data-v="mid">auf Mitte</button><button type="button" class="btn sm" data-act="svBulk" data-v="grp">auf Gruppe</button></div>` : ''}
+      ${confN ? `<div class="row"><span class="small grow">Sicherheit laut Umfrage bei ${plural(confN, 'Spieler', 'Spielern')}:</span><button type="button" class="btn sm" data-act="svBulkConf">alle vormerken</button></div>` : ''}</div>` : ''}
     <div class="svapply${nPick ? ' on' : ''}"><span class="grow small">${nPick ? `${plural(nPick, 'Änderung', 'Änderungen')} vorgemerkt${nVal ? ' – der grüne Punkt zeigt den neuen Wert' : ''}.` : 'Je Spieler „Mitte“ oder „Gruppe“ wählen, dann hier übernehmen. Nichts ändert sich automatisch.'}</span>${nPick ? '<button type="button" class="btn sm ghost" data-act="svPickClear">verwerfen</button>' : ''}<button type="button" class="btn sm primary" data-act="svApply"${nPick ? '' : ' disabled'}>Übernehmen</button></div>`;
   const msgTxt = svMsg(sv);
   const armedSv = ui.arm === 'svDrop:' + sv.id;
@@ -10820,21 +10845,37 @@ function svSheetHTML() {
 }
 /* Wert übernehmen. Wird die Stärke aus Fähigkeiten berechnet, wandern alle bewerteten Fähigkeiten gleichmäßig mit
    (Stärken und Schwächen bleiben erhalten); an den Grenzen 1–10 kann der Zielwert dann knapp verfehlt werden. */
+/* Wert übernehmen: Es wird nur die Gesamtstärke gesetzt (eine Nachkommastelle). Wurde sie aus Fähigkeiten berechnet,
+   schaltet die App die Berechnung für diesen Spieler aus – die Fähigkeiten bleiben unverändert stehen. */
 function svApplyOne(p, v, when) {
-  const real = () => Engine.effective(p, SPORT, S.settings.attrW, S.settings.autoStrength);
   const extra = { isNew: p.isNew, rated: p.rated, autoStrength: p.autoStrength };
   const old = p.strength, oldEff = effOf(p).strength, oldAttrs = { ...p.attrs }, top = p.star ? 15 : 10;
-  v = clamp(svR2(v), 1, top);
-  const e0 = real();
-  if (e0.auto && Object.keys(p.attrs).length) {
-    const delta = v - e0.strength;
-    Object.keys(p.attrs).forEach(k => { p.attrs[k] = clamp(svR2(+p.attrs[k] + delta), 1, 10); });
-    p.strength = clamp(svR2((isNum(p.strength) ? +p.strength : 5) + delta), 1, top);
-  } else p.strength = v;
+  const wasAuto = Engine.effective(p, SPORT, S.settings.attrW, S.settings.autoStrength).auto;
+  p.strength = clamp(svR1(v), 1, top);
+  if (wasAuto) p.autoStrength = false;
   markRated(p);
-  const now = effOf(p).strength;
-  S.log.push({ id: uid(), at: Date.now(), src: 'own', kind: 'player', target: p.id, field: 'strength', old, new: p.strength, oldAttrs, extra, label: `${nameAny(p.id)}: Stärke ${fmtV(oldEff)} → ${fmtS(now)} (Umfrage vom ${when})` });
-  return Math.abs(now - v) > 0.26 ? { name: disp(p), want: v, got: now } : null;
+  S.log.push({ id: uid(), at: Date.now(), src: 'own', kind: 'player', target: p.id, field: 'strength', old, new: p.strength, oldAttrs, extra, label: `${nameAny(p.id)}: Stärke ${fmtV(oldEff)} → ${fmtS(p.strength)} (Umfrage vom ${when})${wasAuto ? ', Berechnung aus Fähigkeiten aus' : ''}` });
+  return wasAuto ? disp(p) : null;
+}
+/* Warum ist die automatische Sicherheit so? (neu, nicht eingeschätzt, Gast) */
+const confWhy = p => (expert() && p.isNew ? 'weil „neu in der Gruppe“' : !ratedOf(p) ? 'weil noch nicht eingeschätzt' : expert() && p.status === 'guest' ? 'weil Gast' : '');
+/* Wer bin ich in dieser Umfrage? (Einstellung „Ich“ im Projekt) */
+const svMe = sv => { const k = S.me ? sv.players.findIndex(x => x.id === S.me) : -1; return k >= 0 ? 'p' + k.toString(36) : null; };
+/* Sicherheit laut Umfrage: ab 3 Stimmen; uneinig → unsicher, eng beieinander → sicher, dazwischen eher sicher */
+function svConfSuggest(x) {
+  if (!x.n || x.n < 3) return null;
+  if (x.split) return 'unsure';
+  return x.n >= 4 && x.sd <= 0.8 ? 'sure' : x.sd <= 1.3 ? 'rather' : 'unsure';
+}
+/* Im Spielerprofil: Gruppenwert aus den letzten Umfragen */
+function svProfileHTML(p) {
+  const L = svList().filter(sv => sv.players.some(x => x.id === p.id) && sv.responses.some(r => r.on));
+  if (!L.length) return '';
+  const items = L.slice(0, 3).map(sv => {
+    const E = svEval(sv, svOwn, svMe(sv)), x = E.rows.find(r => r.id === p.id);
+    return `<span><button type="button" class="linkbtn" data-act="svOpenAt" data-id="${sv.id}">Umfrage ${svDate(sv.created).replace(/\d{4}$/, '')}</button> ${x && x.n ? `<b>${fmt(x.val, 1)}</b> <span class="muted">(${plural(x.n, 'Stimme', 'Stimmen')}${x.split ? ', uneinig' : ''})</span>` : '<span class="muted">keine Stimmen</span>'}</span>`;
+  });
+  return `<div class="svprof small"><span class="muted">Gruppenmeinung:</span>${items.join('')}${L.length > 3 ? `<span class="muted">und ${plural(L.length - 3, 'ältere Umfrage', 'ältere Umfragen')}</span>` : ''}</div>`;
 }
 Object.assign(A, {
   svOpen: () => { ui.svy = { view: '', sel: null, picks: {} }; render(); },
@@ -10879,29 +10920,31 @@ Object.assign(A, {
   svOpt: el => { const sv = svCur(), on = !(sv.opt.adj && sv.opt.scale); sv.opt.adj = on; sv.opt.scale = on; render(); },
   svSort: el => { ui.svy.sort = el.dataset.v; render(); },
   svConf: el => { const C = ui.svy.conf || (ui.svy.conf = {}); if (C[el.dataset.id] === el.dataset.v) delete C[el.dataset.id]; else C[el.dataset.id] = el.dataset.v; render(); },
-  svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id); if (p && x.split && !['unsure', 'very'].includes(confOf(p))) C[x.id] = 'unsure'; }); render(); },
+  svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn, svMe(sv)), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id), w = svConfSuggest(x); if (p && w && w !== confOf(p)) C[x.id] = w; }); render(); },
+  svEdit: el => { const sh = $('.sheet'); ui._svScroll = sh ? sh.scrollTop : null; ui.editId = el.dataset.id; render(); },
+  svOpenAt: el => { ui.editId = null; ui.svy = { view: '', sel: el.dataset.id, picks: {} }; render(); },
   svFilter: el => { ui.svy.filter = el.dataset.v; render(); },
   svPickRow: el => { const P = ui.svy.picks; if (el.dataset.v) P[el.dataset.id] = el.dataset.v; else delete P[el.dataset.id]; render(); },
   svBulk: el => {
     const sv = svCur(), E = svEval(sv, svOwn), P = ui.svy.picks;
-    E.rows.forEach(x => { const own = svOwn(x.id); if (byId(x.id) && x.n >= 3 && isNum(own) && Math.abs(x.val - own) >= 1) P[x.id] = el.dataset.v; });
+    E.rows.forEach(x => { const own = svOwn(x.id); if (!byId(x.id) || !x.n) return; if (el.dataset.v === 'mid' && !isNum(own)) return; if (el.dataset.s === 'all' || (x.n >= 3 && isNum(own) && Math.abs(x.val - own) >= 1)) P[x.id] = el.dataset.v; });
     render();
   },
   svPickClear: () => { ui.svy.picks = {}; ui.svy.conf = {}; render(); },
   svApply: () => {
-    const sv = svCur(), E = svEval(sv, svOwn), P = ui.svy.picks, when = svDate(sv.created);
+    const sv = svCur(), E = svEval(sv, svOwn, svMe(sv)), P = ui.svy.picks, when = svDate(sv.created);
     const todo = E.rows.filter(x => P[x.id] && x.n && byId(x.id)), C = ui.svy.conf || {}, cIds = Object.keys(C).filter(id => byId(id));
     if (!todo.length && !cIds.length) return;
     remember('Werte aus der Umfrage übernommen');
     const miss = [];
     todo.forEach(x => {
-      const own = svOwn(x.id), v = P[x.id] === 'grp' ? svR2(x.val) : svR2(isNum(own) ? (own + x.val) / 2 : x.val);
+      const own = svOwn(x.id), v = P[x.id] === 'grp' ? svR1(x.val) : svR1(isNum(own) ? (own + x.val) / 2 : x.val);
       const m = svApplyOne(byId(x.id), v, when); if (m) miss.push(m);
     });
     cIds.forEach(id => { byId(id).conf = C[id]; });
     ui.svy.picks = {}; ui.svy.conf = {};
     render();
-    toast(`${[todo.length ? plural(todo.length, 'Wert', 'Werte') : '', cIds.length ? plural(cIds.length, 'Sicherheit', 'Sicherheiten') : ''].filter(Boolean).join(' und ')} übernommen.${miss.length ? ` ${miss.map(m => `${m.name}: erreicht ${fmtS(m.got)} statt ${fmtS(m.want)} (Fähigkeiten an der Grenze)`).join('; ')}.` : ''}`, { label: 'Rückgängig', act: 'undo' });
+    toast(`${[todo.length ? plural(todo.length, 'Wert', 'Werte') : '', cIds.length ? plural(cIds.length, 'Sicherheit', 'Sicherheiten') : ''].filter(Boolean).join(' und ')} übernommen.${miss.length ? ` Berechnung aus Fähigkeiten ausgeschaltet bei: ${miss.join(', ')}.` : ''}`, { label: 'Rückgängig', act: 'undo' });
   },
   svDrop: () => {
     const sv = svCur(), k = 'svDrop:' + sv.id;
@@ -11269,6 +11312,29 @@ function tidyHelp() {
 }
 Object.assign(A, { helpSet: el => { try { if (el.dataset.v === 'off') localStorage.setItem(HELP_KEY, 'off'); else localStorage.removeItem(HELP_KEY); } catch (e) { /* privat */ } render(); toast(el.dataset.v === 'off' ? 'Erklärtexte ausgeblendet – die (i)-Knöpfe erklären weiterhin auf Wunsch.' : 'Erklärtexte werden wieder gezeigt.'); } });
 const helpField = () => `<div class="field"><span class="lbl">Erklärtexte</span>${seg('helpSet', [['on', 'zeigen'], ['off', 'ausblenden']], helpOff() ? 'off' : 'on')}<span class="small muted">Für alle, die die App schon kennen: weniger Text, nur noch Knöpfe und Felder. Die (i)-Knöpfe erklären weiterhin auf Wunsch. Gilt für dieses Gerät.</span></div>`;
+
+
+/* ---------- Bereich „Spieler“: Werkzeuge nebeneinander ---------- */
+function playerToolsHTML(X) {
+  const L = svList(), sv = L[0], SL = (S.share && S.share.list) || [], last = SL[SL.length - 1], t = [];
+  if (S.players.length >= 3) t.push(`<button type="button" class="ptool" data-act="svOpen"><span class="emo" aria-hidden="true">🗳️</span><span>Bewerten lassen</span><small>${sv ? plural(sv.responses.length, 'Antwort', 'Antworten') : 'Umfrage'}</small></button>`);
+  if (S.players.length >= 2) t.push(`<button type="button" class="ptool" data-act="gsOpen"><span class="emo" aria-hidden="true">🔗</span><span>Gast-Link</span><small>${last ? 'Stand ' + dateDE(last.date).replace(/\d{4}$/, '') : 'für die Gruppe'}</small></button>`);
+  if (X) t.push(`<button type="button" class="ptool" data-act="shotOpen" data-v="players"><span class="emo" aria-hidden="true">📷</span><span>Screenshots</span><small>Spieler anlegen</small></button>`);
+  return t.length ? `<div class="ptools" style="--n:${t.length}">${t.join('')}</div>` : '';
+}
+/* ---------- Import: nur ausgewählte Teile übernehmen ---------- */
+function impFiltered(st0) {
+  const o = ui.impOpt || {}, st = clone(st0);
+  if (o.ratings === false) { st.players.forEach(p => Object.assign(p, { strength: 5, rated: false, attrs: {}, gk: null, autoStrength: null, posFit: {}, conf: null, star: false })); st.recs = []; st.log = []; }
+  if (o.matches === false) { st.matches = []; st.result = null; st.recs = []; }
+  if (o.info === false) st.players.forEach(p => Object.assign(p, { note: '', phone: '', birth: '', photo: '', aliases: [] }));
+  if (o.rules === false) st.rules = [];
+  if (o.places === false) { st.places = []; st.day.place = ''; st.day.field = ''; }
+  if (o.surveys === false) st.surveys = [];
+  if (o.settings === false) st.settings = { ...defaultSettings(), mode: st.settings.mode };
+  return cleanState(st);
+}
+Object.assign(A, { impOpt: el => { const o = ui.impOpt || (ui.impOpt = {}); o[el.dataset.k] = o[el.dataset.k] === false; render(); } });
 
 if (SV_MODE) svStart();
 else {
