@@ -1223,12 +1223,14 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svnums b { color: var(--turf); font-size: 1.05rem; }
 .svline { position: relative; flex: 1; min-width: 120px; display: block; }
 .svline i, .svline b { position: absolute; transform: translateX(-50%); }
-.svline .axis { left: 0; right: 0; bottom: 15px; transform: none; height: 2px; border-radius: 2px; background: var(--line); }
+.svline .axis { left: 0; right: 0; bottom: 28px; transform: none; height: 2px; border-radius: 2px; background: var(--line); }
+.svline .tick { bottom: 26px; width: 1px; height: 6px; background: var(--line); }
+.svline .tnum { bottom: 0; font-size: .6rem; font-weight: 600; line-height: 1; color: var(--muted); opacity: .8; }
 .svline .dot { width: 7px; height: 7px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 75%, transparent); }
 .svline .dotn { font-size: .62rem; font-weight: 750; color: var(--muted); line-height: 1; }
-.svline .grp { bottom: 0; width: 4px; height: 13px; border-radius: 2px; background: var(--turf); z-index: 2; }
-.svline .own { bottom: 1px; width: 11px; height: 11px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--surface); z-index: 3; }
-.svline .new { bottom: 2px; width: 9px; height: 9px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 30%, transparent); z-index: 4; }
+.svline .grp { bottom: 12px; width: 4px; height: 13px; border-radius: 2px; background: var(--turf); z-index: 2; }
+.svline .own { bottom: 13px; width: 11px; height: 11px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--surface); z-index: 3; }
+.svline .new { bottom: 14px; width: 9px; height: 9px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 30%, transparent); z-index: 4; }
 .svrmid { align-items: flex-end; }
 .svconf { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .svctl { gap: 8px; }
@@ -1265,6 +1267,7 @@ body.is-guest .tp .sv, body.is-guest .team-head .tval { display: none !important
 .lamp.masked { background: var(--surface-2); color: var(--muted); }
 .gcode { max-height: 160px; overflow: auto; }
 body.no-help .xhelp { display: none !important; }
+@media (max-width: 640px) { .toolbar .tgroup .btn, .toolbar.simpletb .btn { padding: 10px 4px 8px; min-height: 64px; gap: 5px; } }
 </style>
 </head>
 <body>
@@ -5791,7 +5794,7 @@ function variantCards(M, R) {
       change = moved.length <= 4 ? moved.join(', ') : `${moved.length} Spieler in anderen Teams`;
     }
     const over = R.stats.bestU > 0 ? (d.U - R.stats.bestU) / R.stats.bestU * 100 : 0;
-    const status = i === 0 ? 'Empfehlung' : v.eq ? 'Alternative, gleichwertig' : `Alternative, ${fmt(over, 0)} % mehr Strafpunkte`;
+    const status = i === 0 ? 'Empfehlung' : v.eq ? 'Alternative, gleichwertig' : expert() ? `Alternative, ${fmt(over, 0)} % mehr Strafpunkte` : 'Alternative, etwas weniger gut';
     const notes = variantNotes(dets, i);
     return `<button type="button" class="var${on ? ' on' : ''}" data-act="pickVar" data-v="${i}" aria-pressed="${on}">
       <span class="vh"><b>${L}</b><span class="vstat">${status}</span>${guestMasked(v.teams) ? '' : `<span class="vpct ${lampClass(d.pct)}">${fmt(d.pct, 1)} %</span>`}</span>
@@ -6664,7 +6667,7 @@ function forecastBlock(M, det, R) {
     <div class="block-head"><div class="lblrow"><h2>Prognose</h2>${ib('forecast')}${expert() ? srcBadge(bas) : ''}</div><span class="muted small">Siegchance laut ${bas === 'mix' ? 'Bewertungen + Ergebnissen' : bas === 'data' ? 'Ergebnissen' : 'Bewertungen'} · Remis · Siegchance</span></div>
     ${rows}
     ${eg.N >= 15 ? `<p class="small muted">Rund ${fmt(eg.N, 0)} Tore → der Zufall gleicht sich aus.<br>Darum gewinnt meist das stärkere Team, auch bei kleinem Unterschied.</p>` : ''}
-    <p class="small muted">Torzahl: ${eg.src}.${!S.day.place ? ' Den Ort legst du unter „Spieltag“ fest.' : ''}</p>
+    <p class="small muted">Torzahl: ${eg.src}.${!S.day.place && !isGuest() ? ' Den Ort legst du unter „Spieltag“ fest.' : ''}</p>
   </section>`;
 }
 
@@ -10244,7 +10247,7 @@ document.addEventListener('click', e => {
   if (!f) return;
   e.preventDefault();
   if (ui.arm && String(ui.arm).startsWith('bk:') && el.dataset.act === 'bkRestore') { /* bleibt scharf */ } else
-  if (ui.arm && !String(el.dataset.act).match(/^(delPlayer|resetDay|resetAll|delTag|importMultiReplace|delData|delPlace|fieldDel|newDay|projDel|rawReset|importConfirm|svRespDel|svDrop)$/)) ui.arm = null;
+  if (ui.arm && !String(el.dataset.act).match(/^(delPlayer|resetDay|resetAll|delTag|importMultiReplace|delData|delPlace|fieldDel|newDay|projDel|rawReset|importConfirm|svRespDel|svDrop|gDel)$/)) ui.arm = null;
   if (ui.res && ui.res.arm && el.dataset.act !== 'resDel') ui.res.arm = false;
   f(el, e);
 });
@@ -10708,11 +10711,13 @@ function svDotsHTML(row, own, pick) {
   const MAXS = 5, H = Math.min(MAXS, Math.max(1, ...bins.values()));
   let dots = '';
   bins.forEach((n, b) => {
-    for (let k = 0; k < Math.min(n, MAXS); k++) dots += `<i class="dot" style="left:${x(b)}%;bottom:${18 + k * 7}px"></i>`;
-    if (n > MAXS) dots += `<b class="dotn" style="left:${x(b)}%;bottom:${18 + MAXS * 7}px">${n}</b>`;
+    for (let k = 0; k < Math.min(n, MAXS); k++) dots += `<i class="dot" style="left:${x(b)}%;bottom:${31 + k * 7}px"></i>`;
+    if (n > MAXS) dots += `<b class="dotn" style="left:${x(b)}%;bottom:${31 + MAXS * 7}px">${n}</b>`;
   });
   const tip = [...bins.entries()].sort((a, b) => a[0] - b[0]).map(([b, n]) => `${fmtS(b)}: ${n}×`).join(' · ');
-  return `<span class="svline" style="height:${24 + H * 7 + (Math.max(...bins.values(), 0) > MAXS ? 12 : 0)}px" title="Stimmen ${esc(tip)}" aria-hidden="true"><i class="axis"></i>${dots}${row.n ? `<i class="grp" style="left:${x(row.val)}%"></i>` : ''}${isNum(own) ? `<i class="own" style="left:${x(own)}%"></i>` : ''}${isNum(pick) ? `<i class="new" style="left:${x(pick)}%"></i>` : ''}</span>`;
+  // Zahlen 1–10 unter der Linie, kleine Striche auf der Linie
+  const scale = Array.from({ length: 10 }, (_, k) => `<i class="tick" style="left:${x(k + 1)}%"></i><b class="tnum" style="left:${x(k + 1)}%">${k + 1}</b>`).join('');
+  return `<span class="svline" style="height:${37 + H * 7 + (Math.max(...bins.values(), 0) > MAXS ? 12 : 0)}px" title="Stimmen ${esc(tip)}" aria-hidden="true"><i class="axis"></i>${scale}${dots}${row.n ? `<i class="grp" style="left:${x(row.val)}%"></i>` : ''}${isNum(own) ? `<i class="own" style="left:${x(own)}%"></i>` : ''}${isNum(pick) ? `<i class="new" style="left:${x(pick)}%"></i>` : ''}</span>`;
 }
 function svSheetHTML() {
   const U = ui.svy, L = svList();
@@ -10769,12 +10774,13 @@ function svSheetHTML() {
     // „sicher“ nur, wenn die einige Gruppe zu deinem (künftigen) Wert passt – sonst wäre es ein Widerspruch
     const want = x.split ? 'unsure' : x.agree && (x.d == null || Math.abs(x.d) < 1 || picks[x.id] === 'grp') ? 'sure' : null, p = byId(x.id);
     if (!want || !p) return '';
-    if (p.conf === want) return `<div class="small muted svconf">Sicherheit: schon „${CL[want]}“</div>`;
+    const cur = confOf(p), CLx = { sure: 'sicher', rather: 'eher sicher', unsure: 'unsicher', very: 'sehr unsicher' };
+    if (want === 'unsure' ? cur === 'unsure' || cur === 'very' : cur === 'sure') return `<div class="small muted svconf">Sicherheit: schon „${CLx[cur]}“</div>`;
     const on = confs[x.id] === want;
-    return `<div class="svconf"><button type="button" class="chip${on ? ' on' : ''}" data-act="svConf" data-id="${x.id}" data-v="${want}" aria-pressed="${on}">${on ? '✓ ' : ''}als „${CL[want]}“ einstufen</button><span class="small muted">${x.split ? 'die Gruppe ist sich uneinig' : 'die Gruppe ist sich einig'}${p.conf ? ` · bisher „${CL[p.conf] || CONF[p.conf].label}“` : ''}</span></div>`;
+    return `<div class="svconf"><button type="button" class="chip${on ? ' on' : ''}" data-act="svConf" data-id="${x.id}" data-v="${want}" aria-pressed="${on}">${on ? '✓ ' : ''}als „${CL[want]}“ einstufen</button><span class="small muted">${x.split ? 'die Gruppe ist sich uneinig' : 'die Gruppe ist sich einig'} · bisher „${CLx[cur]}“</span></div>`;
   };
   const strong = rowsAll.filter(x => x.n >= 3 && x.d != null && Math.abs(x.d) >= 1);
-  const splitN = rowsAll.filter(x => x.split && byId(x.id) && byId(x.id).conf !== 'unsure').length;
+  const splitN = rowsAll.filter(x => x.split && byId(x.id) && !['unsure', 'very'].includes(confOf(byId(x.id)))).length;
   const resTable = !E.nResp ? '<p class="hint">Noch keine Antworten. Sobald Codes eingefügt sind, erscheint hier der Vergleich.</p>' : `
     <div class="row svopts"><span class="small">${sw('svOpt', adjOn, 'data-k="both"', 'Werte angleichen')} Werte angleichen (empfohlen) ${ib('svAdj')}</span>${!adjOn ? '<span class="small muted">aus: Median der Stimmen, wie abgegeben</span>' : ''}</div>
     ${adjOn && !E.scaled ? '<p class="small muted">Auf deine Skala übertragen wird erst, wenn mindestens 4 Spieler Stimmen haben, die du selbst eingeschätzt hast.</p>' : ''}
@@ -10873,7 +10879,7 @@ Object.assign(A, {
   svOpt: el => { const sv = svCur(), on = !(sv.opt.adj && sv.opt.scale); sv.opt.adj = on; sv.opt.scale = on; render(); },
   svSort: el => { ui.svy.sort = el.dataset.v; render(); },
   svConf: el => { const C = ui.svy.conf || (ui.svy.conf = {}); if (C[el.dataset.id] === el.dataset.v) delete C[el.dataset.id]; else C[el.dataset.id] = el.dataset.v; render(); },
-  svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id); if (p && x.split && p.conf !== 'unsure') C[x.id] = 'unsure'; }); render(); },
+  svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id); if (p && x.split && !['unsure', 'very'].includes(confOf(p))) C[x.id] = 'unsure'; }); render(); },
   svFilter: el => { ui.svy.filter = el.dataset.v; render(); },
   svPickRow: el => { const P = ui.svy.picks; if (el.dataset.v) P[el.dataset.id] = el.dataset.v; else delete P[el.dataset.id]; render(); },
   svBulk: el => {
@@ -11083,7 +11089,7 @@ function guestSendHTML() {
   ui.gsend.msg = msg; ui.gsend.ids = pick.map(m => m.id);
   return sheetWrap(`<div class="sheet-head"><h2 id="gsTitle">Ergebnisse zurückschicken</h2><button type="button" class="btn sm primary" data-act="gSendClose">Fertig</button></div>
     <p class="hint">Schick diese Nachricht an ${esc(S.guest.by || 'den Organisator')}. Er fügt sie in seiner App ein, dann stehen die Runden mit Ergebnis bei ihm im Rückblick.</p>
-    ${all.length ? `<ul class="rules">${all.map(m => `<li><span class="grow"><b>${esc(dateShort(m.date))}</b> · ${esc(inCols(m.colors, () => resultText(m)) || '–')}</span>${un.has(m.id) ? tag('neu', 't-new') : tag('geschickt')}</li>`).join('')}</ul>` : '<p class="hint">Noch keine Runde mit Ergebnis. Nach dem Spiel unter „Teams“ das Ergebnis eintragen.</p>'}
+    ${all.length ? `<ul class="rules">${all.map(m => { const armed = ui.arm === 'gDel:' + m.id; return `<li><span class="grow"><b>${esc(dateShort(m.date))}</b> · ${esc(inCols(m.colors, () => resultText(m)) || '–')}</span>${un.has(m.id) ? tag('neu', 't-new') : tag('geschickt')}<button type="button" class="btn sm ${armed ? 'danger armed' : 'ghost'}" data-act="gDel" data-id="${m.id}">${armed ? 'Löschen?' : 'Löschen'}</button></li>`; }).join('')}</ul>` : '<p class="hint">Noch keine Runde mit Ergebnis. Nach dem Spiel unter „Teams“ das Ergebnis eintragen.</p>'}
     ${all.length > un.size ? `<div class="row">${cbx('gSendAll', !!ui.gsend.all, 'auch schon geschickte noch einmal')}</div>` : ''}
     ${msg ? `<details class="field"><summary class="small muted">Nachricht ansehen</summary><pre class="svcode gcode">${esc(msg)}</pre></details>
     <div class="row"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-act="gSent">Per WhatsApp senden</a>${navigator.share ? '<button type="button" class="btn" data-act="gShare">Teilen …</button>' : ''}<button type="button" class="btn" data-act="gCopy">Kopieren</button></div>` : un.size === 0 && all.length ? '<p class="hint">Alles schon geschickt. ✓</p>' : ''}`, 'gsTitle', 'gSendClose');
@@ -11141,7 +11147,7 @@ function shareSheetHTML() {
       <div class="field"><label class="lbl" for="gsBy">Dein Name (steht in der Nachricht und beim Zurückschicken)</label><input type="text" id="gsBy" data-in="gsBy" maxlength="30" value="${esc(S.share.by)}" placeholder="z. B. Peter"></div>
       <div class="field"><div class="lblrow"><span class="lbl">Wer steht im Link? (${nSel})</span><span class="grow"></span><button type="button" class="btn sm ghost" data-act="gsPickAll" data-v="1">alle</button><button type="button" class="btn sm ghost" data-act="gsPickAll" data-v="0">keinen</button></div>
         <div class="svpick">${pl.map(p => cbx('gsPick', !!U.pick[p.id], label(p) + (st[p.status] ? ` · ${st[p.status]}` : ''), `data-id="${p.id}"`)).join('')}</div></div>
-      <div class="row"><button type="button" class="btn primary" data-act="gsCreate"${nSel >= 2 && svBase() ? '' : ' disabled'}>Link erstellen</button></div></details>`, 'gshTitle', 'gsClose');
+      <div class="row"><button type="button" class="btn primary" data-act="gsCreate"${nSel >= 2 && svBase() && str(S.share.by) ? '' : ' disabled'}>Link erstellen</button>${str(S.share.by) ? '' : '<span class="small errtxt">Bitte oben deinen Namen eintragen – er erscheint bei der Gruppe.</span>'}</div></details>`, 'gshTitle', 'gsClose');
 }
 /* Ergebnis-Codes der Gäste einlesen: Runde mit Teams und Ergebnis anlegen. Bewertet wird sie wie eigene Runden
    mit deinen Bewertungen (nicht mit den Link-Werten – die enthalten frühere Ergebnisse schon). */
@@ -11222,12 +11228,20 @@ Object.assign(A, {
   gSendOpen: () => { ui.gsend = { all: false }; render(); },
   gSendClose: () => { ui.gsend = null; render(); },
   gSendAll: () => { ui.gsend.all = !ui.gsend.all; render(); },
+  gDel: el => {
+    const id = el.dataset.id, k = 'gDel:' + id;
+    if (ui.arm !== k) { ui.arm = k; render(); return; }
+    ui.arm = null; remember('Runde gelöscht');
+    S.matches = S.matches.filter(m => m.id !== id); delete S.guest.sent[id];
+    if (S.result && S.result.mid === id) { S.result.mid = null; S.result.untracked = true; }
+    render(); toast('Runde gelöscht.', { label: 'Rückgängig', act: 'undo' });
+  },
   gSent: el => { (ui.gsend.ids || []).forEach(id => { const m = matchById(id); if (m) S.guest.sent[id] = guestSig(m); }); save(); window.open(el.href, '_blank', 'noopener'); setTimeout(render, 300); },
   gShare: async () => { try { await navigator.share({ text: ui.gsend.msg }); (ui.gsend.ids || []).forEach(id => { const m = matchById(id); if (m) S.guest.sent[id] = guestSig(m); }); render(); } catch (e) { /* abgebrochen */ } },
   gCopy: () => { (ui.gsend.ids || []).forEach(id => { const m = matchById(id); if (m) S.guest.sent[id] = guestSig(m); }); copyText(ui.gsend.msg, 'Kopiert – jetzt in WhatsApp einfügen und abschicken.'); }
 });
 Object.assign(IN, {
-  gsBy: el => { S.share.by = el.value.slice(0, 30); save(); },
+  gsBy: el => { S.share.by = el.value.slice(0, 30); save(); const b = document.querySelector('[data-act="gsCreate"]'); if (b) b.disabled = !str(S.share.by) || !svBase(); },
   gsRes: el => { ui.gshare.paste = el.value; const b = document.querySelector('[data-act="gsRead"]'); if (b) b.disabled = !str(el.value); }
 });
 
