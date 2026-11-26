@@ -1431,6 +1431,40 @@ body.is-guest { --top-bg: #1f5168; --bg: #edf0f1; --surface-2: #e3e8ea; }
 .installbar { position: relative; }
 .installbar > .mini { position: absolute; top: 4px; right: 4px; }
 .installbar .installhint { background: var(--surface); padding-right: 40px; }
+
+/* v46 */
+/* Desktop: Bereiche nicht mehr auf volle Höhe gestreckt; Hintergrund jetzt hinter allem (siehe has-bg) */
+main.wrap { align-content: start; }
+@media (min-width: 1240px) { html { background: var(--bg); } html::before { content: none; } main.wrap { background: transparent; box-shadow: none; min-height: 0; } }
+body.has-bg { background: transparent !important; }
+body.has-bg::before { content: ''; position: fixed; inset: 0; z-index: -2; background: #142a1d url(assets/bg-portrait.webp) center / cover no-repeat; }
+@media (min-aspect-ratio: 1/1) { body.has-bg::before { background-image: url(assets/bg-wide.webp); } }
+body.has-bg::after { content: ''; position: fixed; inset: 0; z-index: -1; background: color-mix(in srgb, var(--bg) 84%, transparent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body.has-bg::after { background: color-mix(in srgb, var(--bg) 78%, transparent); } }
+:root[data-theme="dark"] body.has-bg::after { background: color-mix(in srgb, var(--bg) 78%, transparent); }
+body.has-bg main.wrap { gap: 18px; }
+body.has-bg main.wrap > .block, body.has-bg main.wrap > section, body.has-bg .team { box-shadow: 0 2px 4px rgba(0, 0, 0, .08), 0 8px 24px -12px rgba(0, 0, 0, .45); border-color: color-mix(in srgb, var(--ink) 16%, var(--line)); }
+/* Start */
+.welcome-hero { height: 150px; }
+/* Spielfeld mit freien Positionen */
+.pitch.free { display: block; position: relative; padding: 0; }
+.pitch.free .pspot { position: absolute; transform: translate(-50%, -38%); z-index: 2; }
+.pitch.free .pchip { max-width: 78px; }
+.pitch.free .pchip .cn { white-space: normal; text-align: center; line-height: 1.15; max-width: 76px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+/* Datum: Antippen öffnet die Auswahl des Geräts */
+@media (pointer: coarse) { .datepick input.dtnative { left: 40px; right: 40px; top: 0; bottom: 0; width: auto; height: auto; pointer-events: auto; z-index: 2; font-size: 16px; -webkit-appearance: none; appearance: none; } }
+.sdpick { position: relative; display: inline-flex; }
+.sdpick .dtover { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; opacity: 0; border: 0; padding: 0; font-size: 16px; -webkit-appearance: none; appearance: none; }
+.timepick input[type="time"] { -webkit-appearance: none; appearance: none; text-align: left; min-width: 0; max-width: 100%; width: 100%; padding-right: 40px; }
+.timepick input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
+/* Sonnenuntergang */
+.sunline { margin-top: 2px; }
+.sunwarn { margin-top: 4px; }
+/* Kalender-Seite allein */
+body.cal-mode .top, body.cal-mode nav, body.cal-mode .nav, body.cal-mode #actionbar, body.cal-mode .actionbar { display: none !important; }
+body.cal-mode main.wrap { max-width: 560px; padding-top: 24px; padding-bottom: 40px; }
+.calpage { display: grid; gap: 14px; }
+.calfoot { text-align: center; }
 </style>
 </head>
 <body>
@@ -3173,6 +3207,8 @@ const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const fmt = (x, d = 1) => Number(x).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
 // Kleinere Verschiebungen durch Platz, Form oder Position (in Punkten) werden nicht extra angezeigt – sie sind praktisch gleich
 const SHOW_SHIFT = 0.2;
+/* Zeigen, wenn sich die gerundet angezeigten Werte um mindestens 0,2 unterscheiden (nicht der ungerundete Abstand) */
+const shiftShown = (a, b) => Math.abs(Math.round(a * 10) - Math.round(b * 10)) >= 2;
 const fmtS = x => (Math.abs(x - Math.round(x)) < 0.05 ? String(Math.round(x)) : fmt(x, 1));
 const fmtInt = x => Math.round(x).toLocaleString('de-DE');
 const pctTxt = x => `${Math.round(x * 100)} %`;
@@ -3257,6 +3293,7 @@ function usualTimes() {
   return (top.length ? top : ['18:00', '19:00', '20:00']).sort();
 }
 /* Datum und Uhrzeit: großer Datumsknopf mit ‹ ›, Schnellwahl; Uhrzeit als Textfeld (wird erst beim Verlassen übernommen) */
+const coarse = () => { try { return matchMedia('(pointer: coarse)').matches; } catch (e) { return false; } };
 function dateTimeHTML(t, d) {
   const id = t + 'Date', tid = t + 'Time', today = isoToday();
   const dt = new Date(d.date + 'T12:00:00');
@@ -3274,7 +3311,7 @@ function dateTimeHTML(t, d) {
         <input type="date" id="${id}" class="dtnative" data-ch="${id}" value="${esc(d.date)}" tabindex="-1" aria-hidden="true"></div>
       ${chips.length ? `<div class="chips">${chips.map(([l, v]) => `<button type="button" class="chip" data-act="dtSet" data-t="${t}" data-v="${v}">${esc(l)}</button>`).join('')}</div>` : ''}</div>
     <div class="field dtfield"><label class="lbl" for="${tid}">Uhrzeit <span class="muted">(optional)</span></label>
-      <div class="timepick"><input type="text" id="${tid}" inputmode="numeric" autocomplete="off" maxlength="9" placeholder="18:30" data-ch="${tid}" value="${esc(d.time || '')}">${d.time ? `<button type="button" class="tclear" data-act="tmSet" data-t="${t}" data-v="" aria-label="Uhrzeit entfernen">${ICON.out}</button>` : '<span class="tunit">Uhr</span>'}</div>
+      <div class="timepick"><input type="${coarse() ? 'time' : 'text'}" id="${tid}" inputmode="numeric" autocomplete="off" maxlength="9" placeholder="18:30" data-ch="${tid}" value="${esc(d.time || '')}">${d.time ? `<button type="button" class="tclear" data-act="tmSet" data-t="${t}" data-v="" aria-label="Uhrzeit entfernen">${ICON.out}</button>` : '<span class="tunit">Uhr</span>'}</div>
       <div class="chips">${times.map(x => `<button type="button" class="chip${d.time === x ? ' on' : ''}" data-act="tmSet" data-t="${t}" data-v="${x}" aria-pressed="${d.time === x}">${x}</button>`).join('')}</div></div>`;
 }
 /* Lange Kartentexte („33, Bahnhofstraße, Bad Salzuflen, Werl-Aspe, …, 32105, Deutschland“) kurz: „Bahnhofstraße 33, 32105 Bad Salzuflen“ */
@@ -3419,7 +3456,7 @@ function cleanPlaces(list) {
     const name = o ? str(o.name).slice(0, 60) : '';
     if (!name || out.has(name.toLowerCase())) return;
     const lat = isNum(o.lat) && Math.abs(+o.lat) <= 90 ? +o.lat : null, lon = isNum(o.lon) && Math.abs(+o.lon) <= 180 ? +o.lon : null;
-    out.set(name.toLowerCase(), { name, address: str(o.address).slice(0, 160), lat: lat != null && lon != null ? lat : null, lon: lat != null && lon != null ? lon : null, found: str(o.found).slice(0, 200), fields: cleanFields(o.fields), photo: cleanPhoto(o.photo) });
+    out.set(name.toLowerCase(), { name, light: !!o.light, address: str(o.address).slice(0, 160), lat: lat != null && lon != null ? lat : null, lon: lat != null && lon != null ? lon : null, found: str(o.found).slice(0, 200), fields: cleanFields(o.fields), photo: cleanPhoto(o.photo) });
   });
   return [...out.values()].slice(0, 100);
 }
@@ -3774,7 +3811,7 @@ const ui = {
   arm: null, sel: [], late: false, suggest: null, copy: null, tview: 'list', colorPick: null, open: {}, calc: false, report: false,
   dups: [], addErr: '', pop: null, popAt: 0, bulkField: '', importPreview: null, undo: null, saveFailed: false, busy: false,
   ruleForm: { type: 'together', a: '', b: '', hard: false, prio: 1, bonus: 1, note: '' },
-  res: null, pa: null, recOwn: null, allRecs: false, paSort: 'dev', dsort: 'name', tsort: 'pos', placeNew: null, mb: null, mf: { st: 'all', span: 0, fmt: '', q: '' }, mLimit: 20, storeBig: false, chSel: {}, chScroll: {}
+  res: null, pa: null, recOwn: null, allRecs: false, paSort: 'dev', dsort: 'games', tsort: 'pos', placeNew: null, mb: null, mf: { st: 'all', span: 0, fmt: '', q: '' }, mLimit: 20, storeBig: false, chSel: {}, chScroll: {}
 };
 /* ---------- Projekte ----------
    Jedes Projekt (z. B. „Dienstagskick“, „Fußball mit Freunden“) hat eigene Spieler, Regeln, Orte,
@@ -3991,11 +4028,11 @@ function placeField(id, cur, ch, t) {
   // Mit Spieltag/Ergebnis: eine Liste – Orte fett (Gruppen), ihre Felder eingerückt darunter
   const sel = t
     ? `<select id="${id}" data-ch="placeSel" data-t="${t}"><option value="">– keine Angabe –</option>
-        ${list.map(x => { const P = placeByName(x), fl = P ? P.fields || [] : []; return `
-          <option value="p:${esc(x)}"${x === cur && !curF ? ' selected' : ''} style="font-weight:700">${esc(x)}</option>
-          ${fl.map(f => `<option value="f:${esc(x)}|${f.id}"${curF === f ? ' selected' : ''}>↳ ${esc(f.name)}</option>`).join('')}
-          <option value="n:${esc(x)}" class="optnew" style="color:#7d8a82;font-style:italic">↳ + Neues Feld bei ${esc(x)} …</option>`; }).join('')}
-        ${cur && !list.includes(cur) ? `<option value="p:${esc(cur)}" selected>${esc(cur)}</option>` : ''}<option value="__new" class="optnew" style="color:#7d8a82;font-style:italic">+ Neuer Ort …</option></select>`
+        ${list.map(x => { const P = placeByName(x), fl = P ? P.fields || [] : []; return `<optgroup label="📍 ${esc(x)}">
+          <option value="p:${esc(x)}"${x === cur && !curF ? ' selected' : ''} style="font-weight:700">${esc(x)}${fl.length ? ' – ohne Feld' : ''}</option>
+          ${fl.map(f => `<option value="f:${esc(x)}|${f.id}"${curF === f ? ' selected' : ''}>${esc(x)} · ${esc(f.name)}</option>`).join('')}
+          <option value="n:${esc(x)}" class="optnew" style="color:#7d8a82;font-style:italic">＋ Neues Feld bei ${esc(x)} …</option></optgroup>`; }).join('')}
+        ${cur && !list.includes(cur) ? `<option value="p:${esc(cur)}" selected>${esc(cur)}</option>` : ''}<optgroup label="Neu"><option value="__new" class="optnew" style="color:#7d8a82;font-style:italic">＋ Neuer Ort …</option></optgroup></select>`
     : `<select id="${id}" data-ch="${ch}"><option value="">– keine Angabe –</option>${list.map(x => `<option${x === cur ? ' selected' : ''}>${esc(x)}</option>`).join('')}${cur && !list.includes(cur) ? `<option selected>${esc(cur)}</option>` : ''}<option value="__new" class="optnew" style="color:#7d8a82;font-style:italic">+ Neuer Ort …</option></select>`;
   return `<div class="field placefield"><label class="lbl" for="${id}">${t ? 'Ort und Feld' : 'Ort'} <span class="muted">(optional)</span></label>${adding
     ? `<div class="row"><input type="text" class="grow" id="${id}New" placeholder="Neuer Ort, z. B. Halle Nord" maxlength="60"><button type="button" class="btn sm primary" data-act="placeAdd" data-k="${id}" data-ch="${ch}">Anlegen</button><button type="button" class="btn sm ghost" data-act="placeCancel">Abbrechen</button></div>`
@@ -4549,10 +4586,10 @@ function shareText(o) {
   const det = !isStale(R, M) ? Engine.evaluate(M, assignFrom(M, R.teams), true) : null;
   // WhatsApp: *fett*. Kopf: Wochentag und Datum ausgeschrieben, darunter Uhrzeit (mit Ende, falls die Dauer bekannt ist) und Ort
   const day = isIso(S.day.date) ? new Date(S.day.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
-  const lines = ['⚽ *Teams für*', day ? `*${day}*` : '*heute*'];
+  const lines = [`⚽ *Teams für ${day || 'heute'}*`];
   if (isTime(S.day.time)) lines.push(`⏰ ${S.day.time}${S.day.minutes ? '–' + addMin(S.day.time, S.day.minutes) : ''} Uhr`);
   if (S.day.place) lines.push(`📍 ${S.day.place}${o.map && A.map ? ': ' + placeMapUrl(A.pl) : ''}`);
-  if (o.wx && A.wx && S.day.weather) lines.push(wxShare(S.day.weather));
+  if (o.wx && A.wx && S.day.weather) { const L = daylight(); lines.push(wxShare(S.day.weather) + (L ? ` · 🌇 ${hhmm(L.set)}` : '')); }
   if (o.cal && A.cal) lines.push(`📅 In den Kalender: ${calLink()}`);
   R.teams.forEach((ids, t) => {
     const c = teamCol(t);
@@ -4613,20 +4650,64 @@ function teamsImage() {
     g.beginPath(); g.moveTo(fx + 8, fy + fh / 2); g.lineTo(fx + fw - 8, fy + fh / 2); g.stroke();
     g.beginPath(); g.arc(fx + fw / 2, fy + fh / 2, 34, 0, Math.PI * 2); g.stroke();
     [[fy + 8, 1], [fy + fh - 8, -1]].forEach(([yy, d]) => { g.strokeRect(fx + fw * 0.22, d > 0 ? yy : yy - 62, fw * 0.56, 62); g.strokeRect(fx + fw * 0.36, d > 0 ? yy : yy - 24, fw * 0.28, 24); });
-    const rows = pitchLayout(E), nR = rows.length;
-    rows.forEach((Rw, ri) => {
-      const cy = fy + 40 + (fh - 80) * (nR > 1 ? ri / (nR - 1) : 0.5);
-      Rw.cells.forEach(z => {
-        const same = Rw.cells.filter(q => q.c === z.c), off = same.indexOf(z) - (same.length - 1) / 2;
-        const cx = fx + fw * (0.12 + z.c * 0.19), yy = cy + off * 44;
-        g.beginPath(); g.arc(cx, yy - 8, 14, 0, Math.PI * 2); g.fillStyle = c.color; g.fill(); g.lineWidth = 2.5; g.strokeStyle = '#fff'; g.stroke();
-        if (z.x.r === 'GK') { g.fillStyle = c.ink; g.font = font(800, 11); const tw = g.measureText('TW').width; g.fillText('TW', cx - tw / 2, yy - 7); }
-        g.font = font(700, 13); const nm = fit(disp(byId(z.x.id)), fw * 0.21 + 14), tw = g.measureText(nm).width;
-        g.fillStyle = 'rgba(0,0,0,.45)'; g.fillText(nm, cx - tw / 2 + 1, yy + 18); g.fillStyle = '#fff'; g.fillText(nm, cx - tw / 2, yy + 17);
+    pitchLayout(E).forEach(P => {
+      const cx = fx + fw * P.x, yy = fy + 14 + (fh - 40) * P.y;
+      g.beginPath(); g.arc(cx, yy - 8, 14, 0, Math.PI * 2); g.fillStyle = c.color; g.fill(); g.lineWidth = 2.5; g.strokeStyle = '#fff'; g.stroke();
+      if (P.e.r === 'GK') { g.fillStyle = c.ink; g.font = font(800, 11); const tw = g.measureText('TW').width; g.fillText('TW', cx - tw / 2, yy - 7); }
+      // Name: höchstens so breit wie der Abstand zum Nachbarn; zu lang → zwei Zeilen (Vor- und Nachname), dann gekürzt
+      const maxW = fw * 0.19 - 4, nm = disp(byId(P.e.id)); g.font = font(700, 12);
+      let ln = [nm];
+      if (g.measureText(nm).width > maxW && nm.includes(' ')) { const k = nm.indexOf(' '); ln = [nm.slice(0, k), nm.slice(k + 1)]; }
+      ln.slice(0, 2).forEach((t0, li) => {
+        const t = fit(t0, maxW), tw = g.measureText(t).width, ty = yy + 17 + li * 14;
+        g.fillStyle = 'rgba(0,0,0,.5)'; g.fillText(t, cx - tw / 2 + 1, ty + 1); g.fillStyle = '#fff'; g.fillText(t, cx - tw / 2, ty);
       });
     });
   });
   return new Promise((ok, no) => cv.toBlob(b => (b ? ok(b) : no(new Error('Bild'))), 'image/png'));
+}
+/* ---------- Sonnenuntergang (ohne Internet berechnet, Genauigkeit etwa ±2 Minuten) ---------- */
+function sunsetAt(date, lat, lon) {
+  const r = Math.PI / 180, ms = Date.UTC(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10), 12);
+  const n = Math.round(ms / 864e5 + 2440587.5 - 2451545.0 + 0.0008), Js = n - lon / 360;
+  const M = (357.5291 + 0.98560028 * Js) % 360, C = 1.9148 * Math.sin(M * r) + 0.02 * Math.sin(2 * M * r) + 0.0003 * Math.sin(3 * M * r);
+  const L = (M + C + 180 + 102.9372) % 360, Jt = 2451545.0 + Js + 0.0053 * Math.sin(M * r) - 0.0069 * Math.sin(2 * L * r);
+  const dec = Math.asin(Math.sin(L * r) * Math.sin(23.4397 * r));
+  const cw = (Math.sin(-0.833 * r) - Math.sin(lat * r) * Math.sin(dec)) / (Math.cos(lat * r) * Math.cos(dec));
+  if (cw < -1 || cw > 1) return null;   // Polarsommer/-nacht
+  return new Date((Jt + Math.acos(cw) / r / 360 - 2440587.5) * 864e5);
+}
+const DUSK_KEY = 'ft-dusk';
+function duskMin() { try { const v = +localStorage.getItem(DUSK_KEY); return isNum(localStorage.getItem(DUSK_KEY)) ? clamp(v, 0, 90) : 20; } catch (e) { return 20; } }
+const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+/* Übliche Gesamtspielzeit: angegeben, sonst die häufigste der letzten Runden, sonst 90 Minuten */
+function usualMinutes() {
+  if (S.day.minutes) return { m: S.day.minutes, src: '' };
+  const c = {}; S.matches.slice(-20).forEach(m => { if (m.minutes) c[m.minutes] = (c[m.minutes] || 0) + 1; });
+  const top = Object.keys(c).sort((a, b) => c[b] - c[a])[0];
+  return top ? { m: +top, src: 'wie meist' } : { m: 90, src: 'angenommen' };
+}
+/* Ergebnis: null (drinnen, Flutlicht, keine Lage) oder { set, light, end, late, latest } */
+function daylight() {
+  const d = S.day, pl = placeByName(d.place);
+  if (!pl || pl.lat == null || pl.light || isIndoor(d) || !isIso(d.date)) return null;
+  const set = sunsetAt(d.date, pl.lat, pl.lon); if (!set) return null;
+  const light = new Date(set.getTime() + duskMin() * 60000), U = usualMinutes();
+  const out = { set, light, U };
+  if (isTime(d.time)) {
+    const st = new Date(`${d.date}T${d.time}:00`), end = new Date(st.getTime() + U.m * 60000);
+    out.end = end; out.late = end > light;
+    out.latest = new Date(light.getTime() - U.m * 60000);
+  }
+  return out;
+}
+function daylightHTML() {
+  const L = daylight(); if (!L) return '';
+  const base = `🌇 Sonnenuntergang ${hhmm(L.set)} · hell bis etwa ${hhmm(L.light)}`;
+  if (!L.late) return `<div class="small muted sunline">${base}${L.end ? ` · Ende ${hhmm(L.end)}${L.U.src ? ` (${L.U.m} Min. ${L.U.src})` : ''}` : ''}</div>`;
+  const pl = placeByName(S.day.place);
+  return `<div class="banner warn sunwarn"><p><b>Es wird dunkel:</b> Ende ${hhmm(L.end)}${L.U.src ? ` (${L.U.m} Min. ${L.U.src})` : ''}, hell ist es bis etwa ${hhmm(L.light)} (Sonnenuntergang ${hhmm(L.set)} + ${duskMin()} Min.). Spätester Start: <b>${hhmm(L.latest)}</b>.</p>
+    <div class="row"><button type="button" class="btn sm" data-act="tmSet" data-t="day" data-v="${hhmm(L.latest)}">Auf ${hhmm(L.latest)} setzen</button><button type="button" class="btn sm ghost" data-act="placeLight" data-v="${esc(pl.name)}">Platz hat Flutlicht</button></div></div>`;
 }
 /* ---------- Kalender-Link: #ftk + Zahlen (Basis 36, feste Längen) + Texte wie beim Umfrage-Link ---------- */
 const CAL_D0 = Date.UTC(2020, 0, 1) / 864e5;
@@ -4648,7 +4729,7 @@ function calUnpack(s) {
 }
 function calLink() {
   const d = S.day, pl = placeByName(d.place), pr = curProject();
-  return `${svBase()}#ftk${calPack({ date: d.date, time: d.time, min: d.minutes, title: str((pr ? pr.name : S.name) || 'Fußball').replace(/\s*\(.*\)\s*$/, '').slice(0, 40), place: d.place, lat: null, lon: null, addr: '' })}`;
+  return `${svBase()}#ftk${calPack({ date: d.date, time: d.time, min: d.minutes || usualMinutes().m, title: str((pr ? pr.name : S.name) || 'Fußball').replace(/\s*\(.*\)\s*$/, '').slice(0, 40), place: d.place, lat: pl && pl.lat != null ? pl.lat : null, lon: pl && pl.lat != null ? pl.lon : null, addr: '' })}`;
 }
 function calTimes(c) {
   const ymd = c.date.replace(/-/g, '');
@@ -4663,7 +4744,14 @@ function calIcs(c) {
   const loc = [c.place, c.addr].filter(Boolean).join(', ');
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Faire Teams//DE', 'BEGIN:VEVENT', `UID:${T.a}-${svSum(c.title + c.place)}@faire-teams`, `DTSTAMP:${now}`,
     T.allDay ? `DTSTART;VALUE=DATE:${T.a}` : `DTSTART:${T.a}`, T.allDay ? `DTEND;VALUE=DATE:${T.b}` : `DTEND:${T.b}`,
-    `SUMMARY:${e('⚽ ' + (c.title || 'Fußball'))}`, loc ? `LOCATION:${e(loc)}` : '', c.lat != null ? `GEO:${c.lat.toFixed(5)};${c.lon.toFixed(5)}` : '', 'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
+    `SUMMARY:${e('⚽ ' + (c.title || 'Fußball'))}`, loc ? `LOCATION:${e(loc)}` : '',
+    // Apple Kalender zeigt mit der Lage eine Karte samt Route im Termin; die anderen nutzen GEO und den Kartenlink
+    c.lat != null ? `X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-APPLE-RADIUS=100;X-TITLE="${String(c.place || 'Platz').replace(/"/g, '')}":geo:${c.lat.toFixed(5)},${c.lon.toFixed(5)}` : '',
+    c.lat != null ? `GEO:${c.lat.toFixed(5)};${c.lon.toFixed(5)}` : '',
+    c.lat != null ? `URL:${placeMapUrl({ lat: c.lat, lon: c.lon })}` : '',
+    c.lat != null ? `DESCRIPTION:${e('Route: ' + placeMapUrl({ lat: c.lat, lon: c.lon }))}` : '',
+    'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${e('⚽ ' + (c.title || 'Fußball'))}`, 'TRIGGER:-PT60M', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
 }
 function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
 function calSheetHTML() {
@@ -4678,6 +4766,23 @@ function calSheetHTML() {
       ${navigator.canShare ? '<button type="button" class="btn ghost" data-act="calShare">Termin als Datei teilen …</button>' : ''}</div>
     <p class="hint">iPhone: Klappt „In den Kalender eintragen“ nicht, oben rechts „In Safari öffnen“ wählen und nochmal tippen – oder „Termin als Datei teilen“ → „Kalender“.</p>`, 'calTitle', 'calClose');
 }
+function calPageHTML() {
+  const c = ui.cal; if (!c) return '<section class="block"><p>Dieser Kalender-Link ist unvollständig.</p></section>';
+  const T = calTimes(c), loc = [c.place, c.addr].filter(Boolean).join(', ');
+  const when = new Date(c.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + (c.time ? ` · ${c.time}${c.min ? '–' + addMin(c.time, c.min) : ''} Uhr` : '');
+  const g = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('⚽ ' + (c.title || 'Fußball'))}&dates=${T.a}/${T.b}${loc ? '&location=' + encodeURIComponent(loc) : ''}${c.lat != null ? '&details=' + encodeURIComponent('Route: ' + placeMapUrl({ lat: c.lat, lon: c.lon })) : ''}`;
+  return `<section class="block calpage"><h2>Termin</h2>
+    <div class="calcard"><b>⚽ ${esc(c.title || 'Fußball')}</b><span>${esc(when)}</span>${c.place ? `<span>📍 ${esc(c.place)}</span>` : ''}${!c.time ? '<span class="small muted">Ohne Uhrzeit – wird als ganztägiger Termin eingetragen.</span>' : ''}</div>
+    <div class="calbtns">
+      <button type="button" class="btn primary big" data-act="calIcs">📅 In den Kalender eintragen</button>
+      <a class="btn" href="${esc(g)}" target="_blank" rel="noopener">Google Kalender</a>
+      ${navigator.canShare ? '<button type="button" class="btn ghost" data-act="calShare">Termin als Datei teilen …</button>' : ''}</div>
+    <p class="small muted">Der Termin erinnert eine Stunde vorher${c.lat != null ? ' und enthält den Ort mit Karte' : ''}.</p>
+  </section>
+  <p class="small muted calfoot">Erstellt mit <a href="${esc(svBase() || location.pathname)}">Faire Teams</a>.</p>`;
+}
+function calRender() { document.body.classList.add('cal-mode'); const m = $('#main'); if (m) m.innerHTML = calPageHTML(); }
+function calStart() { try { ui.cal = calUnpack(location.hash.slice(4)); } catch (e) { ui.cal = null; } document.title = 'Termin – Faire Teams'; calRender(); }
 function calFromHash() {
   const m = location.hash.match(/^#ftk([0-9a-zA-Z-]+)/);
   if (!m) return;
@@ -4690,6 +4795,8 @@ var P10_ACTS = Object.assign(P10_ACTS || {}, {
   shrCopy: () => copyText(shareText(ui.shr.o), 'Teams kopiert – jetzt z. B. in WhatsApp einfügen.'),
   shrShare: async () => { try { await navigator.share({ text: shareText(ui.shr.o) }); } catch (e) { /* abgebrochen */ } },
   calClose: () => { ui.cal = null; render(); },
+  placeLight: el => { const pl = placeByName(el.dataset.v); if (!pl) return; remember('Flutlicht'); pl.light = true; render(); toast(`„${pl.name}“: Flutlicht vermerkt – kein Hinweis mehr zur Dunkelheit.`, { label: 'Rückgängig', act: 'undo' }); },
+  duskSet: el => { try { localStorage.setItem(DUSK_KEY, String(+el.dataset.v)); } catch (e) { /* egal */ } render(); },
   calIcs: () => {
     const blob = new Blob([calIcs(ui.cal)], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob);
     if (isIOS()) location.href = url;
@@ -5113,7 +5220,7 @@ const narrow = () => { try { return matchMedia('(max-width: 600px)').matches; } 
 const LOGO_SRC = (document.getElementById('appIcon') || {}).href || '';   // App-Logo (eingebettet im Favicon)
 function viewWelcome() {
   return `<section class="welcome">
-    <div class="welcome-hero" aria-hidden="true"><div class="welcome-pitch"><img src="${LOGO_SRC}" alt="" width="64" height="64"></div></div>
+    <div class="welcome-hero" aria-hidden="true"></div>
     <h2>Faire Teams für eure Runde</h2>
     <p class="lead">Schluss mit 10:1. Gleich starke Teams in Sekunden – gespeichert wird nur auf diesem Gerät.</p>
     <ol class="steps"><li>Namen eintragen, gern mit Stärke 1–10</li><li>Ankreuzen, wer da ist</li><li>„Faire Teams“ tippen</li></ol>
@@ -5190,7 +5297,7 @@ function rosterRow(p) {
       <div><button type="button" class="btn sm ghost" data-act="edit" data-id="${p.id}">Profil öffnen</button></div>
     </div>` : '';
   return `<li class="prow${on ? ' on' : ''}${maybe ? ' maybe' : ''}${ui.fxFlash === p.id ? ' flash' : ''}">
-    <button type="button" class="pcheck" role="checkbox" aria-checked="${maybe ? 'mixed' : on}" data-act="present" data-id="${p.id}"><span class="box" aria-hidden="true"></span><span class="pname">${esc(p.name || p.nick)}${p.nick && p.name ? ` <small>${esc(p.nick)}</small>` : ''}${badges}</span></button>
+    <button type="button" class="pcheck" role="checkbox" aria-checked="${maybe ? 'mixed' : on}" data-act="present" data-id="${p.id}"><span class="box" aria-hidden="true"></span><span class="pname"${p.nick && p.name ? ` title="${esc(p.name)}"` : ''}>${esc(disp(p))}${badges}</span></button>
     ${ui.dsort === 'games' ? `<span class="small muted num" title="in den letzten 12 Monaten">${plural(gamesCount12()[p.id] || 0, 'Spiel', 'Spiele')}</span>` : ''}
     <button type="button" class="maybetog${maybe ? ' on' : ''}" data-act="maybeTog" data-id="${p.id}" aria-pressed="${maybe}" title="${maybe ? 'vielleicht – nochmal antippen zum Entfernen' : 'als „vielleicht“ markieren (zählt nicht für die Teams)'}">?</button>
     ${stepper('qStr', fmtS(e.strength), `data-id="${p.id}"`, 'Stärke von ' + label(p))}
@@ -5211,7 +5318,7 @@ function viewDaySimple() {
   const stale = !ui.keepDate && (d.date < isoToday() || (curM && curM.status !== 'open' && curM.date === d.date));
   const dt = new Date(d.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
   const row = p => { const on = !!d.present[p.id], e = effOf(p), G = isGuest() ? guestRowHTML(p) : null; return `<li class="prow simple${on ? ' on' : ''}${ui.fxFlash === p.id ? ' flash' : ''}">
-    <button type="button" class="pcheck" role="checkbox" aria-checked="${on}" data-act="present" data-id="${p.id}"><span class="box" aria-hidden="true"></span><span class="pname">${esc(p.name || p.nick)}${G ? G.tags : p.roleMain === 'GK' ? tag('TW', 'gk', 'Torwart') : ''}</span></button>
+    <button type="button" class="pcheck" role="checkbox" aria-checked="${on}" data-act="present" data-id="${p.id}"><span class="box" aria-hidden="true"></span><span class="pname">${esc(disp(p))}${G ? G.tags : p.roleMain === 'GK' ? tag('TW', 'gk', 'Torwart') : ''}</span></button>
     ${G ? G.tool + G.opts : `<button type="button" class="sstr num" data-act="edit" data-id="${p.id}" title="Stärke – antippen zum Ändern" aria-label="Stärke von ${esc(label(p))}: ${fmtS(e.strength)}">${fmtS(e.strength)}</button>`}</li>`; };
   return `
   ${guestBannerHTML()}
@@ -5220,7 +5327,7 @@ function viewDaySimple() {
   ${stale ? `<div class="banner warn"><p>${curM && curM.status !== 'open' && curM.date === d.date ? 'Das Ergebnis dieses Spieltags ist eingetragen.' : `Der Spieltag steht noch auf <b>${dateShort(d.date).replace(/\.$/, '')}</b>.`}</p><button type="button" class="btn sm primary" data-act="newDay">Neuer Spieltag</button></div>` : ''}
   <section class="block">
     <div class="block-head"><h2>Wer spielt heute?</h2><span class="muted num">${n} von ${total}</span></div>
-    <div class="sdate"><button type="button" class="dpnav" data-act="dtShift" data-t="day" data-v="-1" aria-label="Einen Tag früher">‹</button><span>${esc(dt)} <span class="muted">· ${esc(relDay(d.date))}</span></span><button type="button" class="dpnav" data-act="dtShift" data-t="day" data-v="1" aria-label="Einen Tag später">›</button></div>
+    <div class="sdate"><button type="button" class="dpnav" data-act="dtShift" data-t="day" data-v="-1" aria-label="Einen Tag früher">‹</button><label class="sdpick"><span>${esc(dt)} <span class="muted">· ${esc(relDay(d.date))}</span></span><input type="date" class="dtover" data-ch="dayDate" value="${esc(d.date)}" aria-label="Datum wählen"></label><button type="button" class="dpnav" data-act="dtShift" data-t="day" data-v="1" aria-label="Einen Tag später">›</button></div>
     ${S.players.length > 12 ? `<input type="search" id="search" data-in="search" placeholder="Name suchen" value="${esc(ui.search)}" aria-label="Spieler suchen">` : ''}
     ${pool.length ? `<ul class="roster sroster">${pool.map(row).join('')}</ul>
       <div class="row small"><button type="button" class="linkbtn quiet" data-act="allOn">alle ankreuzen</button><button type="button" class="linkbtn quiet" data-act="allOff">keinen</button><span class="grow"></span>${isGuest() ? '' : '<span class="muted">Zahl = Stärke 1–10</span>'}</div>`
@@ -5252,7 +5359,7 @@ function viewDay() {
     role: (a, b) => ro[a.roleMain] - ro[b.roleMain] || effOf(b).strength - effOf(a).strength || sortByLabel(a, b),
     games: (a, b) => (games[b.id] || 0) - (games[a.id] || 0) || sortByLabel(a, b)
   };
-  const grp = p => (d.present[p.id] ? 0 : d.maybe[p.id] ? 1 : 2), srt = sorters[ui.dsort] || sorters.name;
+  const grp = p => (d.present[p.id] ? 0 : d.maybe[p.id] ? 1 : 2), srt = sorters[ui.dsort] || sorters.games;
   pool.sort((a, b) => (ui.presentTop ? grp(a) - grp(b) : 0) || srt(a, b));
   const maybeN = Object.keys(d.maybe || {}).filter(id => byId(id) && !d.present[id]).length;
   const pausedN = S.players.filter(p => p.status === 'paused').length, guestN = S.players.filter(p => p.status === 'guest').length;
@@ -5347,6 +5454,7 @@ function viewDay() {
       ${dateTimeHTML('day', d)}
       ${placeField('dayPlace', d.place, 'dayPlace', 'day')}
     </div>
+    ${daylightHTML()}
   </section>`;
 
   return `
@@ -5372,10 +5480,10 @@ function viewDay() {
     ${S.players.length ? `<div class="row dshow">
       ${pausedN ? `<button type="button" class="showchip${ui.showPaused ? ' on' : ''}" data-act="toggleList" data-k="showPaused" aria-pressed="${!!ui.showPaused}"><span class="tbox" aria-hidden="true"></span>Pausierte <span class="cnt">${pausedN}</span></button>` : ''}
       ${guestN ? `<button type="button" class="showchip${ui.showGuests ? ' on' : ''}" data-act="toggleList" data-k="showGuests" aria-pressed="${!!ui.showGuests}"><span class="tbox" aria-hidden="true"></span>Gäste <span class="cnt">${guestN}</span></button>` : ''}
-      <select id="dsortSel" class="psortsel dsortsel" data-ch="dsortSel" aria-label="Sortieren" title="Sortieren">${[['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele']].map(([v, l]) => `<option value="${v}"${(ui.dsort || 'name') === v ? ' selected' : ''}>↕ ${l}</option>`).join('')}</select></div>
+      <select id="dsortSel" class="psortsel dsortsel" data-ch="dsortSel" aria-label="Sortieren" title="Sortieren">${[['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele']].map(([v, l]) => `<option value="${v}"${(ui.dsort || 'games') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
     <div class="row dpick"><label class="minichk" title="Angekreuzte und „vielleicht“ zuerst"><input type="checkbox" data-ch="presentTop"${ui.presentTop ? ' checked' : ''}>Angekreuzte oben</label>
       <button type="button" class="btn sm dpall" data-act="allOn" title="Alle aktiven Spieler ankreuzen">✓ alle</button><button type="button" class="btn sm" data-act="allOff" title="Keinen ankreuzen">✕ keinen</button></div>
-    <input type="search" id="search" class="dsearchfull" data-in="search" placeholder="Name suchen (auch Pausierte und Gäste)" value="${esc(ui.search)}" aria-label="Spieler suchen">` : ''}
+    <input type="search" id="search" class="dsearchfull" data-in="search" placeholder="Name suchen" title="Findet auch Pausierte und Gäste" value="${esc(ui.search)}" aria-label="Spieler suchen">` : ''}
     ${!pool.length ? `<p class="hint">${q ? 'Niemand gefunden.' : 'Noch keine Spieler. Füge oben Namen ein.'}</p>`
       : ui.dsort === 'role' ? `${posBoard(pool, { toggle: true, hint: 'Antippen schaltet weiter: <b>dabei</b> (grün) → <b>vielleicht</b> (gelb) → nicht dabei. Für die Teams zählen nur die grünen. Tagesform und Rolle für heute: Sortierung „Name“ und dort ⋯.' })}`
       : `${dayExtras() ? `<div class="row"><span class="hint grow">Für heute gesetzt: Tagesform, Rollen, Pausen oder Fixierungen.</span><button type="button" class="btn sm ${ui.arm === 'day' ? 'danger armed' : 'ghost'}" data-act="resetDay">${ui.arm === 'day' ? 'Wirklich zurücksetzen?' : 'Alle Form-Daten zurücksetzen'}</button></div>` : ''}<div class="rosterbox${pool.length > 12 ? ' scrolly' : ''}" data-keep="roster"><ul class="roster">${pool.map(rosterRow).join('')}</ul></div><p class="hint">Die Zahl ist die Stärke 1–10 ${ib('strength')} · über ⋯ Tagesform, Rolle und Pausen für heute${pool.length > 12 ? ' · die Liste scrollt für sich' : ''}.</p>`}
@@ -6255,23 +6363,43 @@ function pitchPlace(L) {
   });
   return L.map((x, i) => ({ x, c: best[i] }));
 }
+/* Positionen auf dem Feld (x, y von 0 bis 1, Angriff oben). Je Linie feste, ausgewogene Plätze nach Anzahl:
+   1 Mitte · 2 halb links/rechts · 3 links–Mitte–rechts · 4 · 5. Die Spieler werden nach ihrer Seite aus dem Profil
+   (links → rechts) auf diese Plätze verteilt – zwei Außenstürmer stehen damit leicht innen, nicht ganz am Rand.
+   Leichte Tiefe: In der Abwehr rücken die Außen etwas auf, im Sturm stehen die Außen etwas tiefer; dazu die Position
+   aus dem Profil (z. B. 6er etwas tiefer als 10er, Libero hinter der Kette). Mehr als fünf in einer Linie: zwei Reihen. */
+const PITCH_Y = [0.15, 0.41, 0.67, 0.9], PITCH_X = { 1: [0.5], 2: [0.33, 0.67], 3: [0.19, 0.5, 0.81], 4: [0.13, 0.38, 0.62, 0.87], 5: [0.1, 0.3, 0.5, 0.7, 0.9] };
+const PITCH_PREF = { links: 0, halblinks: 0.25, innen: 0.5, halbrechts: 0.75, rechts: 1 }, PITCH_CURVE = [0.035, -0.02, -0.05, 0];
 function pitchLayout(entries) {
-  const lines = [[], [], [], []];
-  entries.forEach(x => lines[PITCH_LINE[x.r] ?? 1].push(x));
-  const rows = [];
+  const lines = [[], [], [], []], out = [];
+  entries.forEach((x, i) => lines[PITCH_LINE[x.r] ?? 1].push({ x, i }));
+  const place = (L, y0, li, depthOn) => {
+    const k = L.length, xs = PITCH_X[k] || PITCH_X[5];
+    // Zuordnung zu den Plätzen: kleinste Abweichung von der eigenen Seite (alle Möglichkeiten, höchstens 5! = 120)
+    const perms = a => a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map(r => [x, ...r]));
+    const cost = (z, x) => { const pf = PITCH_PREF[z.x.side]; return pf == null ? Math.abs(x - 0.5) * 0.1 : Math.min(0.5, Math.abs(pf - x)); };
+    let best = null, bc = Infinity;
+    perms(L.map((_, j) => j)).forEach(pm => { const c = pm.reduce((a, slot, j) => a + cost(L[j], xs[slot]), 0); if (c < bc - 1e-9) { bc = c; best = pm; } });
+    L.forEach((z, j0) => {
+      const x = xs[best[j0]], q = ((x - 0.5) / 0.4) ** 2;
+      const rr = SPORT.roleRow[z.x.r], dep = depthOn && isNum(z.x.depth) && isNum(rr) ? clamp(z.x.depth - rr, -1, 1) * 0.035 : 0;
+      out.push({ e: z.x, x, y: y0 + PITCH_CURVE[li] * q + dep, li });
+    });
+  };
   lines.forEach((L, li) => {
-    if (li === 3) { rows.push({ li, cells: L.map((x, i) => ({ x, c: [2, 1, 3, 0, 4][i % 5] })) }); return; }
-    if (L.length <= 5) { rows.push({ li, cells: pitchPlace(L) }); return; }
-    const S2 = L.slice().sort((a, b) => a.depth - b.depth), h = Math.ceil(S2.length / 2);
-    rows.push({ li, cells: pitchPlace(S2.slice(0, h)) }, { li, cells: pitchPlace(S2.slice(h)) });
+    if (!L.length) return;
+    if (li === 3) { L.forEach((z, j) => out.push({ e: z.x, x: 0.5 + (j ? (j % 2 ? 0.2 : -0.2) * Math.ceil(j / 2) : 0), y: PITCH_Y[3], li })); return; }
+    if (L.length <= 5) { place(L, PITCH_Y[li], li, true); return; }
+    const S2 = L.slice().sort((a, b) => (a.x.depth ?? 0) - (b.x.depth ?? 0)), h = Math.ceil(S2.length / 2);
+    place(S2.slice(0, h), PITCH_Y[li] - 0.065, li, false); place(S2.slice(h), PITCH_Y[li] + 0.065, li, false);
   });
-  return rows;
+  return out;
 }
 /* System wie „3-2-1“ (Abwehr–Mittelfeld–Angriff, ohne Torwart); leere Linien entfallen */
 const pitchSystem = entries => ['DEF', 'MID', 'ATT'].map(r => entries.filter(x => x.r === r).length).filter(Boolean).join('-');
 function pitchGrid(entries, label) {
-  const rows = pitchLayout(entries).map(R => `<div class="prow3${R.li === 3 ? ' gkrow' : ''}">${[0, 1, 2, 3, 4].map(c => `<div class="zone">${R.cells.filter(z => z.c === c).map(z => z.x.html).join('')}</div>`).join('')}</div>`).join('');
-  return `<div class="pitch" aria-label="Aufstellung, Angriff oben">${PITCH_LINES}${label ? `<span class="psys">${esc(label)}</span>` : ''}${rows}</div>`;
+  const spots = pitchLayout(entries).map(P => `<div class="pspot" style="left:${(P.x * 100).toFixed(1)}%;top:${(P.y * 100).toFixed(1)}%">${P.e.html}</div>`).join('');
+  return `<div class="pitch free" aria-label="Aufstellung, Angriff oben">${PITCH_LINES}${label ? `<span class="psys">${esc(label)}</span>` : ''}${spots}</div>`;
 }
 /* Einträge eines Teams fürs Spielfeld (auch fürs Bild) */
 function teamPitchEntries(M, det, t, ids) {
@@ -6345,7 +6473,7 @@ function teamCard(M, det, t, ids) {
     return `<li class="tp${sel.has(x.id) ? ' sel' : ''}" data-pid="${x.id}">
       ${X || x.r === 'GK' ? `<span class="rb${x.r === 'GK' ? ' gk' : ''}${x.off ? ' off' : ''}${x.loose ? ' loose' : ''}" data-drag="${x.id}" data-act="tip" title="${esc(title)}${(() => { const c = findPosCode(p.posCode); return c && c.main === x.r ? ` (${c.label})` : ''; })()} Zum Verschieben ziehen.">${roleShort(x.r)}</span>` : `<span class="rb plain" data-drag="${x.id}" title="Zum Verschieben ziehen" aria-hidden="true">${ICON.grip}</span>`}
       <button type="button" class="nm" data-act="pick" data-id="${x.id}" aria-pressed="${sel.has(x.id)}">${esc(disp(p))}${tags}</button>
-      <span class="sv num" data-act="tip" title="${x.r === 'GK' ? 'Torwartwert' : `Stärke ${fmtV(M.base[x.i])} · heute ${fmt(x.val, 1)}: ${[Math.abs(M.shift[x.i]) >= 0.005 ? `Platz/Bedingungen ${M.shift[x.i] > 0 ? '+' : '−'}${fmt(Math.abs(M.shift[x.i]), 2)}` : 'Platz ohne Wirkung (keine Fähigkeiten bewertet oder keine Angaben)', fp ? `Tagesform ${signed(fp)} %` : '', x.fitPct < 0.999 ? `Position ${pctTxt(x.fitPct)}` : ''].filter(Boolean).join(', ')}`}">${x.r !== 'GK' && Math.abs(M.base[x.i] - x.val) >= SHOW_SHIFT ? `<small class="muted">${fmtV(M.base[x.i])} → </small>` : ''}${X ? fmt(x.val, 1) : fmtS(x.val)}</span>
+      <span class="sv num" data-act="tip" title="${x.r === 'GK' ? 'Torwartwert' : `Stärke ${fmtV(M.base[x.i])} · heute ${fmt(x.val, 1)}: ${[Math.abs(M.shift[x.i]) >= 0.005 ? `Platz/Bedingungen ${M.shift[x.i] > 0 ? '+' : '−'}${fmt(Math.abs(M.shift[x.i]), 2)}` : 'Platz ohne Wirkung (keine Fähigkeiten bewertet oder keine Angaben)', fp ? `Tagesform ${signed(fp)} %` : '', x.fitPct < 0.999 ? `Position ${pctTxt(x.fitPct)}` : ''].filter(Boolean).join(', ')}`}">${x.r !== 'GK' && shiftShown(M.base[x.i], x.val) ? `<small class="muted">${fmtV(M.base[x.i])} → </small>` : ''}${X ? fmt(x.val, 1) : fmtS(x.val)}</span>
       ${X ? `<button type="button" class="mini${pinned ? ' on' : ''}" data-act="pin" data-id="${x.id}" data-t="${t}" aria-label="${pinned ? 'Fixierung lösen' : 'In diesem Team fixieren'}" title="${pinned ? 'Fixierung lösen' : 'Fixieren: bleibt bei „Neu berechnen“ in diesem Team'}">${ICON.pin}</button>` : ''}
       <button type="button" class="mini" data-act="drop" data-id="${x.id}" aria-label="${esc(disp(p))} fällt aus" title="fällt aus">${ICON.out}</button>
     </li>`;
@@ -6932,7 +7060,9 @@ function viewSettings() {
     <div class="row"><span class="grow">Bereiche nach 3 Minuten wieder zuklappen <span class="small muted">– wer länger nicht da war, findet alles aufgeräumt vor</span></span>${sw('collapseTog', S.settings.collapse !== false, '', 'Bereiche automatisch zuklappen')}</div>
     <div class="field"><span class="lbl">Farben</span>${seg('theme', [['auto', '🖥️ wie das Gerät'], ['light', '☀️ hell'], ['dark', '🌙 dunkel']], getTheme())}
       <span class="small muted">Gilt für dieses Gerät und alle Projekte.</span></div>
-    ${helpField()}`, `${X ? 'Erweitert' : 'Einfach'} · ${({ auto: 'Farben wie das Gerät', light: 'hell', dark: 'dunkel' })[getTheme()]}`)}
+    ${helpField()}
+    ${bgField()}
+    <div class="field"><span class="lbl">Draußen noch spielbar nach Sonnenuntergang</span>${seg('duskSet', [[0, '0'], [10, '10'], [20, '20'], [30, '30'], [45, '45 Min.']], duskMin())}<span class="small muted">Für den Hinweis am Spieltag, wenn das Spiel ins Dunkle geht. Orte mit Flutlicht sind ausgenommen.</span></div>`, `${X ? 'Erweitert' : 'Einfach'} · ${({ auto: 'Farben wie das Gerät', light: 'hell', dark: 'dunkel' })[getTheme()]}`)}
   ${X ? `
   ${rvBlock('stMe', false, '🙋 Ich', '', '', `<div class="field"><label class="lbl" for="meSel">Welcher Spieler bist du?</label><select id="meSel" data-ch="meSel"><option value="">– noch nicht festgelegt –</option>${S.players.slice().sort(sortByLabel).map(p => `<option value="${p.id}"${S.me === p.id ? ' selected' : ''}>${esc(label(p))}</option>`).join('')}</select>
     <span class="small muted">Beim Einlesen von Screenshots steht man selbst als „Du“ oder gar nicht in der Liste – so ordnet die App dich trotzdem richtig zu.</span></div>`, S.me && byId(S.me) ? esc(label(byId(S.me))) : 'noch nicht festgelegt')}
@@ -8674,7 +8804,7 @@ function resultSheetHTML0() {
   const P = m.pred, mk = Object.fromEntries(d.marks.map(x => [x.id, x.d]));
   const perf = d.teams.map((t, i) => `<div class="perfteam">${teamChip(i)}<ul class="perf">${t.map(id => {
     const v = P && P.fv && isNum(P.fv[id]) ? P.fv[id] : P && isNum(P.val[id]) ? P.val[id] : null, b = P && isNum(P.s[id]) ? P.s[id] : null;
-    return `<li><span class="grow">${esc(matchName(m, id))} <span class="small muted num" title="Stärke ${b != null ? fmtV(b) : '–'}; Wert an diesem Tag mit Tagesform, Platz und Position: ${v != null ? fmt(v, 1) : '–'}">${b != null && v != null && Math.abs(v - b) >= SHOW_SHIFT ? `${fmtV(b)} → ${fmt(v, 1)}` : v != null ? fmt(v, 1) : ''}</span></span>
+    return `<li><span class="grow">${esc(matchName(m, id))} <span class="small muted num" title="Stärke ${b != null ? fmtV(b) : '–'}; Wert an diesem Tag mit Tagesform, Platz und Position: ${v != null ? fmt(v, 1) : '–'}">${b != null && v != null && shiftShown(v, b) ? `${fmtV(b)} → ${fmt(v, 1)}` : v != null ? fmt(v, 1) : ''}</span></span>
       ${seg('resPerf', [[-1, 'schlechter'], [0, '–'], [1, 'besser']], mk[id] || 0, `data-id="${id}"`)}</li>`;
   }).join('')}</ul></div>`).join('');
   // Tagesangaben der Runde – alles, was am Spieltag einstellbar ist, nachträglich korrigierbar.
@@ -9269,9 +9399,14 @@ const A = {
   qStr: el => {
     const p = byId(el.dataset.id), e = effOf(p);
     if (e.auto) { remember('Stärke von Hand gesetzt'); p.autoStrength = false; toast(`${disp(p)}: Stärke ist jetzt von Hand gesetzt statt aus Fähigkeiten berechnet.`, { label: 'Rückgängig', act: 'undo' }); }
+    // Mehrere Tipper hintereinander beim selben Spieler: ein gemeinsames Rückgängig
+    const now = Date.now();
+    if (!e.auto && !(ui._qs && ui._qs.id === p.id && now - ui._qs.at < 5000 && ui.undo)) remember('Stärke geändert');
+    ui._qs = { id: p.id, at: now };
     p.strength = clamp(Math.round(e.strength * 2) / 2 + 0.5 * el.dataset.d, 1, 10);
     markRated(p);
     render();
+    if (!e.auto) toast(`${disp(p)}: Stärke ${fmtS(p.strength)}`, { label: 'Rückgängig', act: 'undo' });
   },
   maybeTog: el => {
     const id = el.dataset.id; if (!byId(id)) return;
@@ -9508,7 +9643,7 @@ const A = {
     toast(`Übernommen vom ${dateShort(m.date)}: ${ids.length} Spieler, Ort, Uhrzeit und Platz. Bitte prüfen.`, { label: 'Rückgängig', act: 'undo' });
     render();
   },
-  timePick: el => { const t = +el.dataset.t, g = +el.dataset.g; S.day.gameMin = g || null; setMinutes('day', t || null); },
+  timePick: el => { const t = +el.dataset.t, g = +el.dataset.g; if ((S.day.minutes || 0) === t && (S.day.gameMin || 0) === g) { S.day.gameMin = null; setMinutes('day', null); return; } S.day.gameMin = g || null; setMinutes('day', t || null); },
   calcApply: el => { const t = el.dataset.t, R = t === 'res' ? ui.res && ui.res.d : S.day, v = +el.dataset.v; if (!R || !(v > 0)) return; R.gameMin = v; if (t === 'res') ui.res.metaOpen = true; render(); toast(`Spielzeit pro Spiel: ${v} Min.`); },
   cfgPick: el => {
     const d = S.day, f = el.dataset.f, c = +el.dataset.c;
@@ -10425,6 +10560,7 @@ let rendering = false, renderAgain = false, soonT = 0;
 function renderSoon() { clearTimeout(soonT); soonT = setTimeout(render, 160); }
 function render() {
   if (SV_MODE) { svRender(); return; }
+  if (CAL_MODE) { calRender(); return; }
   if (rendering) { renderAgain = true; return; }
   rendering = true;
   try { renderNow(); let n = 0; while (renderAgain && n++ < 5) { renderAgain = false; renderNow(); } } finally { rendering = false; }
@@ -10533,6 +10669,7 @@ function renderNow() {
   $('#projBtn').title = 'Projekt: ' + (pr ? pr.name : '') + ' – wechseln oder neu anlegen';
   document.body.classList.toggle('is-expert', expert());
   document.body.classList.toggle('is-guest', isGuest());
+  document.body.classList.toggle('has-bg', bgOn());
 
   const sheet = $('#sheet');
   if (ui.editId && !byId(ui.editId)) ui.editId = null;
@@ -10881,7 +11018,7 @@ function cleanSurveys(list) {
       const x = { who: r.who, name: str(r.name).slice(0, 60) || '?', at: isNum(r.at) ? +r.at : Date.now(), self: cv(r.self), vals: Array.from({ length: n }, (_, k) => cv(Array.isArray(r.vals) ? r.vals[k] : null)), on: r.on !== false, code: str(r.code).slice(0, 600) };
       const o = byWho.get(x.who); if (!o || x.at >= o.at) byWho.set(x.who, x);   // je Befragtem nur die neueste Antwort
     });
-    return { id: v.id, created: isNum(v.created) ? +v.created : Date.now(), title: str(v.title).slice(0, 60), text: str(v.text).slice(0, SV_MAX_TEXT), players, opt: { adj: !(v.opt && v.opt.adj === false), scale: !(v.opt && v.opt.scale === false) }, responses: [...byWho.values()] };
+    return { id: v.id, created: isNum(v.created) ? +v.created : Date.now(), title: str(v.title).slice(0, 60), text: str(v.text).slice(0, SV_MAX_TEXT), players, opt: { adj: !(v.opt && v.opt.adj === false), scale: !(v.opt && v.opt.scale === false) }, responses: [...byWho.values()], ...(v.fix && isNum(v.fix.a) && isNum(v.fix.b) ? { fix: { a: +v.fix.a, b: +v.fix.b } } : {}) };
   }).filter(Boolean).slice(-20);
 }
 /* Adresse der App für den Link: online die aktuelle Seite, als Datei geöffnet die hinterlegte Online-Adresse */
@@ -11015,7 +11152,10 @@ function svEval(sv, ownOf, meWho) {
   R.forEach(r => { if (r.who[0] === 'p' && r.self != null) { const row = rows[parseInt(r.who.slice(1), 36)]; if (row) row.self = r.self; } });
   // Auf deine Skala: über Spieler mit Gruppenwert und eigener Bewertung
   let a = 1, b = 0, scaled = false;
-  if (sv.opt.scale && ownOf) {
+  // Nach der ersten Übernahme bleibt die Skala fest: sonst verschöben die übernommenen Werte die Umrechnung
+  // ein wenig, und es stünde gleich wieder „3,8 → 3,7“ da
+  if (sv.opt.scale && sv.fix) { a = sv.fix.a; b = sv.fix.b; scaled = true; }
+  else if (sv.opt.scale && ownOf) {
     const pairs = rows.filter(x => x.n).map(x => [x.raw, ownOf(x.id)]).filter(x => isNum(x[1]));
     if (pairs.length >= 4) {
       const mG = pairs.reduce((s, x) => s + x[0], 0) / pairs.length, mO = pairs.reduce((s, x) => s + x[1], 0) / pairs.length;
@@ -11025,7 +11165,7 @@ function svEval(sv, ownOf, meWho) {
   }
   const map = v => clamp(a * v + b, 1, 10);
   rows.forEach(x => { if (x.n) { x.val = map(x.raw); x.dots = x.xs.map(map); if (x.mine != null) x.mine = map(x.mine); Object.assign(x, svSpread(x.dots)); } });
-  return { rows, off, R, scaled, nResp: R.length };
+  return { rows, off, R, scaled, nResp: R.length, a, b };
 }
 
 /* ============================================================
@@ -11033,6 +11173,7 @@ function svEval(sv, ownOf, meWho) {
    Läuft, wenn die Adresse #survey= enthält: keine Projekte, keine Navigation, nichts wird in die Projektdaten
    dieses Geräts geschrieben. Nur der Entwurf liegt unter einem eigenen Schlüssel.
    ============================================================ */
+var CAL_MODE = /^#ftk[0-9a-z]{7}[gh]/.test(location.hash);   // Kalender-Link: nur die Termin-Seite
 var SV_MODE = /^#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(location.hash);   // var: render() darf schon vorher aufgerufen werden
 const SVP = { data: null, d: null, err: '', arm: false, order: null, dirty: false, copied: false };
 function svDecodeHash() {
@@ -11438,6 +11579,7 @@ Object.assign(A, {
     const todo = E.rows.filter(x => P[x.id] && x.n && byId(x.id)), C = ui.svy.conf || {}, cIds = Object.keys(C).filter(id => byId(id));
     if (!todo.length && !cIds.length) return;
     remember('Werte aus der Umfrage übernommen');
+    if (sv.opt.scale && E.scaled && !sv.fix) sv.fix = { a: E.a, b: E.b };
     const miss = [];
     todo.forEach(x => {
       const own = svOwn(x.id), v = P[x.id] === 'grp' ? svR1(x.val) : svR1(isNum(own) ? (own + x.val) / 2 : x.val);
@@ -11462,7 +11604,7 @@ Object.assign(IN, {
   svPaste: el => { ui.svy.paste = el.value; const b = document.querySelector('[data-act="svRead"]'); if (b) b.disabled = !str(el.value); }
 });
 // Wird ein Umfrage-Link im selben Tab geöffnet (oder verlassen), neu laden – Umfrage und App laufen getrennt
-window.addEventListener('hashchange', e => { const was = /#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(e.oldURL || ''), now = SV_HASH.test(location.hash) || /^#ft[gk][A-Za-z0-9-]/.test(location.hash); if (was || now) location.reload(); });
+window.addEventListener('hashchange', e => { const was = /#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-]|ftk[0-9a-z])/.test(e.oldURL || ''), now = SV_HASH.test(location.hash) || /^#ft[gk][A-Za-z0-9-]/.test(location.hash); if (was || now) location.reload(); });
 
 /* Notausgang: Ist der Link in WhatsApp nicht vollständig antippbar, öffnet sich nur die Startseite.
    Dort lässt sich die ganze Nachricht einfügen; der Link wird herausgesucht und die Umfrage geöffnet. */
@@ -11795,6 +11937,10 @@ Object.assign(IN, {
    Ausgeblendet werden Hinweise (.hint, Listen mit Erklärungen) und längere graue Erklärsätze. Was Knöpfe oder Felder
    enthält, Statusmeldungen („Noch …“, „✓“) und kurze Angaben (Zahlen, Daten) bleiben. Die (i)-Knöpfe bleiben immer. */
 const HELP_KEY = 'ft-help';
+const BG_KEY = 'ft-bg';
+function bgOn() { try { return localStorage.getItem(BG_KEY) !== 'off'; } catch (e) { return true; } }
+const bgField = () => `<div class="field"><span class="lbl">Stadionbild im Hintergrund</span>${seg('bgSet', [['on', 'zeigen'], ['off', 'aus']], bgOn() ? 'on' : 'off')}<span class="small muted">Dezent hinter den Bereichen. Das Bild lädt aus dem Internet; ohne Verbindung bleibt der Hintergrund einfarbig.</span></div>`;
+Object.assign(A, { bgSet: el => { try { localStorage.setItem(BG_KEY, el.dataset.v === 'off' ? 'off' : 'on'); } catch (e) { /* privat */ } render(); } });
 function helpOff() { try { return localStorage.getItem(HELP_KEY) !== 'on'; } catch (e) { return true; } }
 function tidyHelp() {
   const off = helpOff() && !SV_MODE;
@@ -11840,6 +11986,7 @@ Object.assign(A, { impOpt: el => { const o = ui.impOpt || (ui.impOpt = {}); o[el
 
 Object.assign(A, P10_ACTS);
 if (SV_MODE) svStart();
+else if (CAL_MODE) calStart();
 else {
   load();
   linkCurrentTeams();
