@@ -1221,13 +1221,21 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svrmid { display: flex; align-items: center; gap: 12px; }
 .svnums { flex: none; font-variant-numeric: tabular-nums; font-size: .95rem; white-space: nowrap; }
 .svnums b { color: var(--turf); font-size: 1.05rem; }
-.svline { position: relative; flex: 1; height: 22px; min-width: 120px; }
-.svline i { position: absolute; top: 50%; transform: translate(-50%, -50%); }
-.svline .axis { left: 0; right: 0; transform: translateY(-50%); height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--line), var(--line)); }
-.svline .dot { width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 65%, transparent); }
-.svline .grp { width: 4px; height: 18px; border-radius: 2px; background: var(--turf); z-index: 2; }
-.svline .own { width: 13px; height: 13px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--surface); z-index: 3; }
-.svline .new { width: 11px; height: 11px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 30%, transparent); z-index: 4; }
+.svline { position: relative; flex: 1; min-width: 120px; display: block; }
+.svline i, .svline b { position: absolute; transform: translateX(-50%); }
+.svline .axis { left: 0; right: 0; bottom: 15px; transform: none; height: 2px; border-radius: 2px; background: var(--line); }
+.svline .dot { width: 7px; height: 7px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 75%, transparent); }
+.svline .dotn { font-size: .62rem; font-weight: 750; color: var(--muted); line-height: 1; }
+.svline .grp { bottom: 0; width: 4px; height: 13px; border-radius: 2px; background: var(--turf); z-index: 2; }
+.svline .own { bottom: 1px; width: 11px; height: 11px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--surface); z-index: 3; }
+.svline .new { bottom: 2px; width: 9px; height: 9px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 30%, transparent); z-index: 4; }
+.svrmid { align-items: flex-end; }
+.svconf { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.svctl { gap: 8px; }
+.svctl .lbl { min-width: 5.5em; }
+.svbulk { display: grid; gap: 8px; }
+.svbulk .row > .small.grow { flex: 1 1 100%; }
+.svbulk .row { gap: 6px; }
 .svd { font-size: .8rem; font-weight: 750; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-variant-numeric: tabular-nums; }
 .svd.big { background: color-mix(in srgb, var(--warn) 18%, var(--surface)); color: var(--warn); }
 .svd.ok { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); }
@@ -1242,6 +1250,21 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svgot > summary { cursor: pointer; font-weight: 650; font-size: .92rem; }
 .svgot[open] { display: grid; gap: 8px; }
 .svgot p { margin: 0; }
+
+/* <details> wird nicht überall als Raster dargestellt – daher feste Abstände */
+.svsec > summary { margin-bottom: 12px !important; }
+.svsec .svlinkbox { margin: 0 0 14px; }
+.svsec > .row { margin: 0 0 12px; }
+.svsec > p { margin: 0 0 8px; }
+.svlinkbox input { min-height: 42px; }
+
+/* ---------- Gast-Projekt: keine Einzelwerte zeigen ---------- */
+body.is-guest .tp .sv, body.is-guest .team-head .tval { display: none !important; }
+.guestban { border-color: color-mix(in srgb, var(--turf) 40%, var(--line)); background: var(--turf-soft); }
+.guestban p { flex: 1 1 220px; }
+.lamp.masked { background: var(--surface-2); color: var(--muted); }
+.gcode { max-height: 160px; overflow: auto; }
+body.no-help .xhelp { display: none !important; }
 </style>
 </head>
 <body>
@@ -3127,7 +3150,7 @@ function defaultDay(date) {
   };
 }
 function defaultState() {
-  return { app: 'team-generator', version: DATA_VERSION, name: '', me: null, sample: false, welcomed: false, players: [], rules: [], tags: { presets: SPORT.tagPresets.slice(), off: [] }, places: [], settings: defaultSettings(), day: defaultDay(), result: null, matches: [], recs: [], log: [], surveys: [] };
+  return { app: 'team-generator', version: DATA_VERSION, name: '', me: null, sample: false, welcomed: false, players: [], rules: [], tags: { presets: SPORT.tagPresets.slice(), off: [] }, places: [], settings: defaultSettings(), day: defaultDay(), result: null, matches: [], recs: [], log: [], surveys: [], share: { by: '', gid: '', list: [] }, guest: null };
 }
 /* Ein Spieltag: Teams, Schnappschuss der Bewertungen, Vorhersage, Ergebnis und Einschätzung.
    status: open = Teams gebildet, Ergebnis fehlt · done = erfasst · skipped = übersprungen ·
@@ -3301,6 +3324,9 @@ function cleanState(raw) {
 
   // Umfragen: Spielerliste zum Zeitpunkt der Umfrage und die Antworten (Werte zu später gelöschten Spielern bleiben)
   s.surveys = cleanSurveys(raw.surveys);
+  // Gast-Link: verschickte Links (beim Organisator) bzw. Herkunft eines Gast-Projekts (beim Empfänger)
+  s.share = cleanShare(raw.share);
+  s.guest = cleanGuestMeta(raw.guest);
   // Aktuelle Teams: jeder bekannte Spieler höchstens einmal, kein Team leer
   const validTeams = teams => { const c = cleanTeams(teams, id => ids.has(id)); return c && c.length === teams.length && c.flat().length === teams.flat().length ? c : null; };
   const R = raw.result;
@@ -3635,7 +3661,7 @@ function openProject(id) {
   try { S = raw ? cleanState(JSON.parse(raw)) : defaultState(); }
   catch (e) { ui.loadError = { raw, key: PROJ_KEY(id), msg: e && e.message ? e.message : 'unbekannter Fehler' }; ui.noSave = true; S = defaultState(); }
   if (!S.name) S.name = pr.name;
-  Object.assign(ui, { svy: null, tab: 'day', editId: null, newId: null, res: null, pa: null, mb: null, sel: [], dups: [], undo: null, importPreview: null, arm: null, shot: null, proj: null, search: '', psearch: '' });
+  Object.assign(ui, { svy: null, gshare: null, gsend: null, tab: 'day', editId: null, newId: null, res: null, pa: null, mb: null, sel: [], dups: [], undo: null, importPreview: null, arm: null, shot: null, proj: null, search: '', psearch: '' });
   anaCache = null; predCache.clear();
   return true;
 }
@@ -3689,13 +3715,13 @@ let STD_SET = null;
 const STD = () => STD_SET || (STD_SET = defaultSettings());
 const SET = () => (expert() ? S.settings : STD());
 const simpleDay = d => ({ ...d, ctx: { ...SPORT.defaultCtx }, adjust: {}, form: {}, roleToday: {}, pause: {}, gkShare: {}, pins: {}, rulesOff: {}, format: 'all', cap: 0, maxDiff: 1, gkRule: '' });
-const DAY = () => (expert() ? S.day : simpleDay(S.day));
+const DAY = () => (expert() ? S.day : isGuest() ? { ...simpleDay(S.day), form: S.day.form, roleToday: S.day.roleToday, gkRule: S.day.gkRule } : simpleDay(S.day));
 /* Die Stärke ist die beste vorhandene Zahl: Wer im erweiterten Modus Fähigkeiten bewertet hat, zählt auch hier mit der
    daraus berechneten Stärke – so zeigen beide Modi für denselben Spieler denselben Wert. */
 const bestStrength = p => { const f = Engine.effective(p, SPORT, S.settings.attrW, S.settings.autoStrength); return { v: f.auto ? Math.round(f.strength * 10) / 10 : p.strength, auto: f.auto, rated: p.rated || (f.auto && f.given >= 4) }; };
 const simplePlayer = p => { if (p.__simple) return p; const b = bestStrength(p); return simplePlayerWith(p, b); };
 const simplePlayerWith = (p, b) => ({ ...p, __simple: true, strength: b.v, rated: b.rated, attrs: {}, gk: p.roleMain === 'GK' && isNum(b.v) ? clamp(+b.v, 1, 10) : null, autoStrength: false, roleMain: p.roleMain === 'GK' ? 'GK' : 'FLEX', roleSub: '', side: '', posCode: '', posFit: {}, gkWill: p.roleMain === 'GK' ? 'likes' : 'emergency', tags: [], conf: null, isNew: false, status: p.status === 'guest' ? 'active' : p.status });
-const PV = p => (p && !expert() ? simplePlayer(p) : p);
+const PV = p => (p && !expert() ? (isGuest() ? guestPV(p) : simplePlayer(p)) : p);
 const effOf = p => { const st = SET(); return Engine.effective(PV(p), SPORT, st.attrW, st.autoStrength); };
 /* Wie sicher ist die Einschätzung? Im Profil einstellbar; ohne Angabe ergibt sie sich aus Status,
    „neu“ und ob die Stärke schon eingeschätzt wurde. sd = Unsicherheit für die Teamstärke,
@@ -3951,7 +3977,7 @@ function fieldPlayersPerTeam(d) {
   return Math.max(1, (cap > 0 ? Math.min(cap, per) : per) - 1);
 }
 const mixFor = d => ({ ...SET().mixBy[mixKey(fieldPlayersPerTeam(d))] });
-const gkRuleOf = d => (expert() && d.gkRule) || SET().gkRule;
+const gkRuleOf = d => ((expert() || isGuest()) && d.gkRule) || SET().gkRule;
 /* ---------- Grundlage der Teamstärke (Einstellung, nur erweiterter Modus) ----------
    'rating' = nur eure Bewertungen · 'mix' = Schätzung aus Bewertung und Ergebnissen (Standard) · 'data' = nur aus Ergebnissen
    (alle starten beim Gruppenschnitt; wer noch nicht gespielt hat, behält seine Bewertung).
@@ -3986,7 +4012,7 @@ function buildInput() {
   return {
     T: d.T, cap: capOf(d), maxDiff: d.maxDiff, players,
     ctx: d.ctx, adjust: d.adjust, profiles: st.profiles, form: d.form, roleToday: d.roleToday, pause: d.pause, gkShare: d.gkShare, pins: d.pins,
-    rules: expert() ? activeRules() : [], tagsOff: S.tags.off, history: historyFor(d.date),
+    rules: expert() || isGuest() ? activeRules() : [], tagsOff: S.tags.off, history: historyFor(d.date),
     w: st.w, team: st.team, attrW: st.attrW, fit: st.fit, mix: mixFor(d), posMin: st.posMin, forms: st.forms, gkRule: gkRuleOf(d)
   };
 }
@@ -4371,7 +4397,7 @@ function projectExport(st, kind) {
     D.players.forEach(p => { Object.assign(p, { strength: 5, rated: false, attrs: {}, gk: null, autoStrength: null, posFit: {}, conf: null, star: false }); });
     D.matches.forEach(m => { if (m.snap) Object.values(m.snap.pl).forEach(q => { Object.assign(q, { s: 5, a: {}, g: null, au: null, pf: {}, rt: false, cf: null }); }); m.fb.marks = []; });
   };
-  if (kind !== 'project' && kind !== 'all') { D.recs = []; D.log = []; D.day = defaultDay(); D.result = null; D.me = null; D.surveys = []; }
+  if (kind !== 'project' && kind !== 'all') { D.recs = []; D.log = []; D.day = defaultDay(); D.result = null; D.me = null; D.surveys = []; D.share = { by: '', gid: '', list: [] }; }
   if (kind === 'shareR' || kind === 'share') {
     // Persönliches bleibt hier: Notizen, Telefon, Geburtsdatum, Spielerfotos, Regelgründe, eigene Reglerwerte
     D.players.forEach(p => { Object.assign(p, { note: '', phone: '', birth: '', photo: '', aliases: [] }); });
@@ -4606,8 +4632,7 @@ const srcIcon = k => { const s = SRC[k] || SRC.rating; return `<span class="srci
 /* ---------- Erklärungen (i-Knopf) ---------- */
 const ciPct = () => pctTxt(SET().ci || 0.8);   // eingestellter Unsicherheitsbereich, für die Erklärtexte
 const INFO = {
-  svAdj: () => 'Manche bewerten alle eher hoch, andere eher niedrig. Die App vergleicht jeden Bewerter mit den anderen – über die Spieler, die beide eingeschätzt haben – und verschiebt seine Werte um den typischen Unterschied. So verzerrt es nichts, wenn jemand nur die Starken oder nur die Schwachen bewertet hat. Gestreckt wird nichts, die Reihenfolge jedes Bewerters bleibt.',
-  svScale: () => 'Die Gruppenwerte werden so verschoben und gestreckt, dass ihr Durchschnitt und ihre Streuung zu deinen bisherigen Bewertungen passen. Die Gruppe bestimmt dann Reihenfolge und Abstände, deine gewohnte Skala bleibt – so ändern sich die Teamstärken nicht insgesamt. Aus: die Werte der Gruppe, wie abgegeben.',
+  svAdj: () => 'Zwei Schritte in einem: 1. Strenge ausgleichen – wer alle eher hoch oder eher niedrig bewertet, wird an die anderen angeglichen; so verzerrt es nichts, wenn jemand nur einen Teil der Spieler bewertet hat. 2. Auf deine Skala – die Gruppenwerte werden so verschoben und gestreckt, dass Durchschnitt und Streuung zu deinen bisherigen Bewertungen passen. Die Gruppe bestimmt Reihenfolge und Abstände, das Niveau deiner Teams bleibt. Aus: der reine Median der Stimmen, wie abgegeben.',
   howCmp: () => `Jede Runde merkt sich, wie ihre Teams entstanden sind: von der App fair berechnet, per Zufall, selbst eingeteilt oder von Kapitänen gewählt. Das wird automatisch übernommen; ändern und den Wähler eintragen kannst du im Ergebnis der Runde. Verglichen wird, wie knapp die Spiele ausgingen: Je kleiner der Tor-Unterschied und je näher der Anteil des Siegers an 50 %, desto ausgeglichener waren die Teams. Das ist beschreibend – an verschiedenen Tagen spielen verschiedene Leute, und mit wenigen Spielen entscheidet der Zufall viel.`,
   dayTime: () => 'Die Spielzeit gesamt zählt für die Kondition (kurz, mittel, lang); Spielfluss und Zuschauer können je nach Einstellungen einzelne Fähigkeiten stärker gewichten. Die Spielzeit pro Spiel ändert die Teams nicht – sie wird beim Ergebnis als Dauer jedes Spiels vorbelegt und für die Prognose genutzt. Beim Ergebnis lassen sich die echten Minuten je Spiel eintragen.',
   teamsHelp: () => `Spieler antippen zum Auswählen (auch mehrere), dann unten tauschen oder in ein anderes Team schieben. Oder direkt ziehen – ${ui.tview === 'pitch' ? 'am Kreis mit der Stärke' : 'am Kürzel'} – auf ein Team oder auf einen Spieler zum Tauschen. Zahlen wie „17 : 67 : 17“ = Anteil der Spielzeit im Tor : im Feld : auf der Bank (in %). „5,3 → 4,9“ = Stärke → Wert heute mit Platz, Tagesform und Position.`,
@@ -4783,10 +4808,11 @@ function viewDaySimple() {
   const curM = S.result && matchById(S.result.mid);
   const stale = !ui.keepDate && (d.date < isoToday() || (curM && curM.status !== 'open' && curM.date === d.date));
   const dt = new Date(d.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
-  const row = p => { const on = !!d.present[p.id], e = effOf(p); return `<li class="prow simple${on ? ' on' : ''}${ui.fxFlash === p.id ? ' flash' : ''}">
-    <button type="button" class="pcheck" role="checkbox" aria-checked="${on}" data-act="present" data-id="${p.id}"><span class="box" aria-hidden="true"></span><span class="pname">${esc(p.name || p.nick)}${p.roleMain === 'GK' ? tag('TW', 'gk', 'Torwart') : ''}</span></button>
-    <button type="button" class="sstr num" data-act="edit" data-id="${p.id}" title="Stärke – antippen zum Ändern" aria-label="Stärke von ${esc(label(p))}: ${fmtS(e.strength)}">${fmtS(e.strength)}</button></li>`; };
+  const row = p => { const on = !!d.present[p.id], e = effOf(p), G = isGuest() ? guestRowHTML(p) : null; return `<li class="prow simple${on ? ' on' : ''}${ui.fxFlash === p.id ? ' flash' : ''}">
+    <button type="button" class="pcheck" role="checkbox" aria-checked="${on}" data-act="present" data-id="${p.id}"><span class="box" aria-hidden="true"></span><span class="pname">${esc(p.name || p.nick)}${G ? G.tags : p.roleMain === 'GK' ? tag('TW', 'gk', 'Torwart') : ''}</span></button>
+    ${G ? G.tool + G.opts : `<button type="button" class="sstr num" data-act="edit" data-id="${p.id}" title="Stärke – antippen zum Ändern" aria-label="Stärke von ${esc(label(p))}: ${fmtS(e.strength)}">${fmtS(e.strength)}</button>`}</li>`; };
   return `
+  ${guestBannerHTML()}
   ${resultReminder()}
   ${S.sample ? `<div class="banner"><p>Das ist eine <b>Beispielgruppe</b>.</p><button type="button" class="btn sm" data-act="sampleRemove">Löschen und eigene anlegen</button></div>` : ''}
   ${stale ? `<div class="banner warn"><p>${curM && curM.status !== 'open' && curM.date === d.date ? 'Das Ergebnis dieses Spieltags ist eingetragen.' : `Der Spieltag steht noch auf <b>${dateShort(d.date).replace(/\.$/, '')}</b>.`}</p><button type="button" class="btn sm primary" data-act="newDay">Neuer Spieltag</button></div>` : ''}
@@ -4795,7 +4821,7 @@ function viewDaySimple() {
     <div class="sdate"><button type="button" class="dpnav" data-act="dtShift" data-t="day" data-v="-1" aria-label="Einen Tag früher">‹</button><span>${esc(dt)} <span class="muted">· ${esc(relDay(d.date))}</span></span><button type="button" class="dpnav" data-act="dtShift" data-t="day" data-v="1" aria-label="Einen Tag später">›</button></div>
     ${S.players.length > 12 ? `<input type="search" id="search" data-in="search" placeholder="Name suchen" value="${esc(ui.search)}" aria-label="Spieler suchen">` : ''}
     ${pool.length ? `<ul class="roster sroster">${pool.map(row).join('')}</ul>
-      <div class="row small"><button type="button" class="linkbtn quiet" data-act="allOn">alle ankreuzen</button><button type="button" class="linkbtn quiet" data-act="allOff">keinen</button><span class="grow"></span><span class="muted">Zahl = Stärke 1–10</span></div>`
+      <div class="row small"><button type="button" class="linkbtn quiet" data-act="allOn">alle ankreuzen</button><button type="button" class="linkbtn quiet" data-act="allOff">keinen</button><span class="grow"></span>${isGuest() ? '' : '<span class="muted">Zahl = Stärke 1–10</span>'}</div>`
       : `<p class="hint">${q ? 'Niemand gefunden.' : 'Noch keine Spieler.'}</p>`}
     <div class="addrow"><textarea id="quick" rows="1" data-in="quickType" placeholder="Name, z. B. Jonas 7" aria-label="Neue Spieler">${esc(ui.quickTxt || '')}</textarea><button type="button" class="btn" data-act="quickAdd">Hinzufügen</button></div>
     ${ui.addErr ? `<p class="errtxt">${esc(ui.addErr)}</p>` : ''}
@@ -4804,6 +4830,7 @@ function viewDaySimple() {
   <section class="block">
     <div class="row"><span class="lbl grow">Anzahl Teams</span>${stepper('teamsN', T, '', 'Anzahl Teams', true)}</div>
     <p class="summary">${n < T ? `Für ${T} Teams braucht es mindestens ${T} Spieler.` : `${T} Teams mit je ${per === '1' ? '1 Spieler' : per + ' Spielern'}`}</p>
+    ${isGuest() ? guestGkHTML() : ''}
   </section>`;
 }
 function viewDay() {
@@ -4920,6 +4947,7 @@ function viewDay() {
   </section>`;
 
   return `
+  ${guestBannerHTML()}
   ${resultReminder()}
   ${S.sample ? `<div class="banner"><p>Das ist eine <b>Beispielgruppe</b> zum Ausprobieren.</p><button type="button" class="btn sm" data-act="sampleRemove">Beispiel löschen und eigene Gruppe anlegen</button></div>` : ''}
   ${notes.length ? `<div class="banner"><p>Aus dem erweiterten Modus wirkt weiter: ${notes.join(', ')}.</p><button type="button" class="btn sm ghost" data-act="mode" data-v="expert">Ansehen</button></div>` : ''}
@@ -5766,7 +5794,7 @@ function variantCards(M, R) {
     const status = i === 0 ? 'Empfehlung' : v.eq ? 'Alternative, gleichwertig' : `Alternative, ${fmt(over, 0)} % mehr Strafpunkte`;
     const notes = variantNotes(dets, i);
     return `<button type="button" class="var${on ? ' on' : ''}" data-act="pickVar" data-v="${i}" aria-pressed="${on}">
-      <span class="vh"><b>${L}</b><span class="vstat">${status}</span><span class="vpct ${lampClass(d.pct)}">${fmt(d.pct, 1)} %</span></span>
+      <span class="vh"><b>${L}</b><span class="vstat">${status}</span>${guestMasked(v.teams) ? '' : `<span class="vpct ${lampClass(d.pct)}">${fmt(d.pct, 1)} %</span>`}</span>
       ${notes ? `<span class="small">${esc(notes)}</span>` : ''}${change ? `<span class="small muted">${change}</span>` : ''}
       ${expert() ? `<span class="small muted">Strafpunkte ${fmt(d.U, 2)}</span>` : ''}</button>`;
   }).join('');
@@ -5850,7 +5878,7 @@ function teamCard(M, det, t, ids) {
     return x;
   });
   const tsort = X ? ui.tsort : 'str', tview = X ? ui.tview : 'list';
-  const list = items.slice().sort(tsort === 'str' ? (a, b) => (b.r === 'GK' ? M.gkv[b.i] : M.v[b.i]) - (a.r === 'GK' ? M.gkv[a.i] : M.v[a.i]) : (a, b) => order[a.r] - order[b.r] || M.v[b.i] - M.v[a.i]);
+  const list = items.slice().sort(isGuest() ? (a, b) => (b.r === 'GK') - (a.r === 'GK') || disp(byId(a.id)).localeCompare(disp(byId(b.id)), 'de') : tsort === 'str' ? (a, b) => (b.r === 'GK' ? M.gkv[b.i] : M.v[b.i]) - (a.r === 'GK' ? M.gkv[a.i] : M.v[a.i]) : (a, b) => order[a.r] - order[b.r] || M.v[b.i] - M.v[a.i]);
   const gkI = det.gk[t], ri = det.rotI[t];
   // Niemand im Team ist fürs Tor bereit (alle „nie“): dann müssen sich trotzdem alle abwechseln – deutlich sagen
   const noneReady = gkI < 0 && det.rotN[t] > 0 && idxs.every(i => M.will[i] < 1);
@@ -5909,8 +5937,8 @@ function teamCard(M, det, t, ids) {
 }
 function balanceBar(det) {
   const tot = det.vals.reduce((s, x) => s + Math.max(0, x), 0) || 1;
-  return `<div class="balance" role="img" aria-label="Kräfteverhältnis ${det.vals.map((v, t) => `${teamCol(t).name} ${fmt(v, 1)}`).join(', ')}">
-    ${det.vals.map((v, t) => `<span style="flex:${Math.max(0, v) / tot};${bibVars(t)}"><b>${teamCol(t).name}</b> ${fmt(v, 1)}</span>`).join('')}
+  return `<div class="balance" role="img" aria-label="Kräfteverhältnis${isGuest() ? '' : ' ' + det.vals.map((v, t) => `${teamCol(t).name} ${fmt(v, 1)}`).join(', ')}">
+    ${det.vals.map((v, t) => `<span style="flex:${Math.max(0, v) / tot};${bibVars(t)}"><b>${teamCol(t).name}</b>${isGuest() ? '' : ' ' + fmt(v, 1)}</span>`).join('')}
     ${det.vals.length === 2 ? '<i class="mid" aria-hidden="true"></i>' : ''}
   </div>`;
 }
@@ -5935,7 +5963,7 @@ function viewTeams() {
     return `<section class="banner warn"><p>Anwesenheit, Torhüter oder Teamanzahl haben sich geändert. Die Teams unten passen nicht mehr dazu.</p><button type="button" class="btn primary" data-act="generate">Neu bilden</button></section>
       <section class="teams">${R.teams.map((ids, t) => `<article class="team" style="${bibVars(t)}"><header class="team-head"><h3>${teamCol(t).name}</h3></header><ul class="tlist">${ids.filter(byId).map(id => `<li class="tp"><span></span><span class="nm">${esc(disp(byId(id)))}</span></li>`).join('')}</ul></article>`).join('')}</section>`;
   }
-  const X = expert();
+  const X = expert(), gm = guestMasked(R.teams);
   const det = Engine.evaluate(M, assignFrom(M, R.teams), true);
   const pct = det.pct;
   const hi = det.vals.indexOf(Math.max(...det.vals)), lo = det.vals.indexOf(Math.min(...det.vals));
@@ -5967,25 +5995,25 @@ function viewTeams() {
         <p class="hint">Strafpunkte entscheiden nur, welche Aufteilung gewählt wird. Von der Teamstärke wird nichts abgezogen.</p>`
     : '';
   const lateList = S.players.filter(p => !S.day.present[p.id] && p.status !== 'paused' && p.status !== 'archived').sort((a, b) => (S.day.maybe[b.id] ? 1 : 0) - (S.day.maybe[a.id] ? 1 : 0) || sortByLabel(a, b));
-  return `${changedHint}
+  return `${guestBannerHTML()}${changedHint}
   <section class="block verdict-block">
     <div class="verdict">
-      <div class="lamp ${lampClass(pct)}"><span class="num">${fmt(pct, 1)}</span><small>%</small></div>
-      <div class="vtext"><div class="lblrow"><h2>${verdictWord(pct)}</h2>${ib('pct')}${X ? srcBadge(basisNow()) : ''}</div>
+      ${gm ? '<div class="lamp masked"><span class="num">–</span></div>' : `<div class="lamp ${lampClass(pct)}"><span class="num">${fmt(pct, 1)}</span><small>%</small></div>`}
+      <div class="vtext"><div class="lblrow"><h2>${gm ? `Fairness ab ${GUEST_MIN} Spielern je Team` : verdictWord(pct)}</h2>${gm ? '' : ib('pct')}${X ? srcBadge(basisNow()) : ''}</div>
         ${X ? `<p>${within ? `Der Unterschied von ${fmt(det.dS, 1)} Punkten ist kleiner als die Bewertungsunsicherheit (±${fmt(unc, 1)}): praktisch gleich stark.` : `${fmt(det.dS, 1)} Punkte Unterschied bei einer Bewertungsunsicherheit von ±${fmt(unc, 1)}.`} ${ib('unc')}</p>` : ''}
-        ${explainLine(M, det) ? `<p class="muted">${esc(explainLine(M, det))}</p>` : ''}</div>
+        ${!gm && explainLine(M, det) ? `<p class="muted">${esc(explainLine(M, det))}</p>` : gm ? '<p class="muted">Bei so kleinen Teams ließe sich sonst die Stärke einzelner Spieler ablesen.</p>' : ''}</div>
     </div>
-    ${balanceBar(det)}
+    ${gm ? '' : balanceBar(det)}
     ${hardMsgs.length ? `<div class="banner bad"><p><b>Pflicht nicht eingehalten</b> – ${R.manual ? 'so von Hand eingeteilt' : 'die Angaben wurden nach dem Bilden geändert'}:<br>${hardMsgs.join('<br>')}<br><span class="small">Bewusst so lassen oder „Neu berechnen“.</span></p></div>` : ''}
     ${X ? `<details class="vdet" data-sec="vdet"${ui.open.vdet ?? !narrow() ? ' open' : ''}><summary>Details: ${rows.map(r => r.label).slice(0, 3).join(', ')} …</summary><ul class="report">${rows.map(r => `<li class="st-${r.st}"><i class="dotst" aria-hidden="true"></i><b class="rl">${r.label}</b><span class="rt">${r.html ? r.text : esc(r.text)}</span></li>`).join('')}</ul>
     <p class="small muted">${R.manual && !R.self ? 'Von Hand angepasst. ' : ''}${searchTxt} Rechenzeit ${(st.ms || 0) < 100 ? 'unter 0,1' : fmt(st.ms / 1000, 1)} s.</p></details>` : R.random ? '<p class="small muted">Zufällig eingeteilt.</p>' : R.manual ? '<p class="small muted">Von Hand eingeteilt.</p>' : ''}
     ${X ? `<div><button type="button" class="btn sm ghost" data-act="toggleUi" data-k="report" aria-expanded="${ui.report}">${ui.report ? 'Strafpunkte ausblenden' : 'Strafpunkte je Kriterium'}</button></div>${report}` : ''}
   </section>
   ${teamsResultBlock(R)}
-  ${(() => { TEAMS_TAIL = !X ? '' : R.vars && R.vars.length > 1 && fresh ? `<section class="block">
+  ${(() => { TEAMS_TAIL = !X && !isGuest() ? '' : R.vars && R.vars.length > 1 && fresh ? `<section class="block">
     <div class="block-head"><div class="lblrow"><h2>Varianten</h2>${ib('variants')}</div><span class="muted small">${st.exact ? '' : 'mindestens '}${fmtInt(st.nEqual)} gleichwertige</span></div>
     <div class="vars">${variantCards(M, R)}</div>
-  </section>` : R.vars && R.vars.length > 1 && !changedHint ? '<div class="banner"><p>Seit der Berechnung wurden Bewertungen oder Einstellungen geändert. Die Teams sind mit den neuen Werten bewertet; die Varianten sind ausgeblendet. „Neu berechnen“ sucht wieder die beste Aufteilung.</p></div>' : ''; TEAMS_TAIL = (X ? forecastBlock(M, det, R) : '') + TEAMS_TAIL; return ''; })()}
+  </section>` : R.vars && R.vars.length > 1 && !changedHint ? '<div class="banner"><p>Seit der Berechnung wurden Bewertungen oder Einstellungen geändert. Die Teams sind mit den neuen Werten bewertet; die Varianten sind ausgeblendet. „Neu berechnen“ sucht wieder die beste Aufteilung.</p></div>' : ''; TEAMS_TAIL = (X || (isGuest() && !gm) ? forecastBlock(M, det, R) : '') + TEAMS_TAIL; return ''; })()}
   ${ui.suggest ? `<section class="banner ok"><p>${ui.suggest.text}</p><button type="button" class="btn primary sm" data-act="applySuggest">Übernehmen</button><button type="button" class="btn sm ghost" data-act="dismissSuggest">Verwerfen</button></section>` : ''}
   ${M.fieldKeepers.length ? `<div class="banner"><p>Nur ${M.T} Tore: ${M.fieldKeepers.map(id => `<b>${esc(disp(byId(id)))}</b>`).join(', ')} ${M.fieldKeepers.length > 1 ? 'spielen' : 'spielt'} heute im Feld.</p></div>` : ''}
   <div class="toolrows">
@@ -6108,6 +6136,7 @@ function viewPlayers() {
       <div class="ndlist">${L.length > 1 ? '<button type="button" class="btn sm primary" data-act="newOff" data-id="">Bei allen entfernen</button>' : ''}${L.map(p => `<button type="button" class="btn sm${L.length === 1 ? ' primary' : ''}" data-act="newOff" data-id="${p.id}">${L.length === 1 ? '„Neu“ entfernen' : `${esc(disp(p))} <span class="small muted">· ${newDoneWhy(p)}</span>`}</button>`).join('')}</div></div>` : ''; })()}
     <div class="row"><input class="grow" type="search" id="psearch" data-in="psearch" placeholder="${X ? 'Name oder Merkmal suchen' : 'Name suchen'}" value="${esc(ui.psearch)}" aria-label="Spieler suchen"><button type="button" class="btn primary" data-act="newPlayer">Spieler anlegen</button></div>
     ${S.players.length >= 3 ? svEntryHTML() : ''}
+    ${S.players.length >= 2 && !isGuest() ? guestEntryHTML() : ''}
     ${!X ? '' : `<div class="row"><button type="button" class="btn sm" data-act="shotOpen" data-v="players">Aus Screenshots anlegen</button><span class="small muted">z. B. die Mitgliederliste der Gruppe – Bekannte werden erkannt, du prüfst jede Zuordnung. Heute wird nichts angekreuzt.</span></div>
 `}
     <div class="row"><span class="lbl">Sortieren</span>${seg('psort', [...(X ? [['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele'], ['data', 'Datenlage']] : [['name', 'Name'], ['strength', 'Stärke']]), ...(S.players.some(p => p.birth) ? [['age', 'Alter']] : [])], ui.psort, '', X ? '' : 'pill')}</div>
@@ -6436,6 +6465,7 @@ function applyTheme(v) {
 applyTheme(getTheme());
 function setTheme(v) { v = ['light', 'dark'].includes(v) ? v : 'auto'; try { if (v === 'auto') localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, v); } catch (e) { /* privat */ } applyTheme(v); }
 function viewSettings() {
+  if (isGuest()) return guestSettingsHTML();
   const st = S.settings, X = expert();
   const prof = MODEL_DEFAULTS.profiles;
   const profileCards = `<div class="profiles">${Object.entries(prof).map(([k, p]) => `<button type="button" class="pcard${st.profile === k ? ' on' : ''}" data-act="profile" data-v="${k}" aria-pressed="${st.profile === k}"><b>${p.label}</b><span class="small">${p.hint}</span></button>`).join('')}
@@ -6457,7 +6487,8 @@ function viewSettings() {
       : '<li>Nur Stärke, Torwart und wer da ist. Alles andere nutzt Standardwerte.</li><li>„Erweitert“ zeigt Fähigkeiten, Positionen, Platz, Regeln und die Auswertung.</li>'}</ul>
     <div class="row"><span class="grow">Bereiche nach 3 Minuten wieder zuklappen <span class="small muted">– wer länger nicht da war, findet alles aufgeräumt vor</span></span>${sw('collapseTog', S.settings.collapse !== false, '', 'Bereiche automatisch zuklappen')}</div>
     <div class="field"><span class="lbl">Farben</span>${seg('theme', [['auto', '🖥️ wie das Gerät'], ['light', '☀️ hell'], ['dark', '🌙 dunkel']], getTheme())}
-      <span class="small muted">Gilt für dieses Gerät und alle Projekte.</span></div>`, `${X ? 'Erweitert' : 'Einfach'} · ${({ auto: 'Farben wie das Gerät', light: 'hell', dark: 'dunkel' })[getTheme()]}`)}
+      <span class="small muted">Gilt für dieses Gerät und alle Projekte.</span></div>
+    ${helpField()}`, `${X ? 'Erweitert' : 'Einfach'} · ${({ auto: 'Farben wie das Gerät', light: 'hell', dark: 'dunkel' })[getTheme()]}`)}
   ${X ? `
   ${rvBlock('stMe', false, '🙋 Ich', '', '', `<div class="field"><label class="lbl" for="meSel">Welcher Spieler bist du?</label><select id="meSel" data-ch="meSel"><option value="">– noch nicht festgelegt –</option>${S.players.slice().sort(sortByLabel).map(p => `<option value="${p.id}"${S.me === p.id ? ' selected' : ''}>${esc(label(p))}</option>`).join('')}</select>
     <span class="small muted">Beim Einlesen von Screenshots steht man selbst als „Du“ oder gar nicht in der Liste – so ordnet die App dich trotzdem richtig zu.</span></div>`, S.me && byId(S.me) ? esc(label(byId(S.me))) : 'noch nicht festgelegt')}
@@ -6700,7 +6731,7 @@ function builderHTML0() {
   const B = ui.mb, T = B.teams.length;
   const inT = new Set(B.teams.flat());
   const src = B.src ? matchById(B.src) : null;
-  const pool = [...new Set([...(src ? [] : presentPlayers().map(p => p.id)), ...inT, ...(B.extra || [])])].map(byId).filter(Boolean).sort((a, b) => effOf(b).strength - effOf(a).strength || sortByLabel(a, b));
+  const pool = [...new Set([...(src ? [] : presentPlayers().map(p => p.id)), ...inT, ...(B.extra || [])])].map(byId).filter(Boolean).sort(isGuest() ? sortByLabel : (a, b) => effOf(b).strength - effOf(a).strength || sortByLabel(a, b));
   const inPool = new Set(pool.map(p => p.id));
   const addable = S.players.filter(p => !inPool.has(p.id)).sort(sortByLabel);
   const open = pool.filter(p => !inT.has(p.id)).length;
@@ -6712,9 +6743,10 @@ function builderHTML0() {
     head = `${src ? `<div class="banner"><p>Teams vom <b>${dateShort(src.date)}</b>${src.place ? ' · ' + esc(src.place) : ''}, bewertet mit den <b>heutigen Bewertungen</b> und den Platz- und Tagesangaben von damals. ${src.pred ? `Damals: ${fmt(src.pred.pct, 1)} % Unterschied.` : ''}</p></div>` : ''}<div class="verdict"><div class="lamp ${lampClass(ev.det.pct)}"><span class="num">${fmt(ev.det.pct, 1)}</span><small>%</small></div><div class="vtext"><h2>${verdictWord(ev.det.pct)}</h2><p class="small muted">${B.teams.map((t, i) => `${teamCol(i).name} ${t.length}`).join(' · ')} Spieler${open ? ` · ${open} noch ohne Team (spielen nicht mit)` : ''}</p></div></div>${balanceBar(ev.det)}
       ${hard.length ? `<div class="banner warn"><p><b>Nicht eingehalten:</b><br>${hard.join('<br>')}<br><span class="small">Du kannst trotzdem übernehmen – die Teamansicht zeigt den Hinweis weiter an.</span></p></div>` : ''}`;
   }
+  if (ev && !ev.err && guestMasked(B.teams)) head = `<p class="hint">Die Fairness erscheint ab ${GUEST_MIN} Spielern je Team.</p>`;
   const rows = pool.map(p => {
     const t = B.teams.findIndex(x => x.includes(p.id));
-    return `<li class="mbrow"><span class="grow"><b>${esc(disp(p))}</b> <span class="small muted num">${fmtS(effOf(p).strength)}${p.roleMain === 'GK' || (expert() && p.roleMain !== 'FLEX') ? ' · ' + roleShort(p.roleMain) : ''}</span></span>
+    return `<li class="mbrow"><span class="grow"><b>${esc(disp(p))}</b> <span class="small muted num">${isGuest() ? '' : fmtS(effOf(p).strength)}${p.roleMain === 'GK' || (expert() && p.roleMain !== 'FLEX') ? ' · ' + roleShort(p.roleMain) : ''}</span></span>
       <span class="seg">${B.teams.map((_, i) => `<button type="button" class="tbtn${t === i ? ' on' : ''}" style="${bibVars(i)}" data-act="mbSet" data-id="${p.id}" data-t="${i}" aria-pressed="${t === i}">${teamCol(i).name}</button>`).join('')}<button type="button" class="${t < 0 ? 'on' : ''}" data-act="mbSet" data-id="${p.id}" data-t="-1" aria-pressed="${t < 0}">–</button></span></li>`;
   }).join('');
   return `<div class="sheet-wrap"><button type="button" class="sheet-bg" data-act="mbClose" aria-label="Schließen"></button>
@@ -9896,6 +9928,7 @@ function render() {
   // Effekte erst nach dem letzten Zeichnen, sonst würde ein sofortiges zweites Zeichnen sie abschneiden
   try { playEffects(FX.any); } catch (e) { console.error(e); }
   chartScroll();
+  try { tidyHelp(); } catch (e) { console.error(e); }
 }
 /* Wischbare Verläufe: beim ersten Zeigen ganz rechts (neueste Spiele), danach bleibt die Stelle beim Neuzeichnen */
 function chartScroll() {
@@ -9956,7 +9989,8 @@ function playEffects(anySheet) {
 function renderNow() {
   hidePop();
   $('#main').classList.remove(...FX_CLS); $('#sheet').classList.remove('sheet-in');
-  if (!expert() && ui.tab === 'rules') ui.tab = 'settings';   // Regeln gibt es nur im erweiterten Modus
+  if (!expert() && ui.tab === 'rules') ui.tab = 'settings';
+  if (isGuest()) { if (!['day', 'teams', 'settings'].includes(ui.tab)) ui.tab = 'day'; ui.editId = null; ui.pa = null; }   // Regeln gibt es nur im erweiterten Modus
   if (!ui.pa) { ui.paBack = null; ui.paFromEd = null; }
   if (!ui.editId) ui.edFromPa = null;
   if (ui.shiftAsk && ui.shiftAsk.id !== ui.editId) ui.shiftAsk = null;
@@ -9983,19 +10017,20 @@ function renderNow() {
   $('#main').innerHTML = le + (ui.saveFailed ? '<div class="banner bad"><p><b>Speichern im Browser ist fehlgeschlagen.</b> Änderungen gehen beim Schließen verloren. Sichere die Daten unter Einstellungen → Daten als Datei.</p></div>' : '') + (ui.tab === 'day' ? backupReminder() : '') + safe(VIEWS[ui.tab], (NAV.find(x => x[0] === ui.tab) || [0, ui.tab])[1]);
   keepScroll.forEach(([k, v]) => { const el = document.querySelector(`[data-keep="${k}"]`); if (el) el.scrollTop = v; });
   const openN = S.matches.filter(m => m.status === 'open' && m.remind && m.date < isoToday()).length;
-  $('#nav').innerHTML = NAV.filter(([k]) => expert() || k !== 'rules').map(([k, l, short]) => `<button type="button" class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}" aria-current="${ui.tab === k ? 'page' : 'false'}"${short ? ` aria-label="${l}"` : ''}>${ICON[k]}<span>${short ? `<span class="nl">${l}</span><span class="ns">${short}</span>` : l}${k === 'review' && openN ? `<i class="badge" aria-label="${openN} ohne Ergebnis">${openN}</i>` : ''}</span></button>`).join('');
+  $('#nav').innerHTML = NAV.filter(([k]) => (expert() || k !== 'rules') && (!isGuest() || ['day', 'teams', 'settings'].includes(k))).map(([k, l, short]) => `<button type="button" class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}" aria-current="${ui.tab === k ? 'page' : 'false'}"${short ? ` aria-label="${l}"` : ''}>${ICON[k]}<span>${short ? `<span class="nl">${l}</span><span class="ns">${short}</span>` : l}${k === 'review' && openN ? `<i class="badge" aria-label="${openN} ohne Ergebnis">${openN}</i>` : ''}</span></button>`).join('');
   $('#sub').textContent = `${dateShort(S.day.date)}${S.day.time ? ' · ' + S.day.time : ''}${S.day.place ? ' · ' + S.day.place : ''}`;
   const pr = curProject();
   $('#projName').textContent = pr ? pr.name : 'Projekt';
   document.title = (pr ? pr.name + ' – ' : '') + 'Faire Teams';
   $('#projBtn').title = 'Projekt: ' + (pr ? pr.name : '') + ' – wechseln oder neu anlegen';
   document.body.classList.toggle('is-expert', expert());
+  document.body.classList.toggle('is-guest', isGuest());
 
   const sheet = $('#sheet');
   if (ui.editId && !byId(ui.editId)) ui.editId = null;
   if (ui.res && !matchById(ui.res.id)) ui.res = null;
-  const anySheet = !!(ui.svy || ui.imp || ui.proj || ui.plEd || ui.shot || ui.mb || ui.res || ui.pa || ui.editId);
-  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.svy ? svSheetHTML() : ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
+  const anySheet = !!(ui.gshare || ui.gsend || ui.svy || ui.imp || ui.proj || ui.plEd || ui.shot || ui.mb || ui.res || ui.pa || ui.editId);
+  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.gshare ? shareSheetHTML() : ui.gsend ? guestSendHTML() : ui.svy ? svSheetHTML() : ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
   sheet.hidden = !anySheet;
   document.body.classList.toggle('sheet-open', anySheet);
   if ($('.sheet')) $('.sheet').scrollTop = sheetScroll;
@@ -10235,7 +10270,7 @@ document.addEventListener('toggle', e => {
   if (d.dataset.rerender) render();
 }, true);
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.svy && !SV_MODE) { A.svClose(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
+  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.svy && !SV_MODE) { A.svClose(); return; } if (ui.gshare) { A.gsClose(); return; } if (ui.gsend) { A.gSendClose(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
   if (e.key === 'Enter' && !e.shiftKey && e.target.id === 'quick') { e.preventDefault(); A.quickAdd(); }
   if (e.key === 'Enter' && e.target.id === 'lateName') { e.preventDefault(); const b = document.querySelector('[data-act="lateGuest"][data-v="5"]'); if (b) A.lateGuest(b); }
   if (e.key === 'Enter' && e.target.id === 'newPreset') { e.preventDefault(); A.newPreset(); }
@@ -10388,7 +10423,7 @@ function svLink(sv) {
 /* Nachricht zum Link (WhatsApp, Teilen, Kopieren) */
 function svMsg(sv) {
   const greet = sv.text || 'Bitte schätz ein, wie stark unsere Spieler sind – damit die Teams fairer werden. Dauert ein paar Minuten, deine Einzelwerte sehe nur ich.';
-  return `⚽ ${sv.title || S.name}: ${greet}\n\n👉 ${svLink(sv)}\n\n(Öffnet sich nur die Startseite? Dann diese Nachricht kopieren und in der App bei „Bewertungs-Link einfügen“ einsetzen.)`;
+  return `⚽ ${sv.title || S.name}: ${greet}\n\n👉 ${svLink(sv)}\n\n(Öffnet sich nur die Startseite? Dann diese Nachricht kopieren und in der App bei „Link einfügen“ einsetzen.)`;
 }
 const svDate = ts => new Date(ts).toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric', year: 'numeric' });
 const svWhoName = (sv, who) => { if (who[0] === 'p') { const x = sv.players[parseInt(who.slice(1), 36)]; return x ? x.name : '?'; } try { return svText(b32dec(who.slice(1))).slice(0, 60); } catch (e) { return '?'; } };
@@ -10666,9 +10701,18 @@ function svEntryHTML() {
     <span class="small muted">${cur ? `Umfrage vom ${svDate(cur.created)}: ${plural(nR, 'Antwort', 'Antworten')}` : 'Mitspieler schätzen die Spieler ein – du vergleichst mit deinen Werten.'}</span></div>`;
 }
 function svDotsHTML(row, own, pick) {
-  // Linie 1–10: Punkte = Einzelstimmen (ohne Namen), Strich = Gruppenwert, Ring = deine Bewertung
+  // Skala 1–10. Oben: jede Stimme ein Punkt, gleiche Werte (auf ½ gerundet) stapeln sich. Unten: Ring = deine Bewertung,
+  // Strich = Gruppe, grüner Punkt = vorgemerkter neuer Wert – so verdeckt nichts die Stimmen.
   const x = v => ((clamp(v, 1, 10) - 1) / 9 * 100).toFixed(1);
-  return `<span class="svline" aria-hidden="true"><i class="axis"></i>${(row.dots || []).map(v => `<i class="dot" style="left:${x(v)}%"></i>`).join('')}${row.n ? `<i class="grp" style="left:${x(row.val)}%"></i>` : ''}${isNum(own) ? `<i class="own" style="left:${x(own)}%"></i>` : ''}${isNum(pick) ? `<i class="new" style="left:${x(pick)}%"></i>` : ''}</span>`;
+  const bins = new Map(); (row.dots || []).forEach(v => { const b = svR2(v); bins.set(b, (bins.get(b) || 0) + 1); });
+  const MAXS = 5, H = Math.min(MAXS, Math.max(1, ...bins.values()));
+  let dots = '';
+  bins.forEach((n, b) => {
+    for (let k = 0; k < Math.min(n, MAXS); k++) dots += `<i class="dot" style="left:${x(b)}%;bottom:${18 + k * 7}px"></i>`;
+    if (n > MAXS) dots += `<b class="dotn" style="left:${x(b)}%;bottom:${18 + MAXS * 7}px">${n}</b>`;
+  });
+  const tip = [...bins.entries()].sort((a, b) => a[0] - b[0]).map(([b, n]) => `${fmtS(b)}: ${n}×`).join(' · ');
+  return `<span class="svline" style="height:${24 + H * 7 + (Math.max(...bins.values(), 0) > MAXS ? 12 : 0)}px" title="Stimmen ${esc(tip)}" aria-hidden="true"><i class="axis"></i>${dots}${row.n ? `<i class="grp" style="left:${x(row.val)}%"></i>` : ''}${isNum(own) ? `<i class="own" style="left:${x(own)}%"></i>` : ''}${isNum(pick) ? `<i class="new" style="left:${x(pick)}%"></i>` : ''}</span>`;
 }
 function svSheetHTML() {
   const U = ui.svy, L = svList();
@@ -10703,19 +10747,39 @@ function svSheetHTML() {
   // Ergebnis je Spieler
   const rowsAll = E.rows.filter(x => byId(x.id)).map(x => {
     const own = svOwn(x.id), d = x.n && isNum(own) ? x.val - own : null;
-    return { ...x, own, d };
+    const agree = x.n >= 4 && !x.split && x.dots[x.dots.length - 1] - x.dots[0] <= 1.5;
+    return { ...x, own, d, agree };
   });
-  const filt = U.filter || 'all';
-  const rows = rowsAll.filter(x => filt === 'all' || (filt === 'diff' && x.d != null && Math.abs(x.d) >= 1) || (filt === 'split' && x.split))
-    .sort((a, b) => (b.n > 0) - (a.n > 0) || (b.d == null ? -1 : Math.abs(b.d)) - (a.d == null ? -1 : Math.abs(a.d)) || a.name.localeCompare(b.name, 'de'));
+  const filt = U.filter || 'all', adjOn = sv.opt.adj && sv.opt.scale, so = U.sort || 'diff';
+  const nm = x => ownName(x.id) || x.name, strOf = x => (x.n ? x.val : isNum(x.own) ? x.own : -1);
+  const sorters = {
+    diff: (a, b) => (b.n > 0) - (a.n > 0) || (b.d == null ? -1 : Math.abs(b.d)) - (a.d == null ? -1 : Math.abs(a.d)) || nm(a).localeCompare(nm(b), 'de'),
+    name: (a, b) => nm(a).localeCompare(nm(b), 'de'),
+    str: (a, b) => strOf(b) - strOf(a) || nm(a).localeCompare(nm(b), 'de')
+  };
+  const rows = rowsAll.filter(x => filt === 'all' || (filt === 'diff' && x.d != null && Math.abs(x.d) >= 1) || (filt === 'split' && x.split)).sort(sorters[so] || sorters.diff);
   const picks = U.picks || (U.picks = {});
   const target = (x, how) => (how === 'grp' ? svR2(x.val) : how === 'mid' ? svR2(isNum(x.own) ? (x.own + x.val) / 2 : x.val) : null);
-  const nPick = Object.keys(picks).filter(id => picks[id] && rowsAll.some(x => x.id === id && x.n)).length;
+  const confs = U.conf || (U.conf = {});
+  const nVal = Object.keys(picks).filter(id => picks[id] && rowsAll.some(x => x.id === id && x.n)).length, nConf = Object.keys(confs).filter(id => byId(id)).length, nPick = nVal + nConf;
+  // Sicherheit: Bei uneinigen Stimmen „unsicher“, bei sehr einigen „sicher“ anbieten (wirkt im erweiterten Modus:
+  // Unsicherheit der Teamstärke und wie schnell Ergebnisse die Stärke verschieben)
+  const CL = { sure: 'sicher', unsure: 'unsicher' };
+  const confRow = x => {
+    // „sicher“ nur, wenn die einige Gruppe zu deinem (künftigen) Wert passt – sonst wäre es ein Widerspruch
+    const want = x.split ? 'unsure' : x.agree && (x.d == null || Math.abs(x.d) < 1 || picks[x.id] === 'grp') ? 'sure' : null, p = byId(x.id);
+    if (!want || !p) return '';
+    if (p.conf === want) return `<div class="small muted svconf">Sicherheit: schon „${CL[want]}“</div>`;
+    const on = confs[x.id] === want;
+    return `<div class="svconf"><button type="button" class="chip${on ? ' on' : ''}" data-act="svConf" data-id="${x.id}" data-v="${want}" aria-pressed="${on}">${on ? '✓ ' : ''}als „${CL[want]}“ einstufen</button><span class="small muted">${x.split ? 'die Gruppe ist sich uneinig' : 'die Gruppe ist sich einig'}${p.conf ? ` · bisher „${CL[p.conf] || CONF[p.conf].label}“` : ''}</span></div>`;
+  };
   const strong = rowsAll.filter(x => x.n >= 3 && x.d != null && Math.abs(x.d) >= 1);
+  const splitN = rowsAll.filter(x => x.split && byId(x.id) && byId(x.id).conf !== 'unsure').length;
   const resTable = !E.nResp ? '<p class="hint">Noch keine Antworten. Sobald Codes eingefügt sind, erscheint hier der Vergleich.</p>' : `
-    <div class="row svopts"><span class="small">${sw('svOpt', sv.opt.adj, 'data-k="adj"', 'Strenge ausgleichen')} Strenge ausgleichen ${ib('svAdj')}</span><span class="small">${sw('svOpt', sv.opt.scale, 'data-k="scale"', 'Auf deine Skala')} Auf deine Skala ${ib('svScale')}</span></div>
-    ${sv.opt.scale && !E.scaled ? '<p class="small muted">Für „Auf deine Skala“ brauchst du mindestens 4 Spieler, die du selbst eingeschätzt hast und die Stimmen haben.</p>' : ''}
-    <div class="row">${seg('svFilter', [['all', 'Alle'], ['diff', `Abweichung ab 1 (${rowsAll.filter(x => x.d != null && Math.abs(x.d) >= 1).length})`], ['split', `uneinig (${rowsAll.filter(x => x.split).length})`]], filt, '', 'pill wrap')}</div>
+    <div class="row svopts"><span class="small">${sw('svOpt', adjOn, 'data-k="both"', 'Werte angleichen')} Werte angleichen (empfohlen) ${ib('svAdj')}</span>${!adjOn ? '<span class="small muted">aus: Median der Stimmen, wie abgegeben</span>' : ''}</div>
+    ${adjOn && !E.scaled ? '<p class="small muted">Auf deine Skala übertragen wird erst, wenn mindestens 4 Spieler Stimmen haben, die du selbst eingeschätzt hast.</p>' : ''}
+    <div class="row svctl"><span class="lbl">Zeigen</span>${seg('svFilter', [['all', 'Alle'], ['diff', `Abweichung ab 1 (${rowsAll.filter(x => x.d != null && Math.abs(x.d) >= 1).length})`], ['split', `uneinig (${rowsAll.filter(x => x.split).length})`]], filt, '', 'pill wrap')}</div>
+    <div class="row svctl"><span class="lbl">Sortieren</span>${seg('svSort', [['diff', 'Abweichung'], ['name', 'Name'], ['str', 'Stärke']], U.sort || 'diff', '', 'pill')}</div>
     <p class="small muted svlegend"><span><i class="lg own"></i> deine Bewertung</span><span><i class="lg grp"></i> Gruppe</span><span><i class="lg dot"></i> einzelne Stimmen</span>${nPick ? '<span><i class="lg new"></i> neu</span>' : ''}</p>
     <ul class="svres">${rows.map(x => {
       const pk = picks[x.id], tv = pk ? target(x, pk) : null, weak = x.n > 0 && x.n < 3;
@@ -10723,11 +10787,14 @@ function svSheetHTML() {
       return `<li class="${weak ? 'weak' : ''}${!x.n ? ' none' : ''}">
         <div class="svrtop"><b class="grow">${esc(ownName(x.id) || x.name)}</b>${x.split ? tag('uneinig', 't-split', 'Die Stimmen liegen weit auseinander') : ''}${dTxt}</div>
         ${x.n ? `<div class="svrmid">${svDotsHTML(x, x.own, tv)}<span class="svnums"><span title="deine Bewertung">${isNum(x.own) ? fmtS(x.own) : '–'}</span> → <b title="Gruppe">${fmt(x.val, 1)}</b></span></div>
-        <div class="svrsub small muted">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmtS(x.self)}` : ''}</div>
-        <div class="svrpick">${seg('svPickRow', [['', 'behalten'], ...(isNum(x.own) ? [['mid', `Mitte ${fmtS(target(x, 'mid'))}`]] : []), ['grp', `Gruppe ${fmtS(target(x, 'grp'))}`]], pk || '', `data-id="${x.id}"`, 'pill wrap')}</div>` : '<div class="small muted">Keine Stimmen (alle „kann ich nicht beurteilen“).</div>'}</li>`;
+        <div class="svrsub small">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmtS(x.self)}` : ''}</div>
+        <div class="svrpick">${seg('svPickRow', [['', isNum(x.own) ? `behalten ${fmtS(x.own)}` : 'behalten'], ...(isNum(x.own) ? [['mid', `Mitte ${fmtS(target(x, 'mid'))}`]] : []), ['grp', `Gruppe ${fmtS(target(x, 'grp'))}`]], pk || '', `data-id="${x.id}"`, 'pill wrap')}</div>
+        ${confRow(x)}` : '<div class="small muted">Keine Stimmen (alle „kann ich nicht beurteilen“).</div>'}</li>`;
     }).join('')}</ul>
-    ${strong.length ? `<div class="row svbulk"><span class="small grow">Alle mit mindestens 1 Punkt Abweichung und 3 Stimmen (${strong.length}):</span><button type="button" class="btn sm" data-act="svBulk" data-v="mid">Mitte vormerken</button><button type="button" class="btn sm" data-act="svBulk" data-v="grp">Gruppe vormerken</button></div>` : ''}
-    <div class="svapply${nPick ? ' on' : ''}"><span class="grow small">${nPick ? `${plural(nPick, 'Änderung', 'Änderungen')} vorgemerkt – der grüne Punkt zeigt den neuen Wert.` : 'Je Spieler „Mitte“ oder „Gruppe“ wählen, dann hier übernehmen. Nichts ändert sich automatisch.'}</span>${nPick ? '<button type="button" class="btn sm ghost" data-act="svPickClear">verwerfen</button>' : ''}<button type="button" class="btn sm primary" data-act="svApply"${nPick ? '' : ' disabled'}>Übernehmen</button></div>`;
+    ${strong.length || splitN ? `<div class="svbulk"><b class="small">Schnellauswahl</b> <span class="small muted">– wählt nur vor, geändert wird erst mit „Übernehmen“</span>
+      ${strong.length ? `<div class="row"><span class="small grow">${plural(strong.length, 'Spieler weicht', 'Spieler weichen')} um 1 Punkt oder mehr ab (mit mind. 3 Stimmen):</span><button type="button" class="btn sm" data-act="svBulk" data-v="mid">alle auf Mitte</button><button type="button" class="btn sm" data-act="svBulk" data-v="grp">alle auf Gruppe</button></div>` : ''}
+      ${splitN ? `<div class="row"><span class="small grow">${plural(splitN, 'Spieler ist', 'Spieler sind')} umstritten:</span><button type="button" class="btn sm" data-act="svBulkConf">alle als „unsicher“</button></div>` : ''}</div>` : ''}
+    <div class="svapply${nPick ? ' on' : ''}"><span class="grow small">${nPick ? `${plural(nPick, 'Änderung', 'Änderungen')} vorgemerkt${nVal ? ' – der grüne Punkt zeigt den neuen Wert' : ''}.` : 'Je Spieler „Mitte“ oder „Gruppe“ wählen, dann hier übernehmen. Nichts ändert sich automatisch.'}</span>${nPick ? '<button type="button" class="btn sm ghost" data-act="svPickClear">verwerfen</button>' : ''}<button type="button" class="btn sm primary" data-act="svApply"${nPick ? '' : ' disabled'}>Übernehmen</button></div>`;
   const msgTxt = svMsg(sv);
   const armedSv = ui.arm === 'svDrop:' + sv.id;
   return sheetWrap(`${head('Gruppenmeinung')}
@@ -10735,7 +10802,7 @@ function svSheetHTML() {
     <details class="field svsec" data-sec="svLink"${ui.open.svLink || !sv.responses.length ? ' open' : ''}><summary><b>1. Link teilen</b> <span class="small muted">· ${plural(sv.players.length, 'Spieler', 'Spieler')} · vom ${svDate(sv.created)}</span></summary>
       ${link ? `<div class="svlinkbox"><input type="text" readonly id="svLinkIn" value="${esc(link)}" aria-label="Umfrage-Link"></div>
       <div class="row"><a class="btn sm primary" href="https://wa.me/?text=${encodeURIComponent(msgTxt)}" target="_blank" rel="noopener">WhatsApp</a>${navigator.share ? '<button type="button" class="btn sm" data-act="svShareLink">Teilen …</button>' : ''}<button type="button" class="btn sm" data-act="svCopyLink">Kopieren</button><a class="btn sm ghost" href="${esc(link)}" target="_blank" rel="noopener">Selbst ausfüllen</a></div>
-      ${link.length > 700 ? '<p class="small muted">Der Link ist lang (viele Spieler). Lässt er sich in WhatsApp nicht ganz antippen, öffnet sich nur die Startseite – dort können die Mitspieler die Nachricht unter „Bewertungs-Link einfügen“ einsetzen. Steht so auch in der Nachricht.</p>' : ''}
+      ${link.length > 700 ? '<p class="small muted">Der Link ist lang (viele Spieler). Lässt er sich in WhatsApp nicht ganz antippen, öffnet sich nur die Startseite – dort können die Mitspieler die Nachricht unter „Link einfügen“ einsetzen. Steht so auch in der Nachricht.</p>' : ''}
       <p class="small muted">Tipp: Füll die Umfrage selbst aus, bevor du dir die Ergebnisse ansiehst – dann zählt deine Meinung unbeeinflusst mit.</p>` : '<p class="small errtxt">Kein Link möglich: Die App ist als Datei geöffnet. Öffne sie über ihre Internetadresse.</p>'}</details>
     <div class="field"><label class="lbl" for="svPaste">2. Antworten einfügen</label>
       <textarea id="svPaste" data-in="svPaste" rows="3" placeholder="Nachrichten mit „FTU1-…“ hier einfügen – auch mehrere auf einmal oder ein ganzer Chat.">${esc(U.paste || '')}</textarea>
@@ -10803,7 +10870,10 @@ Object.assign(A, {
     sv.responses = sv.responses.filter(x => x.who !== el.dataset.who); render();
     toast('Antwort gelöscht.', { label: 'Rückgängig', act: 'undo' });
   },
-  svOpt: el => { const sv = svCur(); sv.opt[el.dataset.k] = !sv.opt[el.dataset.k]; render(); },
+  svOpt: el => { const sv = svCur(), on = !(sv.opt.adj && sv.opt.scale); sv.opt.adj = on; sv.opt.scale = on; render(); },
+  svSort: el => { ui.svy.sort = el.dataset.v; render(); },
+  svConf: el => { const C = ui.svy.conf || (ui.svy.conf = {}); if (C[el.dataset.id] === el.dataset.v) delete C[el.dataset.id]; else C[el.dataset.id] = el.dataset.v; render(); },
+  svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id); if (p && x.split && p.conf !== 'unsure') C[x.id] = 'unsure'; }); render(); },
   svFilter: el => { ui.svy.filter = el.dataset.v; render(); },
   svPickRow: el => { const P = ui.svy.picks; if (el.dataset.v) P[el.dataset.id] = el.dataset.v; else delete P[el.dataset.id]; render(); },
   svBulk: el => {
@@ -10811,20 +10881,21 @@ Object.assign(A, {
     E.rows.forEach(x => { const own = svOwn(x.id); if (byId(x.id) && x.n >= 3 && isNum(own) && Math.abs(x.val - own) >= 1) P[x.id] = el.dataset.v; });
     render();
   },
-  svPickClear: () => { ui.svy.picks = {}; render(); },
+  svPickClear: () => { ui.svy.picks = {}; ui.svy.conf = {}; render(); },
   svApply: () => {
     const sv = svCur(), E = svEval(sv, svOwn), P = ui.svy.picks, when = svDate(sv.created);
-    const todo = E.rows.filter(x => P[x.id] && x.n && byId(x.id));
-    if (!todo.length) return;
+    const todo = E.rows.filter(x => P[x.id] && x.n && byId(x.id)), C = ui.svy.conf || {}, cIds = Object.keys(C).filter(id => byId(id));
+    if (!todo.length && !cIds.length) return;
     remember('Werte aus der Umfrage übernommen');
     const miss = [];
     todo.forEach(x => {
       const own = svOwn(x.id), v = P[x.id] === 'grp' ? svR2(x.val) : svR2(isNum(own) ? (own + x.val) / 2 : x.val);
       const m = svApplyOne(byId(x.id), v, when); if (m) miss.push(m);
     });
-    ui.svy.picks = {};
+    cIds.forEach(id => { byId(id).conf = C[id]; });
+    ui.svy.picks = {}; ui.svy.conf = {};
     render();
-    toast(`${plural(todo.length, 'Wert', 'Werte')} übernommen.${miss.length ? ` ${miss.map(m => `${m.name}: erreicht ${fmtS(m.got)} statt ${fmtS(m.want)} (Fähigkeiten an der Grenze)`).join('; ')}.` : ''}`, { label: 'Rückgängig', act: 'undo' });
+    toast(`${[todo.length ? plural(todo.length, 'Wert', 'Werte') : '', cIds.length ? plural(cIds.length, 'Sicherheit', 'Sicherheiten') : ''].filter(Boolean).join(' und ')} übernommen.${miss.length ? ` ${miss.map(m => `${m.name}: erreicht ${fmtS(m.got)} statt ${fmtS(m.want)} (Fähigkeiten an der Grenze)`).join('; ')}.` : ''}`, { label: 'Rückgängig', act: 'undo' });
   },
   svDrop: () => {
     const sv = svCur(), k = 'svDrop:' + sv.id;
@@ -10840,31 +10911,356 @@ Object.assign(IN, {
   svPaste: el => { ui.svy.paste = el.value; const b = document.querySelector('[data-act="svRead"]'); if (b) b.disabled = !str(el.value); }
 });
 // Wird ein Umfrage-Link im selben Tab geöffnet (oder verlassen), neu laden – Umfrage und App laufen getrennt
-window.addEventListener('hashchange', e => { const was = /#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(e.oldURL || ''), now = SV_HASH.test(location.hash); if (was || now) location.reload(); });
+window.addEventListener('hashchange', e => { const was = /#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(e.oldURL || ''), now = SV_HASH.test(location.hash) || /^#ftg[A-Za-z0-9-]/.test(location.hash); if (was || now) location.reload(); });
 
 /* Notausgang: Ist der Link in WhatsApp nicht vollständig antippbar, öffnet sich nur die Startseite.
    Dort lässt sich die ganze Nachricht einfügen; der Link wird herausgesucht und die Umfrage geöffnet. */
 function svGotHTML(open) {
-  return `<details class="svgot"${open ? ' open' : ''}><summary>📩 Bewertungs-Link einfügen</summary>
-    <p class="small muted">Du hast einen Link zum Bewerten bekommen, aber es öffnet sich nur diese Seite? Halte die Nachricht in WhatsApp gedrückt → „Kopieren“ und füge sie hier ein.</p>
+  return `<details class="svgot"${open ? ' open' : ''}><summary>📩 Link einfügen</summary>
+    <p class="small muted">Du hast einen Link zum Bewerten oder einen Gast-Link bekommen, aber es öffnet sich nur diese Seite – oder du nutzt die App vom Home-Bildschirm? Halte die Nachricht in WhatsApp gedrückt → „Kopieren“ und füge sie hier ein.</p>
     <textarea id="svGotIn" rows="3" placeholder="Nachricht hier einfügen"></textarea>
     <div class="row"><button type="button" class="btn sm primary" data-act="svGotOpen">Bewertung öffnen</button>${ui.svGotErr ? `<span class="small errtxt">${esc(ui.svGotErr)}</span>` : ''}</div></details>`;
 }
 Object.assign(A, {
   svGotOpen: () => {
     const t = String(($('#svGotIn') || {}).value || '').replace(/\s+/g, '');
-    const m = /#(ft2[A-Za-z0-9-]{8,}|ftu[a-z2-7]{8,}|survey=[a-z2-7]{8,})/.exec(t);
-    if (!m) { ui.svGotErr = 'Darin steht kein Bewertungs-Link. Bitte die ganze Nachricht kopieren.'; render(); return; }
+    const m = /#(ft2[A-Za-z0-9-]{8,}|ftg[A-Za-z0-9-]{8,}|ftu[a-z2-7]{8,}|survey=[a-z2-7]{8,})/.exec(t);
+    if (!m) { ui.svGotErr = 'Darin steht kein Link der App. Bitte die ganze Nachricht kopieren.'; render(); return; }
     ui.svGotErr = '';
-    location.hash = '#' + m[1];   // löst das Neuladen im Umfrage-Modus aus
+    location.hash = '#' + m[1];   // löst das Neuladen aus (Umfrage-Modus bzw. Gast-Projekt)
   }
 });
 
 $('#logo').innerHTML = `<img src="${LOGO_SRC}" alt="" width="34" height="34">`;
+/* ============================================================
+   GAST-LINK: Die Gruppe bildet faire Teams, ohne die Bewertungen zu sehen
+   Im Link (nach dem #, nie an einen Server): je Spieler Name, Stärke (Bewertungen + Ergebnisse), Torwart-Stärke
+   und Torwart-Rolle, dazu die Pflicht-Paarregeln. Beim Empfänger entsteht daraus ein Gast-Projekt im einfachen
+   Modus; einzelne Werte werden dort nicht gezeigt. Ergebnisse gehen als Text-Code (FTR1-…) zurück.
+   ============================================================ */
+const GUEST_MIN = 4;   // Fairness erst ab so vielen Spielern je Team zeigen – sonst ließen sich Einzelwerte ablesen
+function isGuest() { return !!(S && S.guest); }
+function guestMasked(teams) { return isGuest() && (teams || []).some(t => t.length < GUEST_MIN); }
+function guestPV(p) { if (p.__simple) return p; const q = simplePlayer(p); return { ...q, gk: isNum(p.gk) ? +p.gk : q.gk, gkWill: p.gkWill, roleMain: p.roleMain === 'GK' ? 'GK' : 'FLEX' }; }
+const GV_CH = 'abcdefghijklmnopqrstuvwxyzABC';   // 1,0 … 15,0 in halben Schritten
+const gvChar = v => GV_CH[clamp(Math.round((v - 1) * 2), 0, 28)];
+const gvVal = c => { const k = GV_CH.indexOf(c); return k < 0 ? null : 1 + k / 2; };
+const GW = ['main', 'likes', 'emergency', 'never'];
+const G_EPOCH = '2024-01-01';
+const gDays = iso => Math.round((new Date(iso + 'T12:00:00') - new Date(G_EPOCH + 'T12:00:00')) / 864e5);
+const b26 = (n, len) => { let s = ''; for (let i = 0; i < len; i++) { s = String.fromCharCode(97 + n % 26) + s; n = Math.floor(n / 26); } return s; };
+const unb26 = s => [...s].reduce((n, c) => n * 26 + (c.charCodeAt(0) - 97), 0);
+/* Feste Kennungen aus den Namen: bei jedem neuen Link gleich, so passen die Runden des Gastes weiter zusammen */
+function gIds(names) {
+  const seen = new Set();
+  return names.map(n => { let id = 'g' + svSum('gast:' + n), k = 1; while (seen.has(id)) id = 'g' + svSum('gast:' + n + '#' + k++); seen.add(id); return id; });
+}
+const clearHash = () => { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; } };
+
+/* ---------- Daten im Projekt des Organisators ---------- */
+function cleanShare(v) {
+  const o = v && typeof v === 'object' ? v : {}, cv = x => (isNum(x) ? clamp(svR2(+x), 1, 15) : 5);
+  return {
+    by: str(o.by).slice(0, 30), gid: /^[a-z]{6}$/.test(str(o.gid)) ? o.gid : '',
+    list: (Array.isArray(o.list) ? o.list : []).filter(x => x && /^[a-z]{6}$/.test(str(x.id)) && Array.isArray(x.players) && x.players.length).slice(-20).map(x => ({
+      id: x.id, created: isNum(x.created) ? +x.created : Date.now(), date: isIso(x.date) ? x.date : isoToday(), title: str(x.title).slice(0, 60),
+      players: x.players.slice(0, 200).map(p => ({ id: SAFE_ID.test(str(p && p.id)) ? str(p.id) : uid(), name: str(p && p.name).slice(0, 60) || '?', s: cv(p && p.s), g: cv(p && p.g), w: GW.includes(p && p.w) ? p.w : 'emergency' })),
+      rules: (Array.isArray(x.rules) ? x.rules : []).filter(r => Array.isArray(r) && Number.isInteger(r[0]) && Number.isInteger(r[1]) && ['together', 'apart'].includes(r[2])).slice(0, 100)
+    }))
+  };
+}
+function cleanGuestMeta(v) {
+  if (!v || typeof v !== 'object' || !/^[a-z]{6}$/.test(str(v.gid))) return null;
+  const sent = {};
+  if (v.sent && typeof v.sent === 'object') Object.keys(v.sent).slice(-300).forEach(k => { if (SAFE_ID.test(k) && typeof v.sent[k] === 'string') sent[k] = v.sent[k].slice(0, 12); });
+  return { gid: v.gid, lid: /^[a-z]{6}$/.test(str(v.lid)) ? v.lid : '', by: str(v.by).slice(0, 30), title: str(v.title).slice(0, 60), at: isIso(v.at) ? v.at : isoToday(), sent };
+}
+/* Werte für den Link: Stärke wie bei „Bewertungen + Ergebnisse“, Torwart-Stärke samt Schätzung aus den Spielen im Tor */
+function shareValues(p, A, ds) {
+  const e = effOf(p), q = PV(p);
+  const s = clamp(svR2(e.strength + (isNum(ds[p.id]) ? ds[p.id] : 0)), 1, 15);
+  let g = Engine.keeperBase({ eff: e, roleMain: q.roleMain, roleSub: q.roleSub, gkWill: q.gkWill }, SPORT);
+  const r = A && A.F && A.F.res ? A.F.res['gk:' + p.id] : null;
+  if (r && isNum(A.cur['gk:' + p.id])) g = A.cur['gk:' + p.id] + r.d;
+  return { s, g: clamp(svR2(isNum(g) ? g : 3.5), 1, 15), w: p.roleMain === 'GK' ? 'main' : GW.includes(p.gkWill) ? p.gkWill : 'emergency' };
+}
+function shareLink(sh) {
+  const base = svBase(); if (!base) return '';
+  const idx = new Map(sh.players.map((x, k) => [x.id, k]));
+  const rules = sh.rules.map(r => (r[2] === 'together' ? 't' : 'x') + b26(r[0], 2) + b26(r[1], 2)).join('');
+  const pl = sh.players.map(x => gvChar(x.s) + gvChar(x.g) + 'abcd'[GW.indexOf(x.w)] + x.name);
+  void idx;
+  return `${base}#ftg${svPack([sh.id, S.share.gid, sh.title || S.name || 'Faire Teams', S.share.by || '', b26(gDays(sh.date), 3), rules, ...pl])}`;
+}
+function shareMsg(sh) {
+  const by = S.share.by, title = sh.title || S.name;
+  return `⚽ ${title}: Mit diesem Link könnt ihr auch ohne mich faire Teams bilden (Stand ${dateDE(sh.date)}). Die Bewertungen der Spieler bleiben dabei verborgen.\n\n👉 ${shareLink(sh)}\n\nNach dem Spiel das Ergebnis in der App eintragen und über „Ergebnisse${by ? ' an ' + by : ''} schicken“ zurückschicken.\n(Öffnet sich nur die Startseite? Dann diese Nachricht kopieren und in der App bei „Link einfügen“ einsetzen.)`;
+}
+
+/* ---------- Beim Empfänger: Link → Gast-Projekt ---------- */
+function guestDecode(h) {
+  const f = svUnpack(h.replace(/^#ftg/, '').replace(/[^A-Za-z0-9-]/g, ''));
+  if (f.length < 7 || !/^[a-z]{6}$/.test(f[0]) || !/^[a-z]{6}$/.test(f[1]) || !/^[a-z]{3}$/.test(f[4])) throw new Error('ungültig');
+  const players = f.slice(6, 206).map(x => ({ s: gvVal(x[0]), g: gvVal(x[1]), w: GW['abcd'.indexOf(x[2])], name: str(x.slice(3)).slice(0, 60) }));
+  if (players.some(x => x.s == null || x.g == null || !x.w || !x.name)) throw new Error('ungültig');
+  const rules = []; const rs = f[5];
+  for (let i = 0; i + 5 <= rs.length; i += 5) { const a = unb26(rs.slice(i + 1, i + 3)), b = unb26(rs.slice(i + 3, i + 5)); if (a < players.length && b < players.length && a !== b) rules.push({ type: rs[i] === 't' ? 'together' : 'apart', a, b }); }
+  return { lid: f[0], gid: f[1], title: str(f[2]).slice(0, 60) || 'Faire Teams', by: str(f[3]).slice(0, 30), at: addDays(G_EPOCH, unb26(f[4])), players, rules };
+}
+function guestState(D, old) {
+  const st = defaultState();
+  st.name = `${D.title} (Gast · Stand ${dateDE(D.at).replace(/\d{4}$/, '')})`; st.welcomed = true;
+  const ids = gIds(D.players.map(x => x.name));
+  st.players = D.players.map((x, k) => Object.assign(blankPlayer(x.name, { strength: x.s, rated: true }), { id: ids[k], gk: clamp(x.g, 1, 10), gkWill: x.w === 'main' ? 'likes' : x.w, roleMain: x.w === 'main' ? 'GK' : 'FLEX' }));
+  st.rules = D.rules.map(r => ({ id: uid(), type: r.type, a: ids[r.a], b: ids[r.b], hard: true, prio: 1, bonus: 1, note: '', active: true }));
+  st.guest = { gid: D.gid, lid: D.lid, by: D.by, title: D.title, at: D.at, sent: (old && old.guest && old.guest.sent) || {} };
+  if (old) {
+    // Runden, Spieltag und selbst ergänzte Gäste bleiben; die Spieler aus dem Link kommen neu
+    const linkIds = new Set(ids);
+    (old.players || []).forEach(p => { if (p && !linkIds.has(p.id) && !/^g[0-9a-z]{4}$/.test(String(p.id))) st.players.push(p); });
+    st.matches = old.matches || []; st.day = old.day || st.day; st.result = old.result || null;
+  }
+  return cleanState(st);
+}
+function readProject(pr) { if (pr.id === projects.current) return S; try { return JSON.parse(LS.get(PROJ_KEY(pr.id)) || 'null'); } catch (e) { return null; } }
+function guestFromHash() {
+  if (!/^#ftg[A-Za-z0-9-]/.test(location.hash)) return;
+  let D;
+  try { D = guestDecode(location.hash); } catch (e) { clearHash(); toast('Dieser Gast-Link ist unvollständig oder beschädigt. Bitte noch einmal schicken lassen.'); return; }
+  clearHash();
+  if (ui.noSave) { toast('Gast-Link nicht geöffnet: Die Daten auf diesem Gerät ließen sich nicht lesen.'); return; }
+  let hit = null;
+  projects.list.forEach(pr => { if (hit) return; const st = readProject(pr); if (st && st.guest && st.guest.gid === D.gid) hit = { pr, st }; });
+  const when = dateDE(D.at), name = `${D.title} (Gast · Stand ${when.replace(/\d{4}$/, '')})`;
+  if (hit && hit.st.guest.lid === D.lid) {
+    if (projects.current !== hit.pr.id) openProject(hit.pr.id);
+    ui.tab = 'day'; toast(`Gast-Projekt „${D.title}“ ist schon auf dem neuesten Stand (${when}).`); return;
+  }
+  let st;
+  try { st = guestState(D, hit ? hit.st : null); } catch (e) { toast('Dieser Gast-Link ließ sich nicht lesen.'); return; }
+  if (hit) {
+    if (projects.current === hit.pr.id) { S = st; anaCache = null; predCache.clear(); }
+    else { save(); if (!LS.set(PROJ_KEY(hit.pr.id), JSON.stringify(st))) { toast('Der Speicher im Browser ist voll.'); return; } openProject(hit.pr.id); }
+    hit.pr.name = name; saveIndex();
+    ui.tab = 'day'; toast(`Gast-Projekt „${D.title}“ aktualisiert – Stand ${when}.`);
+  } else {
+    // Frisches Gerät: das leere Standardprojekt nicht stehen lassen
+    const cur = curProject(), empty = cur && projects.list.length === 1 && !S.players.length && !S.matches.length && !S.guest;
+    if (!newProject(name, st)) return;
+    if (empty) { projects.list = projects.list.filter(x => x.id !== cur.id); LS.del(PROJ_KEY(cur.id)); saveIndex(); }
+    ui.tab = 'day'; toast(`Gast-Projekt „${D.title}“ angelegt – Stand ${when}. Die Bewertungen bleiben verborgen.`);
+  }
+}
+
+/* ---------- Gast: Ergebnisse zurückschicken ---------- */
+const guestRounds = () => S.matches.filter(m => m.status === 'done').sort((a, b) => a.date.localeCompare(b.date) || a.created - b.created);
+const guestSig = m => svSum(JSON.stringify([m.date, m.teams, m.games]));
+const guestUnsent = () => (isGuest() ? guestRounds().filter(m => S.guest.sent[m.id] !== guestSig(m)) : []);
+function guestCode(m) {
+  const ids = m.teams.flat(), n = {}, s = {};
+  ids.forEach(id => { const p = byId(id); n[id] = p ? disp(p) : nameAny(id); if (p) s[id] = p.strength; });
+  // Nur das Nötige: Spiele ohne leere Felder, vom Schnappschuss nur Spielform und Tagesangaben
+  const games = m.games.map(g => Object.fromEntries(Object.entries(g).filter(([, v]) => !(v === '' || v == null || v === false || (Array.isArray(v) && !v.length) || (v && typeof v === 'object' && !Array.isArray(v) && !Object.keys(v).length)))));
+  const sd = m.snap ? m.snap.day : {}, day = Object.fromEntries(Object.entries(sd || {}).filter(([, v]) => v && Object.keys(v).length));
+  const k = m.snap ? { cap: m.snap.set.cap, format: m.snap.set.format, gkRule: m.snap.set.gkRule } : null;
+  const payload = { v: 1, m: { id: m.id, date: m.date, time: m.time || '', teams: m.teams, games, colors: m.colors, created: m.created, how: m.how || '', k, day }, n, s };
+  const body = `FTR1-${S.guest.lid}-${b32enc(svUtf8(JSON.stringify(payload)))}`;
+  return `${body}-${svSum(body)}`;
+}
+function guestMsg(list) {
+  return [`Faire Teams – ${list.length === 1 ? 'Ergebnis' : list.length + ' Ergebnisse'} für ${S.guest.by || 'den Organisator'}:`, ...list.map(m => `${dateShort(m.date)}: ${inCols(m.colors, () => resultText(m)) || 'Ergebnis'}\n${guestCode(m)}`)].join('\n\n');
+}
+function guestBannerHTML() {
+  if (!isGuest()) return '';
+  const G = S.guest, n = guestUnsent().length;
+  return `<div class="banner guestban"><p><b>Gast-Projekt</b>${G.by ? ` von ${esc(G.by)}` : ''} · Stand ${dateDE(G.at)}<br><span class="small muted">Die Bewertungen sind verborgen. Ein neuer Link aktualisiert dieses Projekt.</span></p>
+    ${n ? `<button type="button" class="btn sm primary" data-act="gSendOpen">📤 ${n === 1 ? 'Ergebnis' : n + ' Ergebnisse'} an ${esc(G.by || 'Organisator')} schicken</button>` : ''}</div>`;
+}
+function guestSendHTML() {
+  const all = guestRounds(), un = new Set(guestUnsent().map(m => m.id));
+  const pick = all.filter(m => ui.gsend.all || un.has(m.id));
+  const msg = pick.length ? guestMsg(pick) : '';
+  ui.gsend.msg = msg; ui.gsend.ids = pick.map(m => m.id);
+  return sheetWrap(`<div class="sheet-head"><h2 id="gsTitle">Ergebnisse zurückschicken</h2><button type="button" class="btn sm primary" data-act="gSendClose">Fertig</button></div>
+    <p class="hint">Schick diese Nachricht an ${esc(S.guest.by || 'den Organisator')}. Er fügt sie in seiner App ein, dann stehen die Runden mit Ergebnis bei ihm im Rückblick.</p>
+    ${all.length ? `<ul class="rules">${all.map(m => `<li><span class="grow"><b>${esc(dateShort(m.date))}</b> · ${esc(inCols(m.colors, () => resultText(m)) || '–')}</span>${un.has(m.id) ? tag('neu', 't-new') : tag('geschickt')}</li>`).join('')}</ul>` : '<p class="hint">Noch keine Runde mit Ergebnis. Nach dem Spiel unter „Teams“ das Ergebnis eintragen.</p>'}
+    ${all.length > un.size ? `<div class="row">${cbx('gSendAll', !!ui.gsend.all, 'auch schon geschickte noch einmal')}</div>` : ''}
+    ${msg ? `<details class="field"><summary class="small muted">Nachricht ansehen</summary><pre class="svcode gcode">${esc(msg)}</pre></details>
+    <div class="row"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-act="gSent">Per WhatsApp senden</a>${navigator.share ? '<button type="button" class="btn" data-act="gShare">Teilen …</button>' : ''}<button type="button" class="btn" data-act="gCopy">Kopieren</button></div>` : un.size === 0 && all.length ? '<p class="hint">Alles schon geschickt. ✓</p>' : ''}`, 'gsTitle', 'gSendClose');
+}
+function guestSettingsHTML() {
+  const G = S.guest;
+  return `<section class="block"><h2>Gast-Projekt</h2>
+    <p>${esc(G.title)}${G.by ? ` von <b>${esc(G.by)}</b>` : ''} · Stand ${dateDE(G.at)}.</p>
+    <ul class="hint hintlist"><li>Die Stärken der Spieler kommen aus dem Link und bleiben verborgen.</li><li>Die Fairness erscheint ab ${GUEST_MIN} Spielern je Team.</li><li>Ein neuer Link von ${esc(G.by || 'ihm')} aktualisiert dieses Projekt; eure Runden bleiben erhalten.</li></ul>
+    <div class="row"><button type="button" class="btn" data-act="gSendOpen">📤 Ergebnisse zurückschicken</button><button type="button" class="btn ghost" data-act="projOpen">Projekte wechseln oder löschen</button></div></section>
+    <section class="block"><div class="field"><span class="lbl">Farben</span>${seg('theme', [['auto', '🖥️ wie das Gerät'], ['light', '☀️ hell'], ['dark', '🌙 dunkel']], getTheme())}</div>${helpField()}</section>`;
+}
+/* Spieltag im Gast-Projekt: Tagesform und Torwart je Spieler, Regel ohne festen Torwart */
+function guestRowHTML(p) {
+  const d = S.day, fk = d.form[p.id], rt = d.roleToday[p.id], exp = ui.expId === p.id;
+  const inGoal = rt === 'GK' || (p.roleMain === 'GK' && rt !== 'FLEX');
+  const tags = (fk && fk !== 'normal' ? tag(`${signed(STD().forms[fk])} %`, 'form', 'Tagesform') : '');
+  const opts = exp ? `<div class="pday">
+      <div class="field">${lbl('Tagesform', 'form')}${seg('form', SPORT.forms.map(f => [f[0], f[0] === 'normal' ? f[1] : `${f[1]} ${signed(STD().forms[f[0]])} %`]), fk || 'normal', `data-id="${p.id}"`)}</div>
+      <div class="field"><span class="lbl">Heute</span>${seg('roleToday', p.roleMain === 'GK' ? [['', 'im Tor (wie immer)'], ['FLEX', 'im Feld']] : [['', 'im Feld (wie immer)'], ['GK', 'fest im Tor']], rt || '', `data-id="${p.id}"`)}</div></div>` : '';
+  return { tags: tags + (inGoal ? tag(rt === 'GK' ? 'TW heute' : 'TW', 'gk', 'Torwart') : rt === 'FLEX' ? tag('heute im Feld') : ''), tool: `<button type="button" class="mini${exp ? ' on' : ''}" data-act="expand" data-id="${p.id}" aria-label="Tagesform und Torwart für heute" aria-expanded="${exp}">${ICON.dots}</button>`, opts };
+}
+function guestGkHTML() {
+  const cur = S.day.gkRule || STD().gkRule;
+  return `<div class="field"><span class="lbl">Team ohne festen Torwart</span>${seg('gGkRule', SPORT.gkRules.map(r => [r[0], r[1]]), cur, '', 'stack')}</div>`;
+}
+
+/* ---------- Organisator: Fenster „Gast-Link“ ---------- */
+function guestEntryHTML() {
+  const L = (S.share && S.share.list) || [], last = L[L.length - 1];
+  return `<div class="svent"><button type="button" class="btn sm" data-act="gsOpen"><span class="emo" aria-hidden="true">🔗</span> Gast-Link für die Gruppe</button>
+    <span class="small muted">${last ? `Zuletzt am ${dateDE(last.date)} geteilt.` : 'Die Gruppe bildet faire Teams ohne dich – ohne die Bewertungen zu sehen.'}</span></div>`;
+}
+function shareSheetHTML() {
+  const U = ui.gshare, L = S.share.list, last = L[L.length - 1];
+  const pl = S.players.filter(p => p.status !== 'archived').slice().sort(sortByLabel);
+  if (!U.pick) { U.pick = {}; pl.forEach(p => { U.pick[p.id] = p.status === 'active'; }); }
+  const nSel = pl.filter(p => U.pick[p.id]).length, st = { paused: 'pausiert', guest: 'Gast' };
+  const hard = S.rules.filter(r => r.active !== false && r.hard && r.type !== 'duo').length;
+  const link = last ? shareLink(last) : '', msg = last ? shareMsg(last) : '';
+  const withRes = S.matches.some(m => m.status === 'done');
+  return sheetWrap(`<div class="sheet-head"><h2 id="gshTitle">Gast-Link</h2><button type="button" class="btn sm primary" data-act="gsClose">Fertig</button></div>
+    <ul class="hint hintlist"><li>Mit dem Link kann die Gruppe auch ohne dich faire Teams bilden: ankreuzen, wer da ist, Tagesform und Torwart festlegen, Teams bilden, teilen.</li>
+      <li>Im Link stecken je Spieler nur die Stärke${withRes ? ' (Bewertungen + Ergebnisse)' : ''}, die Torwart-Stärke und ob er ins Tor geht${hard ? `, dazu ${plural(hard, 'Pflicht-Paarregel', 'Pflicht-Paarregeln')}` : ''}. Angezeigt werden die Werte nicht – sie sind versteckt, aber nicht verschlüsselt.</li>
+      <li>Der Link ist ein Schnappschuss. Ergebnisse schickt die Gruppe dir als Code zurück, du fügst sie unten ein.</li></ul>
+    ${!svBase() ? '<div class="banner warn"><p>Die App ist als Datei geöffnet. Ein Gast-Link funktioniert nur mit der Online-Adresse der App.</p></div>' : ''}
+    ${last ? `<details class="field svsec" data-sec="gsLink" open><summary><b>Aktueller Link</b> <span class="small muted">· Stand ${dateDE(last.date)} · ${plural(last.players.length, 'Spieler', 'Spieler')}</span></summary>
+      <div class="svlinkbox"><input type="text" readonly value="${esc(link)}" aria-label="Gast-Link"></div>
+      <div class="row"><a class="btn sm primary" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">WhatsApp</a>${navigator.share ? '<button type="button" class="btn sm" data-act="gsShare">Teilen …</button>' : ''}<button type="button" class="btn sm" data-act="gsCopy">Kopieren</button><a class="btn sm ghost" href="${esc(link)}" target="_blank" rel="noopener">Ausprobieren</a></div>
+      ${last.date !== isoToday() ? '<p class="small muted">Hast du seitdem Bewertungen geändert oder Spiele eingetragen? Dann unten einen neuen Link erstellen.</p>' : ''}</details>` : ''}
+    <div class="field"><label class="lbl" for="gsRes">Ergebnisse der Gruppe einfügen</label>
+      <textarea id="gsRes" data-in="gsRes" rows="3" placeholder="Nachrichten mit „FTR1-…“ hier einfügen">${esc(U.paste || '')}</textarea>
+      <div class="row"><button type="button" class="btn sm primary" data-act="gsRead"${str(U.paste) ? '' : ' disabled'}>Einlesen</button>${U.msg ? `<span class="small ${U.msgBad ? 'errtxt' : ''}">${esc(U.msg)}</span>` : ''}</div></div>
+    <details class="field svsec" data-sec="gsNew"${!last || ui.open.gsNew ? ' open' : ''}><summary><b>${last ? 'Neuen Link erstellen' : 'Link erstellen'}</b></summary>
+      <div class="field"><label class="lbl" for="gsBy">Dein Name (steht in der Nachricht und beim Zurückschicken)</label><input type="text" id="gsBy" data-in="gsBy" maxlength="30" value="${esc(S.share.by)}" placeholder="z. B. Peter"></div>
+      <div class="field"><div class="lblrow"><span class="lbl">Wer steht im Link? (${nSel})</span><span class="grow"></span><button type="button" class="btn sm ghost" data-act="gsPickAll" data-v="1">alle</button><button type="button" class="btn sm ghost" data-act="gsPickAll" data-v="0">keinen</button></div>
+        <div class="svpick">${pl.map(p => cbx('gsPick', !!U.pick[p.id], label(p) + (st[p.status] ? ` · ${st[p.status]}` : ''), `data-id="${p.id}"`)).join('')}</div></div>
+      <div class="row"><button type="button" class="btn primary" data-act="gsCreate"${nSel >= 2 && svBase() ? '' : ' disabled'}>Link erstellen</button></div></details>`, 'gshTitle', 'gsClose');
+}
+/* Ergebnis-Codes der Gäste einlesen: Runde mit Teams und Ergebnis anlegen. Bewertet wird sie wie eigene Runden
+   mit deinen Bewertungen (nicht mit den Link-Werten – die enthalten frühere Ergebnisse schon). */
+function shareIngest(text) {
+  const T = String(text || ''), out = { add: 0, upd: 0, same: 0, bad: 0, newPl: [] };
+  const re = /FTR1-/gi; let mm;
+  while ((mm = re.exec(T))) {
+    const raw = T.slice(mm.index, mm.index + 60000).replace(/\s+/g, '').toLowerCase();
+    const m0 = /^ftr1-([a-z]{6})-([a-z2-7]+)-([a-z0-9]{4})/.exec(raw);
+    if (!m0 || svSum(`FTR1-${m0[1]}-${m0[2]}`) !== m0[3]) { out.bad++; continue; }
+    let P; try { P = JSON.parse(svText(b32dec(m0[2]))); } catch (e) { out.bad++; continue; }
+    if (!P || !P.m || !Array.isArray(P.m.teams) || !isIso(P.m.date)) { out.bad++; continue; }
+    const sh = S.share.list.find(x => x.id === m0[1]);
+    const hmap = {};
+    if (sh) { const ids = gIds(sh.players.map(x => x.name)); sh.players.forEach((x, k) => { if (byId(x.id)) hmap[ids[k]] = x.id; }); }
+    const idMap = {};
+    Object.keys(P.n || {}).forEach(gid => {
+      if (!SAFE_ID.test(gid)) return;
+      if (hmap[gid]) { idMap[gid] = hmap[gid]; return; }
+      const nm = str(P.n[gid]).slice(0, 60), hits = nm ? S.players.filter(p => normName(disp(p)) === normName(nm) || normName(label(p)) === normName(nm)) : [];
+      if (hits.length === 1) { idMap[gid] = hits[0].id; return; }
+      if (!nm) return;
+      const np = blankPlayer(nm, { status: 'guest', strength: isNum(P.s && P.s[gid]) ? clamp(+P.s[gid], 1, 10) : 5, rated: isNum(P.s && P.s[gid]) });
+      S.players.push(np); idMap[gid] = np.id; out.newPl.push(nm);
+    });
+    const raw2 = impRemap({ teams: P.m.teams, games: P.m.games || [], day: P.m.day || {} }, idMap);
+    const teams = raw2.teams.map(t => (Array.isArray(t) ? t.filter(id => byId(id)) : []));
+    if (teams.length < 2 || teams.some(t => !t.length)) { out.bad++; continue; }
+    // Einstellungen wie bei eigenen Runden, aber ohne Platzangaben (die Gäste legen keinen Ort fest)
+    const keepDay = S.day; let set;
+    try { S.day = { ...defaultDay(P.m.date), present: {} }; set = makeSnapshot(teams).set; } finally { S.day = keepDay; }
+    if (P.m.k) { if (isNum(P.m.k.cap)) set.cap = P.m.k.cap; if (P.m.k.format) set.format = P.m.k.format; if (P.m.k.gkRule) set.gkRule = P.m.k.gkRule; }
+    const day = raw2.day || {};
+    const snap = { v: 1, set, day: { form: day.form || {}, roleToday: day.roleToday || {}, pause: day.pause || {}, gkShare: day.gkShare || {} }, duo: [], pl: {} };
+    teams.flat().forEach(id => { snap.pl[id] = snapPlayer(PV(byId(id))); });
+    const id = SAFE_ID.test(str(P.m.id)) ? 'x' + str(P.m.id).slice(0, 30) : uid() + uid();
+    const m = cleanMatch({ id, date: P.m.date, time: P.m.time, status: 'done', teams, planned: teams, snap, pred: null, games: raw2.games, colors: P.m.colors, created: isNum(P.m.created) ? P.m.created : Date.now(), upd: Date.now(), remind: false, how: P.m.how,
+      edits: [{ at: Date.now(), txt: `Von der Gruppe über den Gast-Link eingetragen${sh ? ` (Link vom ${dateDE(sh.date)})` : ''}` }] }, new Set(S.players.map(p => p.id)));
+    if (!m) { out.bad++; continue; }
+    const i = S.matches.findIndex(x => x.id === m.id);
+    if (i >= 0 && JSON.stringify([S.matches[i].teams, S.matches[i].games]) === JSON.stringify([m.teams, m.games])) { out.same++; continue; }
+    if (i >= 0) { S.matches[i] = m; out.upd++; } else { S.matches.push(m); out.add++; }
+  }
+  return out;
+}
+Object.assign(A, {
+  gsOpen: () => { if (!S.share.gid) S.share.gid = svNewId(); ui.gshare = { pick: null }; render(); },
+  gsClose: () => { ui.gshare = null; render(); },
+  gsPick: el => { const U = ui.gshare; U.pick[el.dataset.id] = !U.pick[el.dataset.id]; render(); },
+  gsPickAll: el => { const U = ui.gshare; Object.keys(U.pick).forEach(k => { U.pick[k] = el.dataset.v === '1'; }); render(); },
+  gsCreate: () => {
+    const U = ui.gshare, pl = S.players.filter(p => p.status !== 'archived' && U.pick[p.id]).sort(sortByLabel);
+    if (pl.length < 2) return;
+    const withRes = S.matches.some(m => m.status === 'done'), A0 = withRes ? anaNow() : null, ds = withRes ? modelDs() : {};
+    const idx = new Map(pl.map((p, k) => [p.id, k]));
+    const rules = S.rules.filter(r => r.active !== false && r.hard && (r.type === 'together' || r.type === 'apart') && idx.has(r.a) && idx.has(r.b)).map(r => [idx.get(r.a), idx.get(r.b), r.type]);
+    const sh = { id: svNewId(), created: Date.now(), date: isoToday(), title: str(S.name).slice(0, 60) || 'Faire Teams', players: pl.map(p => ({ id: p.id, name: disp(p), ...shareValues(p, A0, ds) })), rules };
+    S.share.list.push(sh); S.share.list = S.share.list.slice(-20);
+    ui.open.gsNew = false; render(); toast('Gast-Link erstellt – jetzt teilen.');
+  },
+  gsShare: async () => { const L = S.share.list, sh = L[L.length - 1]; if (!sh) return; try { await navigator.share({ text: shareMsg(sh) }); } catch (e) { /* abgebrochen */ } },
+  gsCopy: () => { const L = S.share.list, sh = L[L.length - 1]; if (sh) copyText(shareMsg(sh), 'Nachricht mit Gast-Link kopiert.'); },
+  gsRead: () => {
+    const U = ui.gshare; remember('Ergebnisse der Gruppe eingelesen');
+    const r = shareIngest(U.paste);
+    const parts = [];
+    if (r.add) parts.push(`${plural(r.add, 'Runde', 'Runden')} übernommen`);
+    if (r.upd) parts.push(`${plural(r.upd, 'Runde', 'Runden')} aktualisiert`);
+    if (r.same) parts.push(`${r.same} schon vorhanden`);
+    if (r.newPl.length) parts.push(`neu als Gast: ${r.newPl.join(', ')}`);
+    if (r.bad) parts.push(`${r.bad} fehlerhaft`);
+    U.msg = parts.length ? parts.join(' · ') + '.' : 'Keine Ergebnis-Codes gefunden. Es müssen Nachrichten mit „FTR1-…“ sein.';
+    U.msgBad = !r.add && !r.upd && !r.same;
+    if (r.add || r.upd) { U.paste = ''; anaCache = null; toast(`${U.msg} Die Runden stehen im Rückblick.`, { label: 'Rückgängig', act: 'undo' }); }
+    render();
+  },
+  gGkRule: el => { S.day.gkRule = el.dataset.v === STD().gkRule ? '' : el.dataset.v; render(); },
+  gSendOpen: () => { ui.gsend = { all: false }; render(); },
+  gSendClose: () => { ui.gsend = null; render(); },
+  gSendAll: () => { ui.gsend.all = !ui.gsend.all; render(); },
+  gSent: el => { (ui.gsend.ids || []).forEach(id => { const m = matchById(id); if (m) S.guest.sent[id] = guestSig(m); }); save(); window.open(el.href, '_blank', 'noopener'); setTimeout(render, 300); },
+  gShare: async () => { try { await navigator.share({ text: ui.gsend.msg }); (ui.gsend.ids || []).forEach(id => { const m = matchById(id); if (m) S.guest.sent[id] = guestSig(m); }); render(); } catch (e) { /* abgebrochen */ } },
+  gCopy: () => { (ui.gsend.ids || []).forEach(id => { const m = matchById(id); if (m) S.guest.sent[id] = guestSig(m); }); copyText(ui.gsend.msg, 'Kopiert – jetzt in WhatsApp einfügen und abschicken.'); }
+});
+Object.assign(IN, {
+  gsBy: el => { S.share.by = el.value.slice(0, 30); save(); },
+  gsRes: el => { ui.gshare.paste = el.value; const b = document.querySelector('[data-act="gsRead"]'); if (b) b.disabled = !str(el.value); }
+});
+
+
+/* ---------- Erklärtexte ausblenden (Einstellung je Gerät) ----------
+   Ausgeblendet werden Hinweise (.hint, Listen mit Erklärungen) und längere graue Erklärsätze. Was Knöpfe oder Felder
+   enthält, Statusmeldungen („Noch …“, „✓“) und kurze Angaben (Zahlen, Daten) bleiben. Die (i)-Knöpfe bleiben immer. */
+const HELP_KEY = 'ft-help';
+function helpOff() { try { return localStorage.getItem(HELP_KEY) === 'off'; } catch (e) { return false; } }
+function tidyHelp() {
+  const off = helpOff() && !SV_MODE;
+  document.body.classList.toggle('no-help', off);
+  if (!off) return;
+  const live = el => el.querySelector('button, a, input, select, textarea, label');
+  document.querySelectorAll('#main .hint, #main .hintlist, #sheet .hint, #sheet .hintlist, #actionbar .hint').forEach(el => {
+    const t = el.textContent.trim();
+    if (live(el) || /^(Noch |Zurzeit |Kein |Keine |Niemand )/.test(t) || t.includes('✓')) return;
+    el.classList.add('xhelp');
+  });
+  document.querySelectorAll('#main .small.muted, #sheet .small.muted, #main p.muted, #sheet p.muted').forEach(el => {
+    const t = el.textContent.trim();
+    if (t.length < 55 || live(el) || el.closest('.verdict, .svres, .svresp') || /^(Noch |Zurzeit |Kein |Keine |Niemand )/.test(t) || !(/[.!?…)]$/.test(t) || /[.!?] /.test(t))) return;
+    el.classList.add('xhelp');
+  });
+}
+Object.assign(A, { helpSet: el => { try { if (el.dataset.v === 'off') localStorage.setItem(HELP_KEY, 'off'); else localStorage.removeItem(HELP_KEY); } catch (e) { /* privat */ } render(); toast(el.dataset.v === 'off' ? 'Erklärtexte ausgeblendet – die (i)-Knöpfe erklären weiterhin auf Wunsch.' : 'Erklärtexte werden wieder gezeigt.'); } });
+const helpField = () => `<div class="field"><span class="lbl">Erklärtexte</span>${seg('helpSet', [['on', 'zeigen'], ['off', 'ausblenden']], helpOff() ? 'off' : 'on')}<span class="small muted">Für alle, die die App schon kennen: weniger Text, nur noch Knöpfe und Felder. Die (i)-Knöpfe erklären weiterhin auf Wunsch. Gilt für dieses Gerät.</span></div>`;
+
 if (SV_MODE) svStart();
 else {
   load();
   linkCurrentTeams();
+  guestFromHash();
   render();
 }
 // Vorhersagen, die zu einer anderen Rechenversion gehören, im Hintergrund aus den Schnappschüssen neu rechnen
