@@ -1259,8 +1259,11 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svsec > .row { margin: 0 0 12px; }
 .svsec > p { margin: 0 0 8px; }
 .svlinkbox input { min-height: 42px; }
-.svline .dot.me { background: var(--turf); box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 3px var(--turf); z-index: 2; }
-.lg.dot.me { background: var(--turf); }
+/* Eigene Stimme: grau wie die anderen, mit kleinem dunklen Kreuz */
+.svline .dot.me, .lg.dot.me { width: 9px; height: 9px; z-index: 2;
+  background: linear-gradient(45deg, transparent 42%, #3a403d 42% 58%, transparent 58%), linear-gradient(-45deg, transparent 42%, #3a403d 42% 58%, transparent 58%), color-mix(in srgb, var(--muted) 75%, var(--surface)); }
+.svres > li.svflash { animation: svflash 1.6s ease-out; }
+@keyframes svflash { 0%, 35% { background: color-mix(in srgb, var(--turf) 16%, var(--surface)); border-color: var(--turf); } 100% { background: var(--surface); } }
 .svwho { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; text-align: left; color: var(--ink); min-width: 0; }
 .svwho .avatar { width: 26px; height: 26px; font-size: .72rem; flex: none; }
 .svwho b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1288,6 +1291,36 @@ body.no-help .xhelp { display: none !important; }
 .bstr > span.mini { width: 30px; display: inline-block; }
 body.no-help .htail { display: none; }
 .impopts { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; }
+
+/* v43: Gast-Projekt mit eigenem Farbton (Petrol statt Grün oben, Hintergrund leicht kühler) */
+body.is-guest { --top-bg: #1f5168; --bg: #edf0f1; --surface-2: #e3e8ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body.is-guest { --top-bg: #163446; --bg: #0e1417; --surface-2: #1b252a; } }
+:root[data-theme="dark"] body.is-guest { --top-bg: #163446; --bg: #0e1417; --surface-2: #1b252a; }
+/* Spielerprofil: leicht getönt, damit es sich vom Rest abhebt */
+.sheet.prof { --prof: color-mix(in srgb, var(--est) 5%, var(--surface)); background: var(--prof); border-top: 4px solid color-mix(in srgb, var(--est) 45%, var(--surface)); }
+.sheet.prof .sheet-head { background: var(--prof); }
+/* Auswahl im Verlauf: Kreuz oben rechts statt eigener Zeile */
+.chdet { position: relative; padding-right: 44px; }
+.chdet > .mini { position: absolute; top: 4px; right: 4px; }
+.chdet > .grow { display: none; }
+.psortsel { width: auto; flex: 0 1 auto; min-height: 38px; padding: 4px 30px 4px 10px; }
+/* Schalterleisten in einer Reihe (zur Not seitlich wischbar) */
+.seg.pill.one { display: flex; max-width: 100%; width: max-content; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.seg.pill.one::-webkit-scrollbar { display: none; }
+.seg.pill.one button { flex: none; padding: 0 10px; white-space: nowrap; }
+.row.onerow { flex-wrap: nowrap; min-width: 0; }
+.row.onerow > .lbl { flex: none; }
+.row.onerow > .seg { min-width: 0; }
+.tchips.onerow { overflow-x: auto; scrollbar-width: none; }
+.tchips.onerow::-webkit-scrollbar { display: none; }
+.tchips.onerow .showchip { flex: none; min-height: 32px; gap: 5px; padding: 0 10px 0 7px; font-size: .8rem; }
+.tchips.onerow .showchip .tbox { width: 14px; height: 14px; }
+.tchips.onerow .showchip.on .tbox::after { left: 3.5px; top: -.5px; width: 3.5px; height: 8px; }
+/* Antippbare Erklärungen */
+.tp .rb[data-act="tip"], .tp .sv[data-act="tip"] { cursor: help; }
+/* Symbole auf Knöpfen: größer und mit Kontrast zum weißen Knopf */
+.emo { width: 1.95em; height: 1.95em; font-size: 1.08em; background: var(--turf-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--turf) 30%, transparent); }
+.btn.primary .emo { background: #fffdf6; box-shadow: 0 0 0 1px rgba(0, 0, 0, .1); }
 </style>
 </head>
 <body>
@@ -2334,10 +2367,16 @@ const Engine = (() => {
   }
 
   function measureRate(M) {
-    const a = randomInit(M), t0 = now();
-    let k = 0;
-    while (k < 400 && (k < 30 || now() - t0 < 15)) { evaluate(M, a); k++; }
-    return k / Math.max(0.05, now() - t0);   // Bewertungen je Millisekunde
+    // Mehrere kurze Messungen, die schnellste zählt: Die erste ist oft noch „kalt“ (Code nicht optimiert)
+    const a = randomInit(M);
+    let best = 0;
+    for (let w = 0; w < 4; w++) {
+      const t0 = now();
+      let k = 0;
+      while (k < 400 && (k < 30 || now() - t0 < 10)) { evaluate(M, a); k++; }
+      best = Math.max(best, k / Math.max(0.05, now() - t0));
+    }
+    return best;   // Bewertungen je Millisekunde
   }
 
   /* Exakte Suche: jede Aufteilung genau einmal (austauschbare Teams nur in einer Reihenfolge). */
@@ -3358,7 +3397,7 @@ function cleanState(raw) {
     s.result = {
       T: R.teams.length, date: isIso(R.date) ? R.date : s.day.date, sig: str(R.sig).slice(0, 40), vsel: Number.isInteger(R.vsel) ? R.vsel : 0,
       vars: R.vars.filter(v => v && validTeams(v.teams)).slice(0, 3).map(v => ({ teams: validTeams(v.teams), U: isNum(v.U) ? +v.U : 0, eq: !!v.eq })),
-      teams: validTeams(R.teams), manual: !!R.manual, self: !!R.self, random: !!R.random, untracked: !!R.untracked,
+      teams: validTeams(R.teams), manual: !!R.manual, hand: !!R.hand, self: !!R.self, random: !!R.random, untracked: !!R.untracked,
       ...(['rating', 'mix', 'data'].includes(R.basis) ? { basis: R.basis } : {}),
       howSet: !!R.howSet,
       ...(HOW_KEYS.includes(R.how) ? { how: R.how, pickers: R.how === 'captains' ? cleanPickers(R.pickers, R.teams.length, id => ids.has(id)) : [], lead: R.how === 'self' ? cleanLead(R.lead) : '', howNote: R.how === 'other' ? cleanHowNote(R.howNote) : '' } : {}),
@@ -3501,7 +3540,7 @@ function cleanPred(p, T) {
 }
 const MATCH_STATUS = ['open', 'done', 'skipped', 'cancelled', 'old'];
 /* Wie die Teams einer Runde entstanden sind */
-const HOWS = [['app', 'App (fair berechnet)', '⚖️'], ['random', 'Zufall', '🎲'], ['self', 'Selbst eingeteilt', '✋'], ['captains', 'Kapitäne haben gewählt', '👉'], ['other', 'Sonstiges', '🧩']];
+const HOWS = [['app', 'App (fair berechnet)', '⚖️'], ['random', 'Zufall', '🎲'], ['self', 'Selbst eingeteilt', '✍️'], ['captains', 'Kapitäne haben gewählt', '👉'], ['other', 'Sonstiges', '🧩']];
 const HOW_KEYS = HOWS.map(h => h[0]);
 const howLabel = k => (HOWS.find(h => h[0] === k) || ['', 'nicht angegeben'])[1];
 const howIcon = k => (HOWS.find(h => h[0] === k) || ['', '', '❔'])[2];
@@ -3589,7 +3628,7 @@ function cleanMatch(m, ids) {
       note: str(f.note).slice(0, 300)
     },
     exclude: !!m.exclude, colors: cleanCols(m.colors),
-    how: HOW_KEYS.includes(m.how) ? m.how : '', howEdit: m.how === 'app' && !!m.howEdit, howSet: !!m.howSet,
+    how: HOW_KEYS.includes(m.how) ? m.how : '', howEdit: (m.how === 'app' || m.how === 'self') && !!m.howEdit, howSet: !!m.howSet,
     pickers: m.how === 'captains' ? cleanPickers(m.pickers, T, known) : [],
     lead: m.how === 'self' ? cleanLead(m.lead) : '', howNote: m.how === 'other' ? cleanHowNote(m.howNote) : '',
     edits: (Array.isArray(m.edits) ? m.edits : []).filter(e => e && isNum(e.at)).slice(-50).map(e => ({ at: +e.at, txt: str(e.txt).slice(0, 200) }))
@@ -4179,9 +4218,9 @@ function syncMatch(mode) {
   m.pred = Analysis.prediction(m.snap, m.teams, SPORT);
   m.games = defaultGames(m.teams.length, m.games);
   // Im Einteilen gewählt (auch „keine Angabe“) gilt; sonst ergibt sich die Art aus dem Knopf. Im Ergebnis selbst gesetzt: bleibt.
-  const how = R.howSet ? (HOW_KEYS.includes(R.how) ? R.how : '') : (R.how || (R.random ? 'random' : R.self ? 'self' : 'app'));
+  const how = resultHow(R);
   if (mode === 'new' || !m.howSet) { m.how = how; m.pickers = how === 'captains' ? (R.pickers || []).slice(0, m.teams.length) : []; m.lead = how === 'self' ? cleanLead(R.lead) : ''; m.howNote = how === 'other' ? cleanHowNote(R.howNote) : ''; }
-  m.howEdit = m.how === 'app' && !!R.manual;
+  m.howEdit = m.how === 'self' && !!R.hand && !R.self;   // aus einem Vorschlag der App (oder Zufall) von Hand umgestellt
   m.upd = Date.now();
 }
 /* Rahmendaten der offenen Runde aktuell halten. Wird nach dem Bilden noch der Platz, das Wetter, die
@@ -4377,14 +4416,18 @@ function shareText() {
   // WhatsApp: *fett*. Kopf: Wochentag und Datum ausgeschrieben, darunter Uhrzeit und Ort (soweit eingetragen)
   const day = isIso(S.day.date) ? new Date(S.day.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
   const lines = [`⚽ *Teams für ${day || 'heute'}*`];
-  const when = S.day.time ? `⏰ ${S.day.time} Uhr` : '', where = S.day.place ? `📍 ${S.day.place}${S.day.field ? ' · ' + S.day.field : ''}` : '';
+  const dpl = placeByName(S.day.place), dfl = dpl && dpl.fields.find(f => f.id === S.day.field);
+  const when = S.day.time ? `⏰ ${S.day.time} Uhr` : '', where = S.day.place ? `📍 ${S.day.place}${dfl && dfl.name ? ` · Feld ${dfl.name}` : ''}` : '';
   if (when || where) lines.push([when, where].filter(Boolean).join('   '));
   R.teams.forEach((ids, t) => {
     const c = teamCol(t);
     lines.push('', `${c.mark} *Team ${t + 1}* (${ids.length} Spieler)`);
     ids.forEach(id => { const i = M.idx.get(id); lines.push(disp(byId(id)) + (det && det.gk[t] === i ? ' 🧤' : '')); });
   });
-  if (det) lines.push('', `⚖️ Fairness: ${verdictWord(det.pct).toLowerCase()}`);
+  // Wie die Teams entstanden sind – nur „⚖️“, wenn die App sie wirklich so berechnet hat
+  const how = resultHow(R), vw = det ? verdictWord(det.pct).toLowerCase() : '';
+  const origin = { app: '⚖️ Fair berechnet', random: '🎲 Zufällig eingeteilt', self: '✍️ Selbst eingeteilt', captains: '👉 Kapitäne haben gewählt', other: '🧩 Eingeteilt' }[how] || '';
+  if (origin || det) lines.push('', how === 'app' ? `${origin}${vw ? ': ' + vw : ''}` : [origin, vw ? `laut App ${vw}` : ''].filter(Boolean).join(' · '));
   if (det && det.gk.some(x => x != null && x >= 0)) lines.push('🧤 = Torwart');
   return lines.join('\n');
 }
@@ -4622,7 +4665,7 @@ function impApply() {
    OBERFLÄCHE – Bausteine und Ansichten
    ============================================================ */
 /* Einheitliche Symbole für die Einteilungs-Knöpfe (überall gleich) */
-const EMO = { fair: '<span class="emo" aria-hidden="true">⚖️</span>', rnd: '<span class="emo" aria-hidden="true">🎲</span>', self: '<span class="emo" aria-hidden="true">✋</span>', late: '<span class="emo" aria-hidden="true">➕</span>', share: '<svg class="shareic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>' };
+const EMO = { fair: '<span class="emo" aria-hidden="true">⚖️</span>', rnd: '<span class="emo" aria-hidden="true">🎲</span>', self: '<span class="emo" aria-hidden="true">✍️</span>', late: '<span class="emo" aria-hidden="true">➕</span>', share: '<svg class="shareic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>' };
 const ICON = {
   day: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14l2.5 2.5L16 12"/></svg>',
   teams: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 3 4 5.5 2 10l3 1.5V21h14v-9.5l3-1.5-2-4.5L16 3c-.7 1.5-2.2 2.5-4 2.5S8.7 4.5 8 3Z"/></svg>',
@@ -5801,7 +5844,9 @@ function variantNotes(dets, i) {
     (diff < 0 ? pro : con).push({ t: diff < 0 ? c.better : c.worse, d: Math.abs(diff) });
   });
   const top = arr => arr.sort((x, y) => y.d - x.d).slice(0, 2).map(x => x.t).join(', ');
-  return [pro.length ? `gegenüber A: ${top(pro)}` : '', con.length ? `dafür ${top(con)}` : ''].filter(Boolean).join('; ');
+  // Vorteil und Nachteil in einem Satz: „Im Vergleich zu A: mehr Abwechslung, aber Stärke weniger ausgeglichen“
+  if (!pro.length && !con.length) return '';
+  return `Im Vergleich zu A: ${[pro.length ? top(pro) : '', con.length ? top(con) : ''].filter(Boolean).join(', aber ')}`;
 }
 function variantCards(M, R) {
   const dets = R.vars.map(v => Engine.evaluate(M, assignFrom(M, v.teams), true));
@@ -5926,9 +5971,9 @@ function teamCard(M, det, t, ids) {
       : x.flex ? (S.day.roleToday[x.id] === 'FLEX' ? `Heute flexibel, spielt ${roleLabel(x.r)} – zählt überall voll.` : p.roleMain !== 'FLEX' && x.loose ? `Spielt ${roleLabel(x.r)} (im Profil ${roleLabel(p.roleMain)}). Bei so wenigen Feldspielern zählen Positionen nicht – kein Abzug.` : p.roleMain !== 'FLEX' ? `Spielt ${roleLabel(x.r)} (im Profil ${roleLabel(p.roleMain)}) – laut Eignung überall gleich gut.` : `Ohne feste Position, spielt ${roleLabel(x.r)}.`)
       : x.loose && x.r !== p.roleMain ? `Spielt ${roleLabel(x.r)}. Bei so wenigen Feldspielern zählen Positionen nicht – kein Abzug.` : `Spielt ${roleLabel(x.r)}, seine Position.`;
     return `<li class="tp${sel.has(x.id) ? ' sel' : ''}" data-pid="${x.id}">
-      ${X || x.r === 'GK' ? `<span class="rb${x.r === 'GK' ? ' gk' : ''}${x.off ? ' off' : ''}${x.loose ? ' loose' : ''}" data-drag="${x.id}" title="${esc(title)}${(() => { const c = findPosCode(p.posCode); return c && c.main === x.r ? ` (${c.label})` : ''; })()} Zum Verschieben ziehen.">${roleShort(x.r)}</span>` : `<span class="rb plain" data-drag="${x.id}" title="Zum Verschieben ziehen" aria-hidden="true">${ICON.grip}</span>`}
+      ${X || x.r === 'GK' ? `<span class="rb${x.r === 'GK' ? ' gk' : ''}${x.off ? ' off' : ''}${x.loose ? ' loose' : ''}" data-drag="${x.id}" data-act="tip" title="${esc(title)}${(() => { const c = findPosCode(p.posCode); return c && c.main === x.r ? ` (${c.label})` : ''; })()} Zum Verschieben ziehen.">${roleShort(x.r)}</span>` : `<span class="rb plain" data-drag="${x.id}" title="Zum Verschieben ziehen" aria-hidden="true">${ICON.grip}</span>`}
       <button type="button" class="nm" data-act="pick" data-id="${x.id}" aria-pressed="${sel.has(x.id)}">${esc(disp(p))}${tags}</button>
-      <span class="sv num" title="${x.r === 'GK' ? 'Torwartwert' : `Stärke ${fmtV(M.base[x.i])} · heute ${fmt(x.val, 1)}: ${[Math.abs(M.shift[x.i]) >= 0.005 ? `Platz/Bedingungen ${M.shift[x.i] > 0 ? '+' : '−'}${fmt(Math.abs(M.shift[x.i]), 2)}` : 'Platz ohne Wirkung (keine Fähigkeiten bewertet oder keine Angaben)', fp ? `Tagesform ${signed(fp)} %` : '', x.fitPct < 0.999 ? `Position ${pctTxt(x.fitPct)}` : ''].filter(Boolean).join(', ')}`}">${x.r !== 'GK' && Math.abs(M.base[x.i] - x.val) >= SHOW_SHIFT ? `<small class="muted">${fmtV(M.base[x.i])} → </small>` : ''}${X ? fmt(x.val, 1) : fmtS(x.val)}</span>
+      <span class="sv num" data-act="tip" title="${x.r === 'GK' ? 'Torwartwert' : `Stärke ${fmtV(M.base[x.i])} · heute ${fmt(x.val, 1)}: ${[Math.abs(M.shift[x.i]) >= 0.005 ? `Platz/Bedingungen ${M.shift[x.i] > 0 ? '+' : '−'}${fmt(Math.abs(M.shift[x.i]), 2)}` : 'Platz ohne Wirkung (keine Fähigkeiten bewertet oder keine Angaben)', fp ? `Tagesform ${signed(fp)} %` : '', x.fitPct < 0.999 ? `Position ${pctTxt(x.fitPct)}` : ''].filter(Boolean).join(', ')}`}">${x.r !== 'GK' && Math.abs(M.base[x.i] - x.val) >= SHOW_SHIFT ? `<small class="muted">${fmtV(M.base[x.i])} → </small>` : ''}${X ? fmt(x.val, 1) : fmtS(x.val)}</span>
       ${X ? `<button type="button" class="mini${pinned ? ' on' : ''}" data-act="pin" data-id="${x.id}" data-t="${t}" aria-label="${pinned ? 'Fixierung lösen' : 'In diesem Team fixieren'}" title="${pinned ? 'Fixierung lösen' : 'Fixieren: bleibt bei „Neu berechnen“ in diesem Team'}">${ICON.pin}</button>` : ''}
       <button type="button" class="mini" data-act="drop" data-id="${x.id}" aria-label="${esc(disp(p))} fällt aus" title="fällt aus">${ICON.out}</button>
     </li>`;
@@ -6159,8 +6204,11 @@ function viewPlayers() {
     ${(() => { const L = newDone(); return L.length ? `<div class="banner newdone"><p><b>Nicht mehr neu?</b> ${L.length === 1 ? `${esc(disp(L[0]))} ist schon länger dabei (${newDoneWhy(L[0])}).` : `${L.length} Spieler sind schon länger dabei (mindestens ${NEW_DONE} Runden oder seit über einem Jahr).`} <span class="muted htail">„Neu“ macht die Stärke unsicher und verteilt neue Spieler gleichmäßig auf die Teams.</span></p>
       <div class="ndlist">${L.length > 1 ? '<button type="button" class="btn sm primary" data-act="newOff" data-id="">Bei allen entfernen</button>' : ''}${L.map(p => `<button type="button" class="btn sm${L.length === 1 ? ' primary' : ''}" data-act="newOff" data-id="${p.id}">${L.length === 1 ? '„Neu“ entfernen' : `${esc(disp(p))} <span class="small muted">· ${newDoneWhy(p)}</span>`}</button>`).join('')}</div></div>` : ''; })()}
     ${playerToolsHTML(X)}
-    <div class="row"><span class="lbl">Sortieren</span>${seg('psort', [...(X ? [['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele'], ['data', 'Datenlage']] : [['name', 'Name'], ['strength', 'Stärke']]), ...(S.players.some(p => p.birth) ? [['age', 'Alter']] : [])], ui.psort, '', X ? '' : 'pill')}</div>
-    ${pausedN || guestN || archN ? `<div class="row tchips"><span class="lbl">Zeigen</span>${[['showPausedPl', 'Pausierte', pausedN, ui.showPausedPl !== false], ['showGuestPl', 'Gäste', guestN, !!ui.showGuestPl], ['showArch', 'Archivierte', archN, !!ui.showArch]].filter(x => x[2]).map(([k, l, n, on]) => `<button type="button" class="showchip${on ? ' on' : ''}" data-act="plShow" data-k="${k}" aria-pressed="${on}"><span class="tbox" aria-hidden="true"></span>${l} <span class="cnt">${n}</span></button>`).join('')}</div>` : ''}
+    ${(() => { const so = [...(X ? [['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele'], ['data', 'Datenlage']] : [['name', 'Name'], ['strength', 'Stärke']]), ...(S.players.some(p => p.birth) ? [['age', 'Alter']] : [])];
+      // Wenige Möglichkeiten: Schalter; viele (erweitert): Auswahlliste – beides in einer Zeile
+      return so.length <= 3 ? `<div class="row onerow"><span class="lbl">Sortieren</span>${seg('psort', so, ui.psort, '', 'pill one')}</div>`
+        : `<div class="row onerow"><label class="lbl" for="psortSel">Sortieren</label><select id="psortSel" class="psortsel" data-ch="psortSel">${so.map(([v, l]) => `<option value="${v}"${ui.psort === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>`; })()}
+    ${pausedN || guestN || archN ? `<div class="row tchips onerow" role="group" aria-label="Zeigen">${[['showPausedPl', 'Pausierte', pausedN, ui.showPausedPl !== false], ['showGuestPl', 'Gäste', guestN, !!ui.showGuestPl], ['showArch', 'Archivierte', archN, !!ui.showArch]].filter(x => x[2]).map(([k, l, n, on]) => `<button type="button" class="showchip${on ? ' on' : ''}" data-act="plShow" data-k="${k}" aria-pressed="${on}"><span class="tbox" aria-hidden="true"></span>${l} <span class="cnt">${n}</span></button>`).join('')}</div>` : ''}
     ${ui.psort === 'data' ? '<p class="hint">Oben stehen die Spieler mit den wenigsten Angaben.</p>' : ''}
     <div class="row psrow"><input class="grow" type="search" id="psearch" data-in="psearch" placeholder="${X ? 'Name oder Merkmal suchen' : 'Name suchen'}" value="${esc(ui.psearch)}" aria-label="Spieler suchen"><button type="button" class="btn primary" data-act="newPlayer">+ Spieler</button></div>
     ${ui.psort === 'role' && list.length ? `<div class="field">${posBoard(list.map(x => x.p), { legend: true })}</div>` : ''}
@@ -6259,7 +6307,7 @@ function editorSimpleHTML(p) {
   const ref = o => `<span>${esc(disp(o.x))} ${fmtS(o.s)}</span>`;
   const dups = [...new Set(matchPlayers(p.name, p.id))];
   return `<div class="sheet-wrap"><button type="button" class="sheet-bg" data-act="closeEdit" aria-label="Schließen"></button>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="sheet prof" role="dialog" aria-modal="true" aria-labelledby="edTitle">
     <div class="sheet-head"><h2 id="edTitle">${esc(p.name || p.nick || 'Neuer Spieler')}</h2>
       <button type="button" class="mini" data-act="edNav" data-d="-1" aria-label="Vorheriger Spieler" ${pos <= 0 ? 'disabled' : ''}>${ICON.left}</button>
       <button type="button" class="mini" data-act="edNav" data-d="1" aria-label="Nächster Spieler" ${pos < 0 || pos >= order.length - 1 ? 'disabled' : ''}>${ICON.right}</button>
@@ -6306,7 +6354,7 @@ function editorHTML() {
   const fits = Engine.fitsOf(p, S.day.roleToday[p.id], S.settings.fit, SPORT);
   const code = findPosCode(p.posCode), hasRes = S.matches.some(m => m.status === 'done' && m.teams.some(t => t.includes(p.id)));
   return `<div class="sheet-wrap"><button type="button" class="sheet-bg" data-act="closeEdit" aria-label="Schließen"></button>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="sheet prof" role="dialog" aria-modal="true" aria-labelledby="edTitle">
     <div class="sheet-head"><h2 id="edTitle">${esc(p.name || p.nick || 'Neuer Spieler')}</h2>
       <button type="button" class="mini" data-act="edNav" data-d="-1" aria-label="Vorheriger Spieler" ${pos <= 0 ? 'disabled' : ''}>${ICON.left}</button>
       <span class="small muted num hidesm">${pos >= 0 ? `${pos + 1}/${order.length}` : ''}</span>
@@ -7435,7 +7483,7 @@ function howCmpBlock(all) {
   const P = H.pickers.length ? `<h3 class="howh3">👉 Wer hat gewählt?</h3><div class="scroll"><table class="grid pktab"><thead><tr><th>Wähler</th><th class="num">Spiele</th><th class="num" title="Siege – Unentschieden – Niederlagen seines Teams">S–U–N</th><th class="num">Punkte je Spiel</th><th class="num">Ø Tordifferenz</th></tr></thead><tbody>
       ${H.pickers.map(s => `<tr class="${s.n < 5 ? 'few' : ''}"><td>${esc(nameAny(s.id))}</td><td class="num">${s.n}</td><td class="num">${s.w}–${s.d}–${s.l}</td><td class="num">${fmt((3 * s.w + s.d) / s.n, 1)}</td><td class="num">${s.gd > 0 ? '+' : ''}${fmt(s.gd / s.n, 1)}</td></tr>`).join('')}</tbody></table></div>
       <p class="small muted">Gezählt aus Sicht des Teams, das er gewählt hat (3 Punkte je Sieg, 1 je Unentschieden). Blass: weniger als 5 Spiele.</p>` : '<p class="small muted">Bei Kapitänswahl im Ergebnis eintragen, wer gewählt hat – dann erscheint hier, wessen Teams am häufigsten gewinnen.</p>';
-  const Ld = H.leads.length ? `<h3 class="howh3">✋ Wer hat eingeteilt?</h3><div class="scroll"><table class="grid pktab"><thead><tr><th>Hauptverantwortlich</th><th class="num">Runden</th><th class="num">Spiele</th><th class="num" title="Durchschnittlicher Unterschied in Toren">Ø Tordiff.</th><th class="num" title="Höchstens 1 Tor Unterschied">knapp</th></tr></thead><tbody>
+  const Ld = H.leads.length ? `<h3 class="howh3">✍️ Wer hat eingeteilt?</h3><div class="scroll"><table class="grid pktab"><thead><tr><th>Hauptverantwortlich</th><th class="num">Runden</th><th class="num">Spiele</th><th class="num" title="Durchschnittlicher Unterschied in Toren">Ø Tordiff.</th><th class="num" title="Höchstens 1 Tor Unterschied">knapp</th></tr></thead><tbody>
       ${H.leads.map(s => `<tr class="${s.n < 5 ? 'few' : ''}"><td>${esc(leadName(s.id))}</td><td class="num">${s.rounds.size}</td><td class="num">${s.n}</td><td class="num">${fmt(s.diff / s.n, 1)}</td><td class="num">${pctTxt(s.close / s.n)}</td></tr>`).join('')}</tbody></table></div>
       <p class="small muted">Wie knapp die Spiele waren, wenn diese Person die Teams eingeteilt hat – kleiner Tor-Unterschied = fair eingeteilt. Blass: weniger als 5 Spiele.</p>` : '';
   return rvBlock('rvHow', false, 'Teamwahl im Vergleich', 'howCmp', `<span class="muted small">${known.length ? plural(known.length, 'Art', 'Arten') : ''}</span>`, `
@@ -7443,7 +7491,7 @@ function howCmpBlock(all) {
     ${verdict}
     <div class="scroll"><table class="grid howtab"><thead><tr><th>Teams entstanden durch</th><th class="num">Runden</th><th class="num">Spiele</th><th class="num" title="Durchschnittlicher Unterschied in Toren">Ø Tordiff.</th><th class="num" title="Anteil der Tore, den der Sieger im Schnitt holte – 50 % = völlig ausgeglichen">Ø Anteil Sieger</th><th class="num" title="Höchstens 1 Tor Unterschied">knapp</th><th class="num" title="4 oder mehr Tore Unterschied">deutlich</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="small muted">Blass: weniger als ${HOW_MIN} Spiele – da entscheidet noch viel der Zufall.${H.methods.some(b => b.k === 'unknown') ? ' „Nicht angegeben“: ältere Runden; die Art lässt sich im Ergebnis jeder Runde nachtragen.' : ''}</p>
-    ${(() => { const n = S.matches.filter(m => !m.how && m.status === 'done').length; return n ? `<div class="row"><button type="button" class="btn sm" data-act="howAllApp">${plural(n, 'Runde', 'Runden')} ohne Angabe als ⚖️ App markieren</button><span class="small muted">wenn ihr bisher immer mit der App eingeteilt habt – lässt sich rückgängig machen</span></div>` : ''; })()}
+
     ${P}${Ld}`, 'Wie knapp die Spiele waren – je nachdem, ob die App, der Zufall oder ihr selbst eingeteilt habt.');
 }
 /* Foto zu Ort/Feld: kleines Vorschaubild; Antippen lädt ein neues, × entfernt es */
@@ -7766,8 +7814,8 @@ function matchFacts(m) {
   if (totMin) out.push({ ic: '⏱️', txt: `${totMin} Min.`, title: gMin.length === m.games.length ? 'eingetragene Spielzeit' : 'Spielzeit des Spieltags' });
   ['flow', 'crowd'].forEach(k => { if (c[k] && !(k === 'flow' && c[k] === 'normal')) out.push({ ic: '', txt: ctxOpt(k, c[k], true) }); });
   if (!totMin && c.duration) out.push({ ic: '', txt: ctxOpt('duration', c.duration, true) });
-  if (m.how) out.push({ ic: howIcon(m.how), txt: `${howLabel(m.how)}${m.how === 'self' && m.lead ? ` von ${esc(leadName(m.lead))}` : ''}${m.how === 'other' && m.howNote ? `: ${esc(m.howNote)}` : ''}${m.how === 'captains' && (m.pickers || []).some(Boolean) ? `: ${m.pickers.filter(Boolean).map(id => esc(nameAny(id))).join(', ')}` : ''}`, title: 'So sind die Teams entstanden' });
-  if (m.pred && isNum(m.pred.pct)) out.push({ ic: '⚖️', txt: `${fmt(m.pred.pct, 1)} % Stärke-Unterschied`, title: 'So unterschiedlich stark waren die Teams beim Bilden (berechnet)' });
+  if (m.how) out.push({ ic: howIcon(m.how), txt: `${howLabel(m.how)}${m.how === 'self' && m.lead ? ` von ${esc(leadName(m.lead))}` : ''}${m.how === 'other' && m.howNote ? `: ${esc(m.howNote)}` : ''}${m.how === 'captains' && (m.pickers || []).some(Boolean) ? `: ${m.pickers.filter(Boolean).map(id => esc(nameAny(id))).join(', ')}` : ''}${m.howEdit ? ' (Vorschlag von Hand umgestellt)' : ''}`, title: 'So sind die Teams entstanden' });
+  if (m.pred && isNum(m.pred.pct)) out.push({ ic: '📊', txt: `${fmt(m.pred.pct, 1)} % Stärke-Unterschied`, title: 'So unterschiedlich stark waren die Teams beim Bilden (berechnet)' });
   return out;
 }
 function matchListBlock(all) {
@@ -7777,11 +7825,10 @@ function matchListBlock(all) {
   const formats = [...new Set(all.map(m => (m.snap ? m.snap.set.format : '')).filter(Boolean))];
   const stOf = m => (m.exclude || m.status === 'cancelled' ? 'excl' : m.status);
   const list = all.filter(m => (f.st === 'all' || stOf(m) === f.st || (f.st === 'done' && m.status === 'done' && !m.exclude))
-    && (!f.fmt || (m.snap && m.snap.set.format === f.fmt))
     && (!cutoff || m.date >= cutoff)
     && (!q || (m.place || '').toLowerCase().includes(q) || m.teams.flat().some(id => matchName(m, id).toLowerCase().includes(q))));
   const shown = list.slice(0, ui.mLimit);
-  const stOpts = [['all', 'alle'], ['done', 'erfasst'], ['open', 'Ergebnis fehlt'], ['skipped', 'übersprungen'], ['excl', 'nicht ausgewertet'], ['old', 'nur Aufstellung']]
+  const stOpts = [['all', 'alle'], ['done', 'erfasst'], ['open', 'ohne Ergebnis', 'Teams gebildet, Ergebnis fehlt'], ['skipped', 'übersprungen'], ['excl', 'nicht gewertet', 'nicht ausgewertet oder ausgefallen'], ['old', 'nur Aufstellung']]
     .filter(([k]) => k === 'all' || all.some(m => stOf(m) === k || (k === 'done' && m.status === 'done' && !m.exclude)));
   // nach Tagen gruppiert: ein Tag kann mehrere Runden haben (z. B. erst 3 Teams, dann 2)
   const days = [];
@@ -7792,8 +7839,8 @@ function matchListBlock(all) {
     ${resultsChart(all)}
     ${A ? historyChart(A) : ''}
     ${!A ? '' : `<div class="listtools"><input type="search" id="mq" data-in="mq" placeholder="Ort oder Spieler suchen" value="${esc(f.q)}" aria-label="Runden durchsuchen"><button type="button" class="btn sm" data-act="csv">Als Tabelle (CSV)</button></div>
-    ${stOpts.length > 2 ? seg('mfSt', stOpts, f.st) : ''}
-    <div class="row">${seg('mfSpan', [[0, 'gesamt'], [3, '3 Monate'], [12, '12 Monate']], f.span)}${formats.length > 1 ? seg('mfFmt', [['', 'jede Spielform'], ...formats.map(k => [k, formatName(k)])], f.fmt) : ''}</div>`}
+    ${stOpts.length > 2 ? seg('mfSt', stOpts, f.st, '', 'pill one') : ''}
+    <div class="row">${seg('mfSpan', [[0, 'gesamt'], [3, '3 Monate'], [12, '12 Monate']], f.span, '', 'pill one')}</div>`}
     <ul class="mlist">${days.map((dy, di) => {
       const dt = new Date(dy.date + 'T12:00:00'), mon = dy.date.slice(0, 7), monHead = mon !== lastMon ? `<li class="monhead">${dt.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</li>` : '';
       lastMon = mon;
@@ -8397,8 +8444,8 @@ function saveResult() {
     const pk = d.how === 'captains' ? d.teams.map((ids, t) => ((d.pickers || [])[t] && ids.includes(d.pickers[t]) ? d.pickers[t] : '')) : [];
     const lead = d.how === 'self' ? cleanLead(d.lead) : '', note = d.how === 'other' ? cleanHowNote(d.howNote) : '';
     if (d.how !== (m.how || '') || JSON.stringify(pk) !== JSON.stringify(m.pickers || []) || lead !== (m.lead || '') || note !== (m.howNote || '')) m.howSet = true;
+    if (d.how !== (m.how || '')) m.howEdit = false;
     m.how = d.how; m.pickers = pk; m.lead = lead; m.howNote = note;
-    if (d.how !== 'app') m.howEdit = false;
   }
   if (S.result && S.result.mid === m.id) S.result.colors = m.colors.slice();
   m.status = d.cancelled ? 'cancelled' : noRes ? (m.status === 'skipped' ? 'skipped' : 'open') : 'done';
@@ -8648,13 +8695,20 @@ function applyField(t, f) {
   R.field = t === 'res' ? f.name : f.id;
   if (t === 'day' && f.cap && S.day.format === 'all') { const fm = SPORT.formats.find(x => x.cap === f.cap); if (fm) S.day.format = fm.key; }
 }
-function markManual() { const R = S.result; R.manual = true; syncMatch('edit'); }
+function markManual(hand) { const R = S.result; R.manual = true; if (hand) R.hand = true; syncMatch('edit'); }
+/* So sind die aktuellen Teams entstanden. Von Hand umgestellte App- oder Zufallsteams gelten als selbst eingeteilt. */
+function resultHow(R) {
+  if (!R) return '';
+  if (R.howSet) return HOW_KEYS.includes(R.how) ? R.how : '';
+  const h = R.how || (R.random ? 'random' : R.self ? 'self' : 'app');
+  return R.hand && (h === 'app' || h === 'random') ? 'self' : h;
+}
 function moveIds(ids, t) {
   const R = S.result;
   R.teams = R.teams.map(list => list.filter(x => !ids.includes(x)));
   R.teams[t].push(...ids);
   ids.forEach(id => { delete S.day.pins[id]; });
-  markManual();
+  markManual(true);
 }
 function swapSets(aIds, bIds) {
   const R = S.result;
@@ -8662,7 +8716,7 @@ function swapSets(aIds, bIds) {
   R.teams[ta] = R.teams[ta].filter(x => !aIds.includes(x)).concat(bIds);
   R.teams[tb] = R.teams[tb].filter(x => !bIds.includes(x)).concat(aIds);
   [...aIds, ...bIds].forEach(id => { delete S.day.pins[id]; });
-  markManual();
+  markManual(true);
 }
 function lateAdd(id) {
   const R = S.result;
@@ -9068,11 +9122,12 @@ const A = {
   },
   generate: () => startGenerate(),
   randomTeams: () => randomTeams(),
+  tip: el => showTip(el),
 
   // Teams
   pickVar: el => {
     const R = S.result, i = +el.dataset.v; if (!R.vars[i]) return;
-    R.vsel = i; R.manual = false; R.teams = clone(R.vars[i].teams); ui.fxTeams = true;
+    R.vsel = i; R.manual = false; R.hand = false; R.teams = clone(R.vars[i].teams); ui.fxTeams = true;
     // Fixierungen, die nicht mehr zum Team passen, lösen
     Object.keys(S.day.pins).forEach(id => { const t = R.teams.findIndex(x => x.includes(id)); if (t >= 0 && t !== S.day.pins[id]) delete S.day.pins[id]; });
     ui.sel = []; ui.suggest = null; syncMatch('plan'); render();
@@ -9730,6 +9785,7 @@ const IN = {
 };
 /* ---------- Änderungen (beim Verlassen eines Feldes) ---------- */
 const CH = {
+  psortSel: el => { ui.psort = el.value; render(); },
   rerender: () => render(),
   slideDone: () => { matchPreset(); render(); },
   edStrengthDone: () => {
@@ -9913,6 +9969,24 @@ function showPop(btn) {
   if (top + pop.offsetHeight > window.innerHeight - 80) top = Math.max(12, r.top - pop.offsetHeight - 8);
   pop.style.top = top + 'px';
 }
+/* Kurze Erklärung zu einem Element (aus seinem title) – zum Antippen auf dem Handy */
+function showTip(el) {
+  const txt = (el.getAttribute('title') || '').trim(), pop = $('#pop');
+  if (!txt || !pop) return;
+  const key = 'tip:' + txt;
+  if (ui.pop === key) { hidePop(); return; }
+  hidePop();
+  ui.pop = key; ui.popAt = Date.now();
+  setPopText(pop, txt);
+  pop.hidden = false;
+  const r = el.getBoundingClientRect(), w = Math.min(300, window.innerWidth - 24);
+  pop.style.width = w + 'px';
+  pop.style.left = clamp(r.left - 12, 12, window.innerWidth - w - 12) + 'px';
+  let top = r.bottom + 8;
+  pop.style.top = top + 'px';
+  if (top + pop.offsetHeight > window.innerHeight - 80) top = Math.max(12, r.top - pop.offsetHeight - 8);
+  pop.style.top = top + 'px';
+}
 function hidePop() {
   ui.pop = null;
   const pop = $('#pop');
@@ -9955,6 +10029,10 @@ function render() {
   chartScroll();
   try { tidyHelp(); } catch (e) { console.error(e); }
   if (ui.svy && !ui.editId && ui._svScroll != null) { const sh = $('.sheet'); if (sh) sh.scrollTop = ui._svScroll; ui._svScroll = null; }
+  if (ui.svy && !ui.editId && ui._svFocus) {
+    const li = document.getElementById('svr-' + ui._svFocus); ui._svFocus = null;
+    if (li) { li.scrollIntoView({ block: 'center' }); li.classList.add('svflash'); }
+  }
 }
 /* Wischbare Verläufe: beim ersten Zeigen ganz rechts (neueste Spiele), danach bleibt die Stelle beim Neuzeichnen */
 function chartScroll() {
@@ -10261,11 +10339,11 @@ window.addEventListener('storage', e => {
 });
 document.addEventListener('input', () => { lastAct = Date.now(); }, true);
 document.addEventListener('click', e => {
-  if (ui.pop && !e.target.closest('#pop') && !e.target.closest('.ib')) hidePop();
+  if (ui.pop && !e.target.closest('#pop') && !e.target.closest('.ib') && !e.target.closest('[data-act="tip"]')) hidePop();
   const el = e.target.closest('[data-act]');
   if (idleCheck() && !el) render();
   if (!el || el.disabled) return;
-  if (Date.now() - dragEndAt < 350 && (el.dataset.act === 'pick' || el.dataset.act === 'late')) { e.preventDefault(); return; }
+  if (Date.now() - dragEndAt < 350 && (el.dataset.act === 'pick' || el.dataset.act === 'late' || el.dataset.act === 'tip')) { e.preventDefault(); return; }
   const f = A[el.dataset.act];
   if (!f) return;
   e.preventDefault();
@@ -10814,11 +10892,11 @@ function svSheetHTML() {
     <ul class="svres">${rows.map(x => {
       const pk = picks[x.id], tv = pk ? target(x, pk) : null, weak = x.n > 0 && x.n < 3;
       const dTxt = x.d == null ? '' : Math.abs(x.d) < 0.25 ? '<span class="svd ok">passt</span>' : `<span class="svd${Math.abs(x.d) >= 1 ? ' big' : ''}">${x.d > 0 ? '+' : '−'}${fmt(Math.abs(x.d), 1)}</span>`;
-      return `<li class="${weak ? 'weak' : ''}${!x.n ? ' none' : ''}">
+      return `<li id="svr-${x.id}" class="${weak ? 'weak' : ''}${!x.n ? ' none' : ''}">
         <div class="svrtop"><button type="button" class="svwho grow" data-act="svEdit" data-id="${x.id}" title="Profil öffnen">${avatar(byId(x.id))}<b>${esc(ownName(x.id) || x.name)}</b></button>${x.split ? tag('uneinig', 't-split', 'Die Stimmen liegen weit auseinander') : ''}${dTxt}</div>
-        ${x.n ? `<div class="svrmid">${svDotsHTML(x, x.own, tv)}<span class="svnums"><span title="deine Bewertung">${isNum(x.own) ? fmtS(x.own) : '–'}</span> → <b title="Gruppe">${fmt(x.val, 1)}</b></span></div>
-        <div class="svrsub small">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmtS(x.self)}` : ''}</div>
-        <div class="svrpick">${seg('svPickRow', [['', isNum(x.own) ? `behalten ${fmtS(x.own)}` : 'behalten'], ...(isNum(x.own) ? [['mid', `Mitte ${fmtS(target(x, 'mid'))}`]] : []), ['grp', `Gruppe ${fmtS(target(x, 'grp'))}`]], pk || '', `data-id="${x.id}"`, 'pill wrap')}</div>
+        ${x.n ? `<div class="svrmid">${svDotsHTML(x, x.own, tv)}<span class="svnums"><span title="deine Bewertung">${isNum(x.own) ? fmt(x.own, 1) : '–'}</span> → <b title="Gruppe">${fmt(x.val, 1)}</b></span></div>
+        <div class="svrsub small">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmt(x.self, 1)}` : ''}</div>
+        <div class="svrpick">${seg('svPickRow', [['', isNum(x.own) ? `behalten ${fmt(x.own, 1)}` : 'behalten'], ...(isNum(x.own) ? [['mid', `Mitte ${fmt(target(x, 'mid'), 1)}`]] : []), ['grp', `Gruppe ${fmt(target(x, 'grp'), 1)}`]], pk || '', `data-id="${x.id}"`, 'pill wrap')}</div>
         ${confRow(x)}` : '<div class="small muted">Keine Stimmen (alle „kann ich nicht beurteilen“).</div>'}</li>`;
     }).join('')}</ul>
     ${voted ? `<div class="svbulk"><b class="small">Schnellauswahl</b> <span class="small muted">– wählt nur vor, geändert wird erst mit „Übernehmen“</span>
@@ -10873,7 +10951,7 @@ function svProfileHTML(p) {
   if (!L.length) return '';
   const items = L.slice(0, 3).map(sv => {
     const E = svEval(sv, svOwn, svMe(sv)), x = E.rows.find(r => r.id === p.id);
-    return `<span><button type="button" class="linkbtn" data-act="svOpenAt" data-id="${sv.id}">Umfrage ${svDate(sv.created).replace(/\d{4}$/, '')}</button> ${x && x.n ? `<b>${fmt(x.val, 1)}</b> <span class="muted">(${plural(x.n, 'Stimme', 'Stimmen')}${x.split ? ', uneinig' : ''})</span>` : '<span class="muted">keine Stimmen</span>'}</span>`;
+    return `<span><button type="button" class="linkbtn" data-act="svOpenAt" data-id="${sv.id}" data-pid="${p.id}">Umfrage ${svDate(sv.created).replace(/\d{4}$/, '')}</button> ${x && x.n ? `<b>${fmt(x.val, 1)}</b> <span class="muted">(${plural(x.n, 'Stimme', 'Stimmen')}${x.split ? ', uneinig' : ''})</span>` : '<span class="muted">keine Stimmen</span>'}</span>`;
   });
   return `<div class="svprof small"><span class="muted">Gruppenmeinung:</span>${items.join('')}${L.length > 3 ? `<span class="muted">und ${plural(L.length - 3, 'ältere Umfrage', 'ältere Umfragen')}</span>` : ''}</div>`;
 }
@@ -10922,7 +11000,7 @@ Object.assign(A, {
   svConf: el => { const C = ui.svy.conf || (ui.svy.conf = {}); if (C[el.dataset.id] === el.dataset.v) delete C[el.dataset.id]; else C[el.dataset.id] = el.dataset.v; render(); },
   svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn, svMe(sv)), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id), w = svConfSuggest(x); if (p && w && w !== confOf(p)) C[x.id] = w; }); render(); },
   svEdit: el => { const sh = $('.sheet'); ui._svScroll = sh ? sh.scrollTop : null; ui.editId = el.dataset.id; render(); },
-  svOpenAt: el => { ui.editId = null; ui.svy = { view: '', sel: el.dataset.id, picks: {} }; render(); },
+  svOpenAt: el => { ui.editId = null; ui._svScroll = null; ui._svFocus = el.dataset.pid || null; ui.svy = { view: '', sel: el.dataset.id, picks: {} }; render(); },
   svFilter: el => { ui.svy.filter = el.dataset.v; render(); },
   svPickRow: el => { const P = ui.svy.picks; if (el.dataset.v) P[el.dataset.id] = el.dataset.v; else delete P[el.dataset.id]; render(); },
   svBulk: el => {
