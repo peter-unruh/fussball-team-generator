@@ -1260,7 +1260,7 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svsec > p { margin: 0 0 8px; }
 .svlinkbox input { min-height: 42px; }
 /* Eigene Stimme: grau wie die anderen, mit kleinem dunklen Kreuz */
-.svline .dot.me, .lg.dot.me { width: 9px; height: 9px; z-index: 2;
+.svline .dot.me, .lg.dot.me { width: 7px; height: 7px; z-index: 2;
   background: linear-gradient(45deg, transparent 42%, #3a403d 42% 58%, transparent 58%), linear-gradient(-45deg, transparent 42%, #3a403d 42% 58%, transparent 58%), color-mix(in srgb, var(--muted) 75%, var(--surface)); }
 .svres > li.svflash { animation: svflash 1.6s ease-out; }
 @keyframes svflash { 0%, 35% { background: color-mix(in srgb, var(--turf) 16%, var(--surface)); border-color: var(--turf); } 100% { background: var(--surface); } }
@@ -1321,6 +1321,72 @@ body.is-guest { --top-bg: #1f5168; --bg: #edf0f1; --surface-2: #e3e8ea; }
 /* Symbole auf Knöpfen: größer und mit Kontrast zum weißen Knopf */
 .emo { width: 1.95em; height: 1.95em; font-size: 1.08em; background: var(--turf-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--turf) 30%, transparent); }
 .btn.primary .emo { background: #fffdf6; box-shadow: 0 0 0 1px rgba(0, 0, 0, .1); }
+
+/* v44 */
+.svline .dot.me { width: 7px; height: 7px; }
+.emo.emosvg svg { width: 17px; height: 17px; }
+.shopts { display: grid; gap: 2px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 4px 12px; background: var(--surface-2); }
+.shopt { min-height: 48px; }
+.shopt + .shopt { border-top: 1px solid var(--line); }
+.shprev { width: 100%; font: .88rem/1.4 var(--font); white-space: pre-wrap; resize: vertical; background: var(--bg); }
+.shbtns { gap: 8px; }
+.calcard { display: grid; gap: 4px; padding: 12px 14px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface-2); font-size: 1.02rem; }
+.calbtns { display: grid; gap: 8px; }
+.calbtns .btn { justify-content: center; text-align: center; }
+/* Spielfeld: immer hochkant, Linien wie in der Positionstafel */
+.pitch { position: relative; aspect-ratio: 4 / 5; align-content: space-evenly; }
+.pitch > .plines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .7; }
+.pitch > .prow3 { position: relative; z-index: 2; }
+.pitch > .plines rect, .pitch > .plines line, .pitch > .plines circle { stroke: rgba(255, 255, 255, .6); }
+.pitch > .plines .dotc { fill: rgba(255, 255, 255, .7); }
+/* Vorschläge-Verlauf */
+.loglist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.loggrp details { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 6px 10px; background: var(--surface); }
+.loggrp summary { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; }
+.loggrp summary::-webkit-details-marker { display: none; }
+.loggrp summary::after { content: '›'; font-size: 1.3rem; color: var(--muted); transition: transform .15s; }
+.loggrp details[open] summary::after { transform: rotate(90deg); }
+.loggrp details[open] > .rules { margin-top: 6px; }
+/* Spieltag: Datum und Uhrzeit nebeneinander, Ort kompakt */
+@media (max-width: 639px) {
+  .dayhead-block .dayfields { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); column-gap: 10px; }
+  .dayhead-block .dayfields > .placefield { grid-column: 1 / -1; }
+  .dayhead-block .datepick, .dayhead-block .timepick input { height: 48px; min-height: 48px; }
+  .dayhead-block .dpnav { width: 30px; min-width: 30px; }
+  .dayhead-block .datebtn .dl { font-size: .95rem; }
+  .dayhead-block .dayfields select { height: 48px; min-height: 48px; }
+}
+.dayhead-block .dtfield .chips { gap: 4px; }
+.dayhead-block .dtfield .chip { min-height: 30px; padding: 0 9px; font-size: .8rem; }
+.placemini { display: flex; align-items: center; gap: 6px; }
+.placemini > .grow { display: none; }
+.dayhead-block .placefield { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 6px; align-items: center; }
+.dayhead-block .placefield > :not(select):not(.placemini) { grid-column: 1 / -1; }
+.placemini .btn.icob { width: 46px; height: 48px; min-height: 48px; padding: 0; justify-content: center; font-size: 1.15rem; }
+.placemini .pi-thumb { width: 56px; height: 40px; object-fit: cover; border-radius: 6px; flex: none; }
+/* Spielerauswahl */
+.dsearch input { min-width: 0; }
+.dsearch .btn { flex: none; }
+.dsortrow { gap: 8px; align-items: center; }
+.dsortrow .minichk { flex: none; font-size: .84rem; white-space: nowrap; }
+.addopts { gap: 6px; align-items: center; }
+.addopts .btn, .addopts .seg { flex: none; }
+.addopts .seg.pill button { padding: 0 8px; }
+.addopts .btn { padding: 0 10px; }
+/* Start: Hinweis zur App */
+.installhint { border: 1px dashed var(--line); border-radius: var(--r-sm); padding: 8px 12px; }
+.installhint > summary { cursor: pointer; font-weight: 650; font-size: .92rem; }
+.installhint ol { margin: 8px 0 4px; padding-left: 20px; display: grid; gap: 4px; }
+/* Speicherplatz */
+.storeuse { gap: 6px; }
+.storeuse > .linkbtn { justify-self: start; text-align: left; }
+.stbar { display: block; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.stbar i { display: block; height: 100%; background: var(--turf); border-radius: 4px; }
+.stbar i.warn { background: var(--warn); } .stbar i.bad { background: var(--bad); }
+.storelist { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.storelist li { display: flex; gap: 8px; }
+/* Aktionsleiste: Knöpfe rechtsbündig */
+.actionbar .info { margin-right: auto; }
 </style>
 </head>
 <body>
@@ -3150,7 +3216,7 @@ function dateTimeHTML(t, d) {
   let next = '';
   if (wd >= 0) { next = today; while (new Date(next + 'T12:00:00').getDay() !== wd) next = addDays(next, 1); }
   const tom = addDays(today, 1);
-  const chips = [d.date !== today ? ['Heute', today] : null, d.date !== tom ? ['Morgen', tom] : null, next && next !== d.date && next !== today && next !== tom ? [`am ${WD_LONG[wd]}`, next] : null].filter(Boolean);
+  const chips = [d.date !== today ? ['Heute', today] : null, d.date !== tom ? ['Morgen', tom] : null, next && next !== d.date && next !== today && next !== tom ? [`am ${WD_LONG[wd].slice(0, 2)}.`, next] : null].filter(Boolean);
   const times = usualTimes();
   return `<div class="field dtfield"><span class="lbl">Datum</span>
       <div class="datepick"><button type="button" class="dpnav" data-act="dtShift" data-t="${t}" data-v="-1" aria-label="Einen Tag früher">‹</button>
@@ -3886,7 +3952,8 @@ function placeField(id, cur, ch, t) {
     ? `<div class="row"><input type="text" class="grow" id="${id}New" placeholder="Neuer Ort, z. B. Halle Nord" maxlength="60"><button type="button" class="btn sm primary" data-act="placeAdd" data-k="${id}" data-ch="${ch}">Anlegen</button><button type="button" class="btn sm ghost" data-act="placeCancel">Abbrechen</button></div>`
     : sel}
     ${t && pl && ui.fieldNew === t ? fieldNewHTML(t, pl) : ''}
-    ${pl ? `<div class="placeinfo">${(curF && curF.photo) || pl.photo ? `<img class="pi-photo" src="${(curF && curF.photo) || pl.photo}" alt="">` : ''}${curF ? `<span class="small"><b>${esc(pl.name)}</b> › Feld <b>${esc(curF.name)}</b>${Object.keys(curF.ctx).length ? ` <span class="muted">· ${esc(ctxSummary(curF.ctx))}</span>` : ''}</span>` : ''}<span class="small ${pl.lat != null ? '' : 'muted'}" title="${esc(pl.found || pl.address || '')}">${pl.lat != null ? `📍 ${esc(shortAddr(pl.found || pl.address) || 'Lage gespeichert')}` : pl.address ? esc(shortAddr(pl.address)) + ' · noch nicht auf der Karte geprüft' : 'Noch nicht auf der Karte geprüft'}</span>
+    ${pl && t === 'day' ? `<div class="placemini">${(curF && curF.photo) || pl.photo ? `<img class="pi-thumb" src="${(curF && curF.photo) || pl.photo}" alt="">` : ''}<span class="grow"></span><a class="btn icob" href="${esc(mapsUrl(pl))}" target="_blank" rel="noopener" title="In Google Maps öffnen${pl.found || pl.address ? ': ' + esc(shortAddr(pl.found || pl.address)) : ''}" aria-label="In Google Maps öffnen">🗺️</a><button type="button" class="btn icob${pl.lat != null ? '' : ' primary'}" data-act="placeEdit" data-v="${esc(pl.name)}" title="${pl.lat != null ? 'Ort bearbeiten' : 'Ort auf der Karte prüfen (für Wetter und Kartenlink)'}" aria-label="${pl.lat != null ? 'Ort bearbeiten' : 'Ort prüfen'}">${pl.lat != null ? '✏️' : '📍'}</button></div>`
+      : pl ? `<div class="placeinfo">${(curF && curF.photo) || pl.photo ? `<img class="pi-photo" src="${(curF && curF.photo) || pl.photo}" alt="">` : ''}${curF ? `<span class="small"><b>${esc(pl.name)}</b> › Feld <b>${esc(curF.name)}</b>${Object.keys(curF.ctx).length ? ` <span class="muted">· ${esc(ctxSummary(curF.ctx))}</span>` : ''}</span>` : ''}<span class="small ${pl.lat != null ? '' : 'muted'}" title="${esc(pl.found || pl.address || '')}">${pl.lat != null ? `📍 ${esc(shortAddr(pl.found || pl.address) || 'Lage gespeichert')}` : pl.address ? esc(shortAddr(pl.address)) + ' · noch nicht auf der Karte geprüft' : 'Noch nicht auf der Karte geprüft'}</span>
       <div class="row placebtns">${maps}<button type="button" class="btn sm${pl.lat != null ? '' : ' primary'}" data-act="placeEdit" data-v="${esc(pl.name)}">${pl.lat != null ? 'Ort bearbeiten' : '📍 Ort prüfen'}</button></div></div>` : ''}</div>`;
 }
 /* Neues Feld benennen; leer = „Standard“ */
@@ -4410,15 +4477,34 @@ const lampClass = pct => (pct < 5 ? 'good' : pct <= 10 ? 'warn' : 'bad');
 const verdictWord = pct => (pct < 2 ? 'Sehr ausgeglichen' : pct < 5 ? 'Gut ausgeglichen' : pct <= 10 ? 'Noch okay' : pct <= 20 ? 'Unausgeglichen' : 'Stark unausgeglichen');
 
 /* ---------- Teilen ---------- */
-function shareText() {
-  const R = S.result, M = buildModel();
+/* Optionen fürs Teilen (merkt sich das Gerät): Kartenlink zum Ort, Wetter, Kalender-Link */
+const SHARE_OPT_KEY = 'ft-share-opt';
+function shareOpts() { let o = {}; try { o = JSON.parse(localStorage.getItem(SHARE_OPT_KEY) || '{}') || {}; } catch (e) { o = {}; } return { map: o.map !== false, wx: o.wx !== false, cal: !!o.cal }; }
+function shareOptsSave(o) { try { localStorage.setItem(SHARE_OPT_KEY, JSON.stringify(o)); } catch (e) { /* egal */ } }
+const isIndoor = d => d.ctx.weather === 'drinnen' || d.ctx.surface === 'halle';
+function shareAvail() {
+  const d = S.day, pl = placeByName(d.place);
+  const days = isIso(d.date) ? (new Date(d.date + 'T12:00:00') - new Date(isoToday() + 'T12:00:00')) / 864e5 : 99;
+  return { pl, map: !!(pl && (pl.lat != null || pl.address)), wx: !!(pl && pl.lat != null && !isIndoor(d) && days >= -1 && days <= 15), cal: !!(svBase() && isIso(d.date)) };
+}
+/* Kartenlink ohne „=“ und „&“ – so verlinkt WhatsApp ihn sicher vollständig */
+function placeMapUrl(pl) {
+  if (pl.lat != null) return `https://www.google.com/maps/search/${pl.lat.toFixed(5)},${pl.lon.toFixed(5)}`;
+  return 'https://www.google.com/maps/search/' + encodeURIComponent([pl.name, pl.address].filter(Boolean).join(', ')).replace(/%20/g, '+');
+}
+const addMin = (t, m) => { const x = (+t.slice(0, 2) * 60 + +t.slice(3, 5) + m) % 1440; return `${pad(Math.floor(x / 60))}:${pad(x % 60)}`; };
+const wxShare = w => `${WX_ICON(w.code)} ${fmt(w.temp, 0)} °C${w.rain >= 0.2 || (w.code >= 51 && w.code < 95) ? ', Regen möglich' : ', trocken'}${w.wind >= 25 ? `, Wind ${fmt(w.wind, 0)} km/h` : ''}`;
+function shareText(o) {
+  o = o || { map: false, wx: false, cal: false };
+  const R = S.result, M = buildModel(), A = shareAvail();
   const det = !isStale(R, M) ? Engine.evaluate(M, assignFrom(M, R.teams), true) : null;
-  // WhatsApp: *fett*. Kopf: Wochentag und Datum ausgeschrieben, darunter Uhrzeit und Ort (soweit eingetragen)
+  // WhatsApp: *fett*. Kopf: Wochentag und Datum ausgeschrieben, darunter Uhrzeit (mit Ende, falls die Dauer bekannt ist) und Ort
   const day = isIso(S.day.date) ? new Date(S.day.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
   const lines = [`⚽ *Teams für ${day || 'heute'}*`];
-  const dpl = placeByName(S.day.place), dfl = dpl && dpl.fields.find(f => f.id === S.day.field);
-  const when = S.day.time ? `⏰ ${S.day.time} Uhr` : '', where = S.day.place ? `📍 ${S.day.place}${dfl && dfl.name ? ` · Feld ${dfl.name}` : ''}` : '';
-  if (when || where) lines.push([when, where].filter(Boolean).join('   '));
+  if (isTime(S.day.time)) lines.push(`⏰ ${S.day.time}${S.day.minutes ? '–' + addMin(S.day.time, S.day.minutes) : ''} Uhr`);
+  if (S.day.place) lines.push(`📍 ${S.day.place}${o.map && A.map ? ': ' + placeMapUrl(A.pl) : ''}`);
+  if (o.wx && A.wx && S.day.weather) lines.push(wxShare(S.day.weather));
+  if (o.cal && A.cal) lines.push(`📅 In den Kalender: ${calLink()}`);
   R.teams.forEach((ids, t) => {
     const c = teamCol(t);
     lines.push('', `${c.mark} *Team ${t + 1}* (${ids.length} Spieler)`);
@@ -4431,6 +4517,90 @@ function shareText() {
   if (det && det.gk.some(x => x != null && x >= 0)) lines.push('🧤 = Torwart');
   return lines.join('\n');
 }
+/* Wetter für die Nachricht holen, falls draußen und noch nicht abgerufen */
+async function shareWx() {
+  const A = shareAvail();
+  if (!A.wx || S.day.weather || ui.wxBusy) return;
+  ui.wxBusy = 'day'; render();
+  try { S.day.weather = await fetchWeather(S.day.date, S.day.time, A.pl); } catch (e) { if (ui.shr) ui.shr.wxErr = e.message || 'Wetter nicht verfügbar'; }
+  ui.wxBusy = null; render();
+}
+function shareDlgHTML() {
+  const U = ui.shr, o = U.o, A = shareAvail(), txt = shareText(o);
+  const opt = (k, on, label, sub) => `<div class="row shopt"><span class="grow">${label}${sub ? `<br><span class="small muted">${sub}</span>` : ''}</span>${sw('shrOpt', on, `data-k="${k}"`, label)}</div>`;
+  const wxSub = ui.wxBusy === 'day' ? 'wird abgerufen …' : S.day.weather ? esc(wxShare(S.day.weather)) : esc(U.wxErr || 'nicht verfügbar');
+  return sheetWrap(`<div class="sheet-head"><h2 id="shrTitle">Teams teilen</h2><button type="button" class="btn sm primary" data-act="shrClose">Fertig</button></div>
+    ${A.map || A.wx || A.cal ? `<div class="shopts">
+      ${A.map ? opt('map', o.map, '📍 Ort mit Kartenlink', 'Antippen öffnet die Route in Google Maps') : ''}
+      ${A.wx ? opt('wx', o.wx, '🌦️ Wetter', wxSub) : ''}
+      ${A.cal ? opt('cal', o.cal, '📅 Kalender-Link', 'Über den Link übernimmt jeder den Termin in seinen Kalender') : ''}</div>` : ''}
+    <div class="field"><span class="lbl">Vorschau</span><textarea class="shprev" id="shrText" rows="${Math.min(16, txt.split('\n').length + 1)}" readonly>${esc(txt)}</textarea></div>
+    <div class="row shbtns"><a class="btn primary" href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">Per WhatsApp senden</a>${navigator.share ? '<button type="button" class="btn" data-act="shrShare">Teilen …</button>' : ''}<button type="button" class="btn" data-act="shrCopy">Kopieren</button></div>`, 'shrTitle', 'shrClose');
+}
+/* ---------- Kalender-Link: #ftk + Zahlen (Basis 36, feste Längen) + Texte wie beim Umfrage-Link ---------- */
+const CAL_D0 = Date.UTC(2020, 0, 1) / 864e5;
+const b36 = (n, len) => Math.max(0, Math.round(n)).toString(36).padStart(len, '0').slice(-len);
+function calPack(c) {
+  const day = Math.round(Date.UTC(+c.date.slice(0, 4), +c.date.slice(5, 7) - 1, +c.date.slice(8, 10)) / 864e5 - CAL_D0);
+  const tm = isTime(c.time) ? +c.time.slice(0, 2) * 60 + +c.time.slice(3, 5) : 1295;
+  const geo = c.lat != null ? 'g' + b36((c.lat + 90) * 1e5, 5) + b36((c.lon + 180) * 1e5, 5) : 'h';
+  return b36(day, 3) + b36(tm, 2) + b36(clamp(c.min || 0, 0, 900), 2) + geo + svPack([c.title || '', c.place || '', c.addr || '']);
+}
+function calUnpack(s) {
+  if (!/^[0-9a-z]{7}[gh]/.test(s)) throw new Error('Kalender-Link');
+  const day = parseInt(s.slice(0, 3), 36), tm = parseInt(s.slice(3, 5), 36), min = parseInt(s.slice(5, 7), 36);
+  const d = new Date((CAL_D0 + day) * 864e5), date = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+  let i = 8, lat = null, lon = null;
+  if (s[7] === 'g') { lat = parseInt(s.slice(8, 13), 36) / 1e5 - 90; lon = parseInt(s.slice(13, 18), 36) / 1e5 - 180; i = 18; }
+  const [title, place, addr] = svUnpack(s.slice(i));
+  return { date, time: tm < 1440 ? `${pad(Math.floor(tm / 60))}:${pad(tm % 60)}` : '', min: min || 0, lat, lon, title: str(title).slice(0, 60), place: str(place).slice(0, 60), addr: str(addr).slice(0, 160) };
+}
+function calLink() {
+  const d = S.day, pl = placeByName(d.place), pr = curProject();
+  return `${svBase()}#ftk${calPack({ date: d.date, time: d.time, min: d.minutes, title: (pr ? pr.name : S.name) || 'Fußball', place: d.place, lat: pl ? pl.lat : null, lon: pl ? pl.lon : null, addr: pl ? pl.address : '' })}`;
+}
+function calTimes(c) {
+  const ymd = c.date.replace(/-/g, '');
+  if (!c.time) { const n = new Date(c.date + 'T12:00:00'); n.setDate(n.getDate() + 1); return { allDay: true, a: ymd, b: `${n.getFullYear()}${pad(n.getMonth() + 1)}${pad(n.getDate())}` }; }
+  const st = new Date(`${c.date}T${c.time}:00`), en = new Date(st.getTime() + (c.min || 90) * 60000);
+  const f = x => `${x.getFullYear()}${pad(x.getMonth() + 1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
+  return { allDay: false, a: f(st), b: f(en) };
+}
+function calIcs(c) {
+  const T = calTimes(c), e = t => String(t).replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+  const now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const loc = [c.place, c.addr].filter(Boolean).join(', ');
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Faire Teams//DE', 'BEGIN:VEVENT', `UID:${T.a}-${svSum(c.title + c.place)}@faire-teams`, `DTSTAMP:${now}`,
+    T.allDay ? `DTSTART;VALUE=DATE:${T.a}` : `DTSTART:${T.a}`, T.allDay ? `DTEND;VALUE=DATE:${T.b}` : `DTEND:${T.b}`,
+    `SUMMARY:${e('⚽ ' + (c.title || 'Fußball'))}`, loc ? `LOCATION:${e(loc)}` : '', c.lat != null ? `GEO:${c.lat.toFixed(5)};${c.lon.toFixed(5)}` : '', 'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
+}
+function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function calSheetHTML() {
+  const c = ui.cal, T = calTimes(c), loc = [c.place, c.addr].filter(Boolean).join(', ');
+  const when = new Date(c.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + (c.time ? ` · ${c.time}${c.min ? '–' + addMin(c.time, c.min) : ''} Uhr` : '');
+  const g = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('⚽ ' + (c.title || 'Fußball'))}&dates=${T.a}/${T.b}${loc ? '&location=' + encodeURIComponent(loc) : ''}`;
+  const route = c.lat != null || c.addr ? placeMapUrl({ name: c.place, address: c.addr, lat: c.lat, lon: c.lon }) : '';
+  return sheetWrap(`<div class="sheet-head"><h2 id="calTitle">Termin</h2><button type="button" class="btn sm primary" data-act="calClose">Schließen</button></div>
+    <div class="calcard"><b>⚽ ${esc(c.title || 'Fußball')}</b><span>${esc(when)}</span>${c.place ? `<span>📍 ${esc(c.place)}${c.addr ? `<br><span class="small muted">${esc(shortAddr(c.addr))}</span>` : ''}</span>` : ''}${!c.time ? '<span class="small muted">Ohne Uhrzeit – wird als ganztägiger Termin eingetragen.</span>' : !c.min ? '<span class="small muted">Dauer nicht angegeben – eingetragen werden 90 Minuten.</span>' : ''}</div>
+    <div class="calbtns">
+      <a class="btn primary big" href="data:text/calendar;charset=utf-8,${encodeURIComponent(calIcs(c))}"${isIOS() ? '' : ' download="fussball.ics"'}>📅 In den Kalender eintragen</a>
+      <a class="btn" href="${esc(g)}" target="_blank" rel="noopener">Google Kalender</a>
+      ${route ? `<a class="btn" href="${esc(route)}" target="_blank" rel="noopener">📍 Route in Google Maps</a>` : ''}</div>
+    <p class="hint">„In den Kalender eintragen“ öffnet den Termin im Kalender deines Handys (iPhone: in Safari öffnen). Nutzt du Google Kalender, nimm den zweiten Knopf.</p>`, 'calTitle', 'calClose');
+}
+function calFromHash() {
+  const m = location.hash.match(/^#ftk([0-9a-zA-Z-]+)/);
+  if (!m) return;
+  try { ui.cal = calUnpack(m[1]); } catch (e) { toast('Dieser Kalender-Link ist unvollständig.'); }
+  clearHash();
+}
+var P10_ACTS = Object.assign(P10_ACTS || {}, {
+  shrClose: () => { ui.shr = null; render(); },
+  shrOpt: el => { const o = ui.shr.o; o[el.dataset.k] = !o[el.dataset.k]; shareOptsSave(o); if (el.dataset.k === 'wx' && o.wx) shareWx(); render(); },
+  shrCopy: () => copyText(shareText(ui.shr.o), 'Teams kopiert – jetzt z. B. in WhatsApp einfügen.'),
+  shrShare: async () => { try { await navigator.share({ text: shareText(ui.shr.o) }); } catch (e) { /* abgebrochen */ } },
+  calClose: () => { ui.cal = null; render(); }
+});
 async function shareTeams() {
   const text = shareText();
   if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -4439,11 +4609,37 @@ async function shareTeams() {
   copyText(text, 'Teams kopiert – jetzt z. B. in WhatsApp einfügen.');
 }
 function copyText(text, msg) {
-  const fail = () => { ui.copy = text; render(); const ta = $('#copyArea'); if (ta) { ta.focus(); ta.select(); } };
+  const fail = () => { if (ui.shr) { const ta = $('#shrText'); if (ta) { ta.focus(); ta.select(); toast('Text ist markiert – jetzt kopieren.'); } return; } ui.copy = text; render(); const ta = $('#copyArea'); if (ta) { ta.focus(); ta.select(); } };
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => { ui.copy = null; toast(msg); render(); }, fail);
     else fail();
   } catch (e) { fail(); }
+}
+
+/* Speicherplatz im Browser: Die Daten liegen im localStorage, den Browser auf etwa 5 MB je Seite begrenzen.
+   Gezählt werden Zeichen (so rechnen die Browser); Fotos von Orten und Spielern sind der größte Posten. */
+const STORE_LIMIT = 5 * 1024 * 1024;
+function storageUse() {
+  const out = { total: 0, proj: {}, bk: 0, other: 0 };
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i), n = k.length + (localStorage.getItem(k) || '').length;
+      out.total += n;
+      const m = /^team-generator\.(p|bk)\.(.+)$/.exec(k);
+      if (m && m[1] === 'p') out.proj[m[2]] = (out.proj[m[2]] || 0) + n; else if (m) out.bk += n; else out.other += n;
+    }
+  } catch (e) { /* kein Zugriff */ }
+  return out;
+}
+const mb = n => (n >= 1024 * 1024 ? `${fmt(n / 1024 / 1024, 1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+function storageHTML() {
+  const U = storageUse(), share = U.total / STORE_LIMIT, open = !!ui.open.store;
+  const rows = projects.list.map(pr => [pr.name, U.proj[pr.id] || 0]).sort((a, b) => b[1] - a[1]);
+  return `<div class="field storeuse"><div class="lblrow"><span class="lbl">Speicherplatz</span><span class="small ${share > 0.8 ? 'errtxt' : share > 0.6 ? 'warntxt' : 'muted'}">${mb(U.total)} von etwa 5 MB (${pctTxt(Math.min(1, share))})</span></div>
+    <span class="stbar" aria-hidden="true"><i style="width:${clamp(share * 100, 1, 100)}%" class="${share > 0.8 ? 'bad' : share > 0.6 ? 'warn' : ''}"></i></span>
+    <button type="button" class="linkbtn small" data-act="toggleSec" data-k="store" aria-expanded="${open}">${open ? 'Aufteilung ausblenden' : 'Aufteilung zeigen'}</button>
+    ${open ? `<ul class="storelist small">${rows.map(([n, v]) => `<li><span class="grow">${esc(n)}</span><span class="num">${mb(v)}</span></li>`).join('')}<li><span class="grow">Automatische Sicherungen</span><span class="num">${mb(U.bk)}</span></li><li><span class="grow">Sonstiges (Entwürfe, Einstellungen)</span><span class="num">${mb(U.other)}</span></li></ul>
+      <p class="hint">Am meisten Platz brauchen Fotos von Orten und Spielern. Wird es knapp: alte Projekte als Datei sichern und hier löschen, oder Fotos entfernen.</p>` : ''}</div>`;
 }
 
 /* ---------- Dateien: Export ----------
@@ -4665,7 +4861,7 @@ function impApply() {
    OBERFLÄCHE – Bausteine und Ansichten
    ============================================================ */
 /* Einheitliche Symbole für die Einteilungs-Knöpfe (überall gleich) */
-const EMO = { fair: '<span class="emo" aria-hidden="true">⚖️</span>', rnd: '<span class="emo" aria-hidden="true">🎲</span>', self: '<span class="emo" aria-hidden="true">✍️</span>', late: '<span class="emo" aria-hidden="true">➕</span>', share: '<svg class="shareic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>' };
+const EMO = { fair: '<span class="emo" aria-hidden="true">⚖️</span>', rnd: '<span class="emo" aria-hidden="true">🎲</span>', self: '<span class="emo" aria-hidden="true">✍️</span>', late: '<span class="emo" aria-hidden="true">➕</span>', share: '<span class="emo emosvg" aria-hidden="true"><svg class="shareic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg></span>' };
 const ICON = {
   day: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14l2.5 2.5L16 12"/></svg>',
   teams: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 3 4 5.5 2 10l3 1.5V21h14v-9.5l3-1.5-2-4.5L16 3c-.7 1.5-2.2 2.5-4 2.5S8.7 4.5 8 3Z"/></svg>',
@@ -4823,8 +5019,27 @@ function viewWelcome() {
     <div class="row welcomeshot"><button type="button" class="btn" data-act="shotOpen" data-v="day">📷 Aus Screenshots einlesen</button><span class="small muted">z. B. die Mitgliederliste eurer WhatsApp-Gruppe oder eine Umfrage – du prüfst jede Zuordnung.</span></div>
     ${ui.previous ? `<div class="banner"><p>In diesem Browser liegen Daten der Vorversion (${ui.previous.players.length} Spieler, ${ui.previous.rules.length} Regeln).</p><button type="button" class="btn sm primary" data-act="takePrevious">Übernehmen</button></div>` : ''}
     <p class="hint">Schon eine Sicherungsdatei? <button type="button" class="linkbtn" data-act="pickFile">Datei einlesen</button></p>
+    ${installHintHTML()}
   </section>`;
 }
+/* „Auch als App nutzbar“ – mit der Anleitung für das Gerät, auf dem die Seite gerade offen ist */
+var installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!S.players.length) render(); });
+function isStandalone() { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } }
+function installHintHTML() {
+  if (isStandalone()) return '';
+  const ua = navigator.userAgent, ios = isIOS(), android = /Android/i.test(ua), safari = ios && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  const steps = ios
+    ? (safari ? '<li>Unten (iPad: oben) auf <b>Teilen</b> tippen – das Quadrat mit dem Pfeil nach oben</li><li>Nach unten scrollen: <b>„Zum Home-Bildschirm“</b></li><li><b>Hinzufügen</b> – fertig. Das Symbol startet die App ohne Adressleiste.</li>'
+      : '<li>Diese Seite in <b>Safari</b> öffnen (Chrome auf dem iPhone kann es je nach Version auch: Teilen-Menü)</li><li><b>Teilen</b> → <b>„Zum Home-Bildschirm“</b> → <b>Hinzufügen</b></li>')
+    : android ? '<li>Oben rechts auf <b>⋮</b> tippen</li><li><b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b></li><li>Bestätigen – die App liegt dann bei deinen anderen Apps.</li>'
+      : '<li>In Chrome oder Edge: in der Adressleiste rechts auf das <b>Installieren-Symbol</b> (Bildschirm mit Pfeil) klicken</li><li>Oder im Menü <b>⋮</b> → <b>„App installieren“</b> bzw. „Speichern und teilen“ → „Seite als App installieren“</li><li>Safari auf dem Mac: <b>Ablage → Zum Dock hinzufügen</b></li>';
+  return `<details class="installhint"><summary>📱 Auch als App nutzbar – so geht’s</summary>
+    ${installEvt ? '<p><button type="button" class="btn sm primary" data-act="installApp">Jetzt installieren</button></p>' : ''}
+    <ol class="small">${steps}</ol>
+    <p class="small muted">Die Daten bleiben dieselben, solange du die App im selben Browser installierst. Updates kommen automatisch, sobald die Seite neu geladen wird.</p></details>`;
+}
+var P10_ACTS = Object.assign(P10_ACTS || {}, { installApp: async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) { /* egal */ } installEvt = null; render(); } });
 
 /* ---------- Spieltag ---------- */
 function dupBanner() {
@@ -5024,21 +5239,19 @@ function viewDay() {
     <div class="field">
       ${lbl('Namen hinzufügen', 'quickAdd', 'quick')}
       <div class="addrow"><textarea id="quick" rows="1" data-in="quickType" placeholder="z. B. Jonas 7, Lukas">${esc(ui.quickTxt || '')}</textarea><button type="button" class="btn primary" data-act="quickAdd">Hinzufügen</button></div>
-      <div class="row"><span class="small muted">Neue anlegen als</span>${seg('quickKind', [['active', 'Stammspieler'], ['new', 'Neu'], ['guest', 'Gast']], ui.quickKind || 'active')}</div>
-      <div class="row"><button type="button" class="btn sm" data-act="shotOpen" data-v="day">Screenshots einlesen</button><span class="small muted">Umfrage, Chat oder Mitgliederliste (z. B. aus WhatsApp) – die Art wird erkannt, du prüfst jede Zuordnung.</span></div>
+      <div class="row addopts"><span class="small muted">als</span>${seg('quickKind', [['active', 'Stamm'], ['new', 'Neu'], ['guest', 'Gast']], ui.quickKind || 'active', '', 'pill one')}<span class="grow"></span><button type="button" class="btn sm" data-act="shotOpen" data-v="day" title="Umfrage, Chat oder Mitgliederliste (z. B. aus WhatsApp) – die Art wird erkannt, du prüfst jede Zuordnung.">📷 Screenshots</button></div>
       ${ui.addErr ? `<p class="errtxt">${esc(ui.addErr)}</p>` : ''}
     </div>
     ${dupBanner()}
-    ${S.players.length ? `<div class="listtools">
-      <input type="search" id="search" data-in="search" placeholder="Name suchen (auch Gäste)" value="${esc(ui.search)}" aria-label="Spieler suchen">
-      <span class="lbl">Ankreuzen</span><button type="button" class="btn sm" data-act="allOn">alle Aktiven</button><button type="button" class="btn sm" data-act="allOff">keinen</button>
+    ${S.players.length ? `<div class="row onerow dsearch">
+      <input class="grow" type="search" id="search" data-in="search" placeholder="Name suchen" title="Findet auch Pausierte und Gäste" value="${esc(ui.search)}" aria-label="Spieler suchen">
+      <button type="button" class="btn sm" data-act="allOn" title="Alle aktiven Spieler ankreuzen">✓ alle</button><button type="button" class="btn sm" data-act="allOff" title="Keinen ankreuzen">keinen</button>
     </div>
-    <div class="listtools">${pausedN || guestN ? `<span class="lbl">Auch zeigen</span>
-      ${pausedN ? `<button type="button" class="fchip${ui.showPaused ? ' on' : ''}" data-act="toggleList" data-k="showPaused" aria-pressed="${ui.showPaused}"><span class="fbox" aria-hidden="true"></span>Pausierte <span class="cnt">${pausedN}</span></button>` : ''}
-      ${guestN ? `<button type="button" class="fchip${ui.showGuests ? ' on' : ''}" data-act="toggleList" data-k="showGuests" aria-pressed="${ui.showGuests}"><span class="fbox" aria-hidden="true"></span>Gäste <span class="cnt">${guestN}</span></button>` : ''}` : ''}
-      <span class="grow"></span><span class="lbl">Sortieren</span>${seg('dsort', [['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele']], ui.dsort || 'name')}
-      <label class="minichk" title="Angekreuzte und „vielleicht“ zuerst"><input type="checkbox" data-ch="presentTop"${ui.presentTop ? ' checked' : ''}>Angekreuzte oben</label>
-    </div>` : ''}
+    <div class="row onerow dsortrow"><label class="lbl" for="dsortSel">Sortieren</label><select id="dsortSel" class="psortsel" data-ch="dsortSel">${[['name', 'Name'], ['strength', 'Stärke'], ['role', 'Position'], ['games', 'Spiele']].map(([v, l]) => `<option value="${v}"${(ui.dsort || 'name') === v ? ' selected' : ''}>${l}</option>`).join('')}</select>
+      <label class="minichk" title="Angekreuzte und „vielleicht“ zuerst"><input type="checkbox" data-ch="presentTop"${ui.presentTop ? ' checked' : ''}>Angekreuzte oben</label></div>
+    ${pausedN || guestN ? `<div class="row tchips onerow" role="group" aria-label="Auch zeigen">
+      ${pausedN ? `<button type="button" class="showchip${ui.showPaused ? ' on' : ''}" data-act="toggleList" data-k="showPaused" aria-pressed="${!!ui.showPaused}"><span class="tbox" aria-hidden="true"></span>Pausierte <span class="cnt">${pausedN}</span></button>` : ''}
+      ${guestN ? `<button type="button" class="showchip${ui.showGuests ? ' on' : ''}" data-act="toggleList" data-k="showGuests" aria-pressed="${!!ui.showGuests}"><span class="tbox" aria-hidden="true"></span>Gäste <span class="cnt">${guestN}</span></button>` : ''}</div>` : ''}` : ''}
     ${!pool.length ? `<p class="hint">${q ? 'Niemand gefunden.' : 'Noch keine Spieler. Füge oben Namen ein.'}</p>`
       : ui.dsort === 'role' ? `${posBoard(pool, { toggle: true, hint: 'Antippen schaltet weiter: <b>dabei</b> (grün) → <b>vielleicht</b> (gelb) → nicht dabei. Für die Teams zählen nur die grünen. Tagesform und Rolle für heute: Sortierung „Name“ und dort ⋯.' })}`
       : `${dayExtras() ? `<div class="row"><span class="hint grow">Für heute gesetzt: Tagesform, Rollen, Pausen oder Fixierungen.</span><button type="button" class="btn sm ${ui.arm === 'day' ? 'danger armed' : 'ghost'}" data-act="resetDay">${ui.arm === 'day' ? 'Wirklich zurücksetzen?' : 'Alle Form-Daten zurücksetzen'}</button></div>` : ''}<div class="rosterbox${pool.length > 12 ? ' scrolly' : ''}" data-keep="roster"><ul class="roster">${pool.map(rosterRow).join('')}</ul></div><p class="hint">Die Zahl ist die Stärke 1–10 ${ib('strength')} · über ⋯ Tagesform, Rolle und Pausen für heute${pool.length > 12 ? ' · die Liste scrollt für sich' : ''}.</p>`}
@@ -5892,19 +6105,34 @@ function teamRoles(M, det, idxs) {
   return { roles: out, cnt };
 }
 /* Spielfeld: Reihe aus Kurzbefehl oder Rolle, Spalte aus der Seite; ohne Seite in die leerste Spalte. */
+/* Aufstellung auf dem Feld. Je Reihe werden die Spieler so auf links … rechts verteilt, dass ihre Seite aus dem Profil
+   möglichst passt und die Reihe trotzdem ausgewogen steht: zwei Linksverteidiger ohne Rechtsverteidiger → einer spielt rechts. */
 function pitchGrid(entries) {
-  const cells = {};
   const col = { links: 0, halblinks: 1, innen: 2, halbrechts: 3, rechts: 4 };
-  entries.slice().sort((a, b) => (a.side ? 0 : 1) - (b.side ? 0 : 1)).forEach(x => {
-    let c = x.row === 6 ? 2 : col[x.side];
-    if (c == null) { const load = [2, 1, 3, 0, 4].map(k => ({ k, n: (cells[x.row + ':' + k] || []).length })); c = load.reduce((b, v) => (v.n < b.n ? v : b)).k; }
-    (cells[x.row + ':' + c] = cells[x.row + ':' + c] || []).push(x.html);
+  const byRow = {};
+  entries.forEach(x => { (byRow[x.row] = byRow[x.row] || []).push(x); });
+  const combos = (k, from = 0, acc = [], out = []) => { if (acc.length === k) { out.push(acc.slice()); return out; } for (let c = from; c < 5; c++) { acc.push(c); combos(k, c + 1, acc, out); acc.pop(); } return out; };
+  const perms = a => a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map(r => [x, ...r]));
+  const cells = {};
+  Object.keys(byRow).forEach(r => {
+    const L = byRow[r], k = L.length;
+    if (+r === 6 || k > 5) { L.forEach((x, i) => { const c = +r === 6 ? 2 : col[x.side] ?? [2, 1, 3, 0, 4][i % 5]; (cells[r + ':' + c] = cells[r + ':' + c] || []).push(x.html); }); return; }
+    let best = null, bc = Infinity;
+    combos(k).forEach(cs => {
+      // Reihe ohne Seitenwunsch: symmetrisch und eher innen; wer eine Seite hat, möglichst dort
+      const shape = Math.abs(cs.reduce((a, c) => a + c - 2, 0)) * (k >= 2 ? 1.5 : 0) + cs.reduce((a, c) => a + (c === 0 || c === 4 ? 0.25 : 0), 0);
+      perms(cs).forEach(pc => {
+        const cost = shape + L.reduce((a, x, i) => a + (col[x.side] != null ? Math.abs(col[x.side] - pc[i]) : Math.abs(2 - pc[i]) * 0.05), 0);
+        if (cost < bc - 1e-9) { bc = cost; best = pc; }
+      });
+    });
+    L.forEach((x, i) => { const c = best[i]; (cells[r + ':' + c] = cells[r + ':' + c] || []).push(x.html); });
   });
   const rows = [0, 1, 2, 3, 4, 5, 6].map(r => {
     const any = [0, 1, 2, 3, 4].some(c => cells[r + ':' + c]);
     return any ? `<div class="prow3${r === 6 ? ' gkrow' : ''}">${[0, 1, 2, 3, 4].map(c => `<div class="zone">${(cells[r + ':' + c] || []).join('')}</div>`).join('')}</div>` : '';
   }).join('');
-  return `<div class="pitch" aria-label="Aufstellung, Angriff oben">${rows}</div>`;
+  return `<div class="pitch" aria-label="Aufstellung, Angriff oben">${PITCH_LINES}${rows}</div>`;
 }
 function pitchRow(p, role) {
   const c = findPosCode(p.posCode);
@@ -6626,6 +6854,7 @@ function viewSettings() {
   ${rvBlock('stData', false, '💾 Daten und Projekte', '', '<button type="button" class="btn sm ghost" data-act="projOpen">Projekte verwalten</button>', `
     ${pi ? `<div class="banner warn"><p><b>Import prüfen${pi.name ? ` – „${esc(pi.name)}“` : ''}:</b> ${pi.players.length} Spieler, ${pi.rules.length} Regeln${pi.matches.length ? `, ${plural(pi.matches.length, 'Runde', 'Runden')} (${pi.matches.filter(m => m.status === 'done').length} mit Ergebnis)` : ''}${pi.players.length && pi.players.every(x => !x.rated) ? ' – ohne Bewertungen' : ''}. „Ersetzen“ überschreibt das geöffnete Projekt (${S.players.length} Spieler), „Als neues Projekt“ lässt es unberührt.</p><div class="impopts"><span class="lbl">Übernehmen:</span>${[['ratings', 'Bewertungen'], ['matches', 'Runden und Ergebnisse'], ['rules', 'Paarregeln'], ['places', 'Orte'], ['surveys', 'Umfragen'], ['info', 'Telefon, Geburtstag, Notizen, Fotos'], ['settings', 'Einstellungen']].map(([k, l]) => cbx('impOpt', (ui.impOpt || {})[k] !== false, l, `data-k="${k}"`)).join('')}</div><button type="button" class="btn sm primary" data-act="importAsNew">Als neues Projekt</button><button type="button" class="btn sm" data-act="impOpen">Nur Teile übernehmen …</button><button type="button" class="btn sm${ui.arm === 'importReplace' ? ' danger armed' : ''}" data-act="importConfirm">${ui.arm === 'importReplace' ? 'Wirklich ersetzen?' : S.players.length || S.matches.length ? 'Dieses Projekt ersetzen' : 'Hier übernehmen'}</button>${ui.arm === 'importReplace' ? `<p class="small errtxt">Ersetzen löscht alles im geöffneten Projekt: ${plural(S.players.length, 'Spieler', 'Spieler')} und ${plural(S.matches.length, 'Runde', 'Runden')} werden durch die Datei (${plural(pi.players.length, 'Spieler', 'Spieler')}, ${plural(pi.matches.length, 'Runde', 'Runden')}) ersetzt.${S.matches.length > pi.matches.length ? ` <b>${S.matches.length - pi.matches.length} Runden gingen dabei verloren.</b> Willst du nur Ergebnisse ergänzen, nimm „Nur Teile übernehmen“.` : ''} Vorher wird automatisch gesichert.</p>` : ''}<button type="button" class="btn sm ghost" data-act="importCancel">Abbrechen</button></div>` : ''}
     <p class="hint">Alles liegt nur in diesem Browser. Ab und zu als Datei sichern – auch zum Übertragen auf ein anderes Gerät. ${backupLine()}</p>
+    ${storageHTML()}
     ${ui.importMulti ? `<div class="banner warn"><p><b>Datei mit ${plural(ui.importMulti.length, 'Projekt', 'Projekten')}:</b> ${ui.importMulti.map(x => `„${esc(x.name)}“ (${x.players.length} Spieler, ${x.matches.length} Runden)`).join(', ')}.</p>
       <div class="row"><button type="button" class="btn sm primary" data-act="importMultiAdd">Als neue Projekte hinzufügen</button><button type="button" class="btn sm ${ui.arm === 'importAll' ? 'danger armed' : ''}" data-act="importMultiReplace">${ui.arm === 'importAll' ? 'Wirklich alle bisherigen Projekte ersetzen?' : 'Alle Projekte ersetzen'}</button><button type="button" class="btn sm ghost" data-act="importCancel">Abbrechen</button></div>
       <div class="row small"><span class="muted">Oder Teile aus einem Projekt übernehmen:</span>${ui.importMulti.map((x, i) => `<button type="button" class="btn sm ghost" data-act="impOpen" data-k="${i}">${esc(x.name)}</button>`).join('')}</div></div>` : ''}
@@ -7142,19 +7371,20 @@ function applyRec(r, value) {
   S.log.push({ id: uid(), at: Date.now(), src: isNum(value) && v !== r.to ? 'own' : 'rec', kind: 'player', target: p.id, field: r.type === 'ok' ? 'new' : 'strength', old, new: p.strength, oldAttrs, extra, label });
   decide(r, 'done', v);
 }
-function undoLog(id) {
+function undoLog(id, quiet) {
   const e = S.log.find(x => x.id === id);
-  if (!e) return;
-  const p = byId(e.target);
-  if (e.kind !== 'player' || !['strength', 'new'].includes(e.field)) { toast('Diese ältere Änderung bitte von Hand zurücksetzen.'); return; }
-  if (!p) { toast('Den Spieler gibt es nicht mehr.'); return; }
-  if (p.strength !== e.new) { toast('Der Wert wurde seitdem geändert – bitte von Hand anpassen.'); return; }
+  if (!e) return false;
+  const p = byId(e.target), say = m => { if (!quiet) toast(m); return false; };
+  if (e.kind !== 'player' || !['strength', 'new'].includes(e.field)) return say('Diese ältere Änderung bitte von Hand zurücksetzen.');
+  if (!p) return say('Den Spieler gibt es nicht mehr.');
+  if (p.strength !== e.new) return say('Der Wert wurde seitdem geändert – bitte von Hand anpassen.');
   p.strength = e.old;
   if (e.oldAttrs && typeof e.oldAttrs === 'object') p.attrs = { ...e.oldAttrs };
   if (e.extra) { p.isNew = e.extra.isNew; p.rated = e.extra.rated; p.autoStrength = e.extra.autoStrength; }
   S.log = S.log.filter(x => x.id !== id);
   S.recs = S.recs.filter(x => x.key !== (e.field === 'new' ? 'ok:' : 'str:') + e.target);
-  toast('Änderung zurückgenommen.');
+  if (!quiet) toast('Änderung zurückgenommen.');
+  return true;
 }
 
 /* ---------- Diagramme (SVG, Farben aus dem Thema) ---------- */
@@ -7369,11 +7599,11 @@ function resultsChart(all) {
 function historyChart(A) {
   const gs = A.obs.games.filter(g => g.kind !== 'feel' && g.ga + g.gb > 0 && g.then != null).sort((x, y) => x.date.localeCompare(y.date) || (matchById(x.mid) || {}).created - (matchById(y.mid) || {}).created || x.k - y.k).slice(-200);
   if (gs.length < 2) return '';
-  const o = A.o, narrow = window.innerWidth < 600, H = narrow ? 200 : 210, L = 4, R = narrow ? 70 : 92, T = 26, B = 22, max = 3;
+  const o = A.o, narrow = window.innerWidth < 600, H = narrow ? 200 : 210, L = 4, R = narrow ? 80 : 96, T = 26, B = 22, max = 3;
   const pts = gs.map(g => { const n = g.ga + g.gb; return { g, n, z: Math.abs(surprise(g.ga / n, g.then, n, o)) }; });
   const lay = timeLayout(pts.map(x => x.g.date), { L, R }), X = lay.X, Y = v => T + (H - T - B) * (1 - Math.min(v, max) / max), sel = ui.chSel.hc;
   const segs = lay.mons.map((m, j) => [j ? m.x + 3 : L, j < lay.mons.length - 1 ? lay.mons[j + 1].x - 3 : lay.end]);
-  const band = (v0, v1, cls, txt) => `${segs.map(([a, b]) => `<rect x="${a}" y="${Y(v1)}" width="${Math.max(0, b - a)}" height="${Y(v0) - Y(v1)}" class="zband ${cls}"/>`).join('')}<text x="${lay.end + 6}" y="${(Y(v0) + Y(v1)) / 2 + 4}" class="axis">${txt}</text>`;
+  const band = (v0, v1, cls, txt) => `${segs.map(([a, b]) => `<rect x="${a}" y="${Y(v1)}" width="${Math.max(0, b - a)}" height="${Y(v0) - Y(v1)}" class="zband ${cls}"/>`).join('')}<text x="${lay.end + 6}" y="${(Y(v0) + Y(v1)) / 2 - 2}" class="axis">${txt.split('|').map((t, k) => `<tspan x="${lay.end + 6}" dy="${k ? 13 : 0}">${t}</tspan>`).join('')}</text>`;
   const excl = S.matches.filter(m => m.status === 'done' && m.exclude).length, noGoals = A.obs.games.filter(g => g.kind !== 'feel' && g.ga + g.gb === 0).length;
   const nOk = pts.filter(x => x.z < 1).length;
   let selHTML = '', selMid = '';
@@ -7388,7 +7618,7 @@ function historyChart(A) {
       <circle cx="${X(i)}" cy="${Y(x.z)}" r="${on ? r + 2 : r}" class="dot ${surpriseCls(x.z)}${x.g.kind !== 'score' ? ' soft' : ''}"/></g>`;
   })).join('');
   const svg = `<svg viewBox="0 0 ${lay.W} ${H}" role="img" aria-label="Wie überraschend war jedes Spiel?">
-    ${band(0, 1, 'zok', 'normal')}${band(1, 2, 'zwarn', narrow ? 'etwas' : 'etwas überr.')}${band(2, max, 'zbad', narrow ? 'sehr' : 'sehr überr.')}
+    ${band(0, 1, 'zok', 'wie|erwartet')}${band(1, 2, 'zwarn', 'etwas|überraschend')}${band(2, max, 'zbad', 'sehr|überraschend')}
     ${timeAxis(lay, T, H - B, H - 6, false)}
     ${dots}
   </svg>`;
@@ -7858,14 +8088,42 @@ function matchListBlock(all) {
       })).join('')}</ul></li>`; }).join('') || '<li class="hint">Keine Runden für diese Auswahl.</li>'}</ul>
     ${list.length > shown.length ? `<div><button type="button" class="btn sm ghost" data-act="mMore">Weitere ${Math.min(20, list.length - shown.length)} zeigen</button></div>` : ''}`, `${plural(all.length, 'Runde', 'Runden')} – Liste, Suche und Export.`);
 }
+/* Gruppen: gleicher Tag und gleiche Quelle (eine Umfrage oder die Vorschläge aus Ergebnissen) */
+function logGroups() {
+  const L = S.log.slice().sort((a, b) => b.at - a.at), G = [];
+  L.forEach(e => {
+    const m = /\((Umfrage vom [^)]+)\)/.exec(e.label || ''), src = m ? m[1] : 'Vorschläge aus Ergebnissen';
+    const day = new Date(e.at).toLocaleDateString('de-DE'), key = day + '|' + src, g = G.find(x => x.key === key);
+    if (g) g.list.push(e); else G.push({ key, day, src, list: [e] });
+  });
+  return G;
+}
 function logBlock() {
-  const L = S.log.slice().sort((a, b) => b.at - a.at);
-  const open = !!ui.open.log;
+  const G = logGroups(), open = !!ui.open.log, lim = ui.logLim || 5;
+  const item = e => `<li><span class="grow">${esc(String(e.label).replace(/ \(Umfrage vom [^)]+\)/, ''))} <span class="small muted">· ${e.src === 'own' ? 'eigener Wert' : 'Vorschlag'}</span></span><button type="button" class="btn sm ghost" data-act="logUndo" data-id="${e.id}">Rückgängig</button></li>`;
+  const grp = (g, gi) => {
+    const armed = ui.arm === 'logGrp:' + g.key;
+    return `<li class="loggrp"><details${ui.open['lg:' + g.key] ? ' open' : ''} data-sec="lg:${esc(g.key)}"><summary><span class="grow"><b>${esc(g.src)}</b><br><span class="small muted">${g.day} · ${plural(g.list.length, 'Änderung', 'Änderungen')}</span></span></summary>
+      <ul class="rules">${g.list.map(item).join('')}</ul>
+      ${g.list.length > 1 ? `<div class="row"><button type="button" class="btn sm ${armed ? 'danger armed' : 'ghost'}" data-act="logGrpUndo" data-k="${esc(g.key)}">${armed ? `Wirklich alle ${g.list.length} zurücknehmen?` : 'Alle dieser Gruppe zurücknehmen'}</button></div>` : ''}</details></li>`;
+  };
   return `<section class="block coll${open ? ' open' : ''}">
-    <div class="block-head"><button type="button" class="collhead" data-act="toggleSec" data-k="log" aria-expanded="${open}"><h2>Übernommene Vorschläge</h2><span class="chev">${ICON.chev}</span></button><span class="muted small">${L.length}</span></div>
-    ${open ? `<ul class="rules">${L.map(e => `<li><span class="grow">${esc(e.label)}<br><span class="small muted">${new Date(e.at).toLocaleDateString('de-DE')} · ${e.src === 'own' ? 'Vorschlag, eigener Wert' : 'Vorschlag'}</span></span><button type="button" class="btn sm ghost" data-act="logUndo" data-id="${e.id}">Rückgängig</button></li>`).join('')}</ul>` : '<p class="hint">Jede Änderung aus einem Vorschlag, mit Rückgängig.</p>'}
+    <div class="block-head"><button type="button" class="collhead" data-act="toggleSec" data-k="log" aria-expanded="${open}"><h2>Übernommene Vorschläge</h2><span class="chev">${ICON.chev}</span></button><span class="muted small">${S.log.length}</span></div>
+    ${open ? `<ul class="loglist">${G.slice(0, lim).map(grp).join('')}</ul>${G.length > lim ? `<button type="button" class="btn sm ghost" data-act="logMore">Ältere zeigen (${G.length - lim} Gruppen)</button>` : ''}
+      <p class="hint">Neueste zuerst, nach Tag und Quelle gruppiert. Gespeichert werden die letzten 500 Änderungen.</p>` : '<p class="hint">Jede Änderung aus einem Vorschlag oder einer Umfrage, mit Rückgängig.</p>'}
   </section>`;
 }
+var P10_ACTS = Object.assign(P10_ACTS || {}, {
+  logMore: () => { ui.logLim = (ui.logLim || 5) + 10; render(); },
+  logGrpUndo: el => {
+    const k = el.dataset.k, g = logGroups().find(x => x.key === k); if (!g) return;
+    if (ui.arm !== 'logGrp:' + k) { ui.arm = 'logGrp:' + k; render(); return; }
+    ui.arm = null; remember('Rückgängig');
+    let ok = 0; g.list.forEach(e => { if (undoLog(e.id, true)) ok++; });
+    render();
+    toast(ok === g.list.length ? `${plural(ok, 'Änderung', 'Änderungen')} zurückgenommen.` : `${ok} von ${g.list.length} zurückgenommen – die übrigen wurden seitdem geändert.`, { label: 'Rückgängig', act: 'undo' });
+  }
+});
 /* Export aller Spieltage als CSV (Semikolon, für Tabellenkalkulationen) */
 const formatName = k => (SPORT.formats.find(x => x.key === k) || { label: k === 'custom' ? 'eigene Spielform' : k || '' }).label;
 const TEND_CSV = { a2: 'A klar', a1: 'A knapp', d: 'unentschieden', b1: 'B knapp', b2: 'B klar' };
@@ -8752,7 +9010,7 @@ function dropOut(id) {
       if (rep.move.type === 'move') { b[rep.move.i] = rep.move.t; text = `<b>${esc(disp(byId(M.ids[rep.move.i])))}</b> wechselt zu ${teamCol(rep.move.t).name}`; }
       else { b[rep.move.i] = a[rep.move.j]; b[rep.move.j] = a[rep.move.i]; text = `<b>${esc(disp(byId(M.ids[rep.move.i])))}</b> und <b>${esc(disp(byId(M.ids[rep.move.j])))}</b> tauschen`; }
       const after = Engine.evaluate(M, b, true);
-      ui.suggest = { teams: teamsFromAssign(M, b), text: `${esc(disp(p))} fällt aus. Vorschlag: ${text} (danach ${fmt(after.pct, 1)} % Unterschied).` };
+      ui.suggest = { base: JSON.stringify(R.teams), teams: teamsFromAssign(M, b), text: `${esc(disp(p))} fällt aus. Vorschlag: ${text} (danach ${fmt(after.pct, 1)} % Unterschied).` };
       toast(`${disp(p)} fällt aus.`, { label: 'Rückgängig', act: 'undo' });
     } else toast(`${disp(p)} fällt aus. Die Teams bleiben ausgeglichen.`, { label: 'Rückgängig', act: 'undo' });
   } else toast(`${disp(p)} fällt aus.`, { label: 'Rückgängig', act: 'undo' });
@@ -8844,7 +9102,7 @@ const A = {
   },
   takePrevious: () => { if (!ui.previous) return; S = ui.previous; S.name = (curProject() || {}).name || ''; ui.previous = null; toast(`${S.players.length} Spieler übernommen.`); render(); },
   sampleRemove: () => { remember('Beispielgruppe gelöscht'); S = defaultState(); S.name = (curProject() || {}).name || ''; ui.tab = 'day'; ui.dups = []; ui.addErr = ''; render(); toast('Beispielgruppe gelöscht.', { label: 'Rückgängig', act: 'undo' }); },
-  undo: () => { if (!ui.undo) return; S = ui.undo.state; ui.undo = null; toast('Rückgängig gemacht.'); render(); },
+  undo: () => { if (!ui.undo) return; S = ui.undo.state; ui.undo = null; ui.suggest = null; ui.sel = []; toast('Rückgängig gemacht.'); render(); },
 
   // Spieltag
   present: el => {
@@ -9172,7 +9430,7 @@ const A = {
     if (!p) { p = blankPlayer(name, { strength: +el.dataset.v, status: 'guest', rated: false, nick: matchPlayers(name).length ? nextNick(name) : '' }); S.players.push(p); }
     lateAdd(p.id);
   },
-  share: () => shareTeams(),
+  share: () => { ui.shr = { o: shareOpts() }; if (ui.shr.o.wx) shareWx(); render(); },
   tview: el => { ui.tview = el.dataset.v; render(); },
   tsort: el => { ui.tsort = el.dataset.v; render(); },
   colorPick: el => { const t = +el.dataset.t; ui.colorPick = ui.colorPick === t ? null : t; render(); },
@@ -9785,6 +10043,7 @@ const IN = {
 };
 /* ---------- Änderungen (beim Verlassen eines Feldes) ---------- */
 const CH = {
+  dsortSel: el => { ui.dsort = el.value; render(); },
   psortSel: el => { ui.psort = el.value; render(); },
   rerender: () => render(),
   slideDone: () => { matchPreset(); render(); },
@@ -10133,8 +10392,9 @@ function renderNow() {
   const sheet = $('#sheet');
   if (ui.editId && !byId(ui.editId)) ui.editId = null;
   if (ui.res && !matchById(ui.res.id)) ui.res = null;
-  const anySheet = !!(ui.gshare || ui.gsend || ui.svy || ui.imp || ui.proj || ui.plEd || ui.shot || ui.mb || ui.res || ui.pa || ui.editId);
-  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.gshare ? shareSheetHTML() : ui.gsend ? guestSendHTML() : ui.svy && !ui.editId ? svSheetHTML() : ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
+  if (ui.suggest && (!S.result || !S.result.teams || (ui.suggest.base && JSON.stringify(S.result.teams) !== ui.suggest.base))) ui.suggest = null;
+  const anySheet = !!(ui.cal || ui.shr || ui.gshare || ui.gsend || ui.svy || ui.imp || ui.proj || ui.plEd || ui.shot || ui.mb || ui.res || ui.pa || ui.editId);
+  sheet.innerHTML = !anySheet ? '' : safe(() => (ui.cal ? calSheetHTML() : ui.shr ? shareDlgHTML() : ui.gshare ? shareSheetHTML() : ui.gsend ? guestSendHTML() : ui.svy && !ui.editId ? svSheetHTML() : ui.imp ? impSheetHTML() : ui.proj ? projSheetHTML() : ui.plEd ? placeSheetHTML() : ui.shot ? shotSheetHTML() : ui.mb ? builderHTML() : ui.res ? resultSheetHTML() : ui.pa ? paSheetHTML() : editorHTML()), 'Fenster', true);
   sheet.hidden = !anySheet;
   document.body.classList.toggle('sheet-open', anySheet);
   if ($('.sheet')) $('.sheet').scrollTop = sheetScroll;
@@ -10145,7 +10405,7 @@ function renderNow() {
 
   if (focusId) {
     const el = document.getElementById(focusId);
-    if (el && el !== document.activeElement) {
+    if (el && el !== document.activeElement && el.tagName !== 'SELECT' && el.type !== 'date') {
       el.focus({ preventScroll: true });
       try { if (selS != null) el.setSelectionRange(selS, selE); } catch (e) { /* Feld ohne Auswahl */ }
     }
@@ -10348,7 +10608,7 @@ document.addEventListener('click', e => {
   if (!f) return;
   e.preventDefault();
   if (ui.arm && String(ui.arm).startsWith('bk:') && el.dataset.act === 'bkRestore') { /* bleibt scharf */ } else
-  if (ui.arm && !String(el.dataset.act).match(/^(delPlayer|resetDay|resetAll|delTag|importMultiReplace|delData|delPlace|fieldDel|newDay|projDel|rawReset|importConfirm|svRespDel|svDrop|gDel)$/)) ui.arm = null;
+  if (ui.arm && !String(el.dataset.act).match(/^(delPlayer|resetDay|resetAll|delTag|importMultiReplace|delData|delPlace|fieldDel|newDay|projDel|rawReset|importConfirm|svRespDel|svDrop|gDel|logGrpUndo)$/)) ui.arm = null;
   if (ui.res && ui.res.arm && el.dataset.act !== 'resDel') ui.res.arm = false;
   f(el, e);
 });
@@ -10374,7 +10634,7 @@ document.addEventListener('toggle', e => {
   if (d.dataset.rerender) render();
 }, true);
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.svy && !SV_MODE && !ui.editId) { A.svClose(); return; } if (ui.gshare) { A.gsClose(); return; } if (ui.gsend) { A.gSendClose(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
+  if (e.key === 'Escape') { if (ui.pop) { hidePop(); return; } if (ui.cal) { A.calClose(); return; } if (ui.shr) { A.shrClose(); return; } if (ui.svy && !SV_MODE && !ui.editId) { A.svClose(); return; } if (ui.gshare) { A.gsClose(); return; } if (ui.gsend) { A.gSendClose(); return; } if (ui.proj) { A.projClose(); return; } if (ui.plEd) { A.plClose(); return; } if (ui.shot) { A.shotClose(); return; } if (ui.mb) { A.mbClose(); return; } if (ui.res) { A.resClose(); return; } if (ui.pa) { A.paClose(); return; } if (ui.editId) { closeEditor(); return; } if (ui.sel.length) { ui.sel = []; render(); } }
   if (e.key === 'Enter' && !e.shiftKey && e.target.id === 'quick') { e.preventDefault(); A.quickAdd(); }
   if (e.key === 'Enter' && e.target.id === 'lateName') { e.preventDefault(); const b = document.querySelector('[data-act="lateGuest"][data-v="5"]'); if (b) A.lateGuest(b); }
   if (e.key === 'Enter' && e.target.id === 'newPreset') { e.preventDefault(); A.newPreset(); }
@@ -10604,7 +10864,7 @@ function svEval(sv, ownOf, meWho) {
     const mean = xs.reduce((a, b) => a + b, 0) / k, main = k >= 3 ? svMed(xs) : mean;
     const q = p => { const pos = (k - 1) * p, lo = Math.floor(pos), hi = Math.ceil(pos); return xs[lo] + (xs[hi] - xs[lo]) * (pos - lo); };
     const range = xs[k - 1] - xs[0], iqr = k >= 4 ? q(0.75) - q(0.25) : range;
-    return { j, id: pl.id, name: pl.name, n: k, xs, mine, mean, raw: main, min: xs[0], max: xs[k - 1], split: k >= 2 && (range >= 3 || (k >= 4 && iqr >= 1.5)) };
+    return { j, id: pl.id, name: pl.name, n: k, xs, mine, mean, raw: main, min: xs[0], max: xs[k - 1] };
   });
   // Selbsteinschätzungen (zählen nie mit)
   R.forEach(r => { if (r.who[0] === 'p' && r.self != null) { const row = rows[parseInt(r.who.slice(1), 36)]; if (row) row.self = r.self; } });
@@ -10619,7 +10879,7 @@ function svEval(sv, ownOf, meWho) {
     }
   }
   const map = v => clamp(a * v + b, 1, 10);
-  rows.forEach(x => { if (x.n) { x.val = map(x.raw); x.dots = x.xs.map(map); if (x.mine != null) x.mine = map(x.mine); const m = x.dots.reduce((a, b) => a + b, 0) / x.n; x.sd = Math.sqrt(x.dots.reduce((a, b) => a + (b - m) ** 2, 0) / x.n); } });
+  rows.forEach(x => { if (x.n) { x.val = map(x.raw); x.dots = x.xs.map(map); if (x.mine != null) x.mine = map(x.mine); Object.assign(x, svSpread(x.dots)); } });
   return { rows, off, R, scaled, nResp: R.length };
 }
 
@@ -10758,7 +11018,7 @@ function svRender() {
   else if (d.step === 'order') bar = `<button type="button" class="btn" data-act="svGo" data-v="rate">Zurück</button><button type="button" class="btn primary${SVP.arm ? ' armed' : ''}" data-act="svSend">${SVP.arm ? `${open} noch offen – trotzdem fertig?` : 'Fertig – Antwort erstellen'}</button>`;
   html += d.step === 'done' ? '' : `<div class="svbar"><div class="wrap svbar-in">${bar}</div></div>`;
   main.innerHTML = html;
-  if (focusId) { const el = document.getElementById(focusId); if (el && el !== document.activeElement) el.focus({ preventScroll: true }); }
+  if (focusId) { const el = document.getElementById(focusId); if (el && el !== document.activeElement && el.tagName !== 'SELECT') el.focus({ preventScroll: true }); }
 }
 function svSetVal(j, v) {
   const d = SVP.d;
@@ -10849,7 +11109,7 @@ function svSheetHTML() {
   const resp = sv.responses.slice().sort((a, b) => b.at - a.at).map(r => {
     const k = E.R.indexOf(r), off = k >= 0 ? E.off[k] : null, n = r.vals.filter(x => x != null).length;
     const armed = ui.arm === 'svDel:' + r.who;
-    const strict = !sv.opt.adj || off == null || E.nResp < 2 ? '' : Math.abs(off) < 0.3 ? 'bewertet wie die anderen' : `bewertet im Schnitt ${fmt(Math.abs(off), 1)} ${off > 0 ? 'höher' : 'niedriger'} als die anderen`;
+    const strict = !sv.opt.adj || off == null || E.nResp < 2 ? '' : Math.abs(off) < 0.3 ? 'bewertet wie die anderen' : `bewertet um ${fmt(Math.abs(off), 1)} ${off > 0 ? 'höher' : 'niedriger'}`;
     return `<li class="${r.on ? '' : 'off'}"><span class="grow"><b>${esc(r.name)}</b>${r.who[0] === 'n' ? ' <span class="small muted">(nicht auf der Liste)</span>' : ''}<br><span class="small muted">${svDate(r.at)} · ${n} von ${sv.players.length - (r.who[0] === 'p' ? 1 : 0)} bewertet${strict ? ' · ' + strict : ''}</span></span>
       ${sw('svRespOn', r.on, `data-who="${r.who}"`, 'Zählt mit')}<button type="button" class="btn sm ${armed ? 'danger armed' : 'ghost'}" data-act="svRespDel" data-who="${r.who}">${armed ? 'Löschen?' : 'Löschen'}</button></li>`;
   }).join('');
@@ -10895,7 +11155,7 @@ function svSheetHTML() {
       return `<li id="svr-${x.id}" class="${weak ? 'weak' : ''}${!x.n ? ' none' : ''}">
         <div class="svrtop"><button type="button" class="svwho grow" data-act="svEdit" data-id="${x.id}" title="Profil öffnen">${avatar(byId(x.id))}<b>${esc(ownName(x.id) || x.name)}</b></button>${x.split ? tag('uneinig', 't-split', 'Die Stimmen liegen weit auseinander') : ''}${dTxt}</div>
         ${x.n ? `<div class="svrmid">${svDotsHTML(x, x.own, tv)}<span class="svnums"><span title="deine Bewertung">${isNum(x.own) ? fmt(x.own, 1) : '–'}</span> → <b title="Gruppe">${fmt(x.val, 1)}</b></span></div>
-        <div class="svrsub small">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmt(x.self, 1)}` : ''}</div>
+        <div class="svrsub small">${plural(x.n, 'Stimme', 'Stimmen')}${weak ? ' – noch wenig belastbar' : ''}${x.n > 1 ? ` · von ${fmt(x.dots[0], 1)} bis ${fmt(x.dots[x.dots.length - 1], 1)}` : ''}${x.out ? ` · <span title="Liegt weit weg von allen anderen – zählt beim Gruppenwert (Median) kaum und bei der Sicherheit nicht">${plural(x.out, 'Ausreißer', 'Ausreißer')}</span>` : ''}${isNum(x.self) ? ` · Selbsteinschätzung ${fmt(x.self, 1)}` : ''}</div>
         <div class="svrpick">${seg('svPickRow', [['', isNum(x.own) ? `behalten ${fmt(x.own, 1)}` : 'behalten'], ...(isNum(x.own) ? [['mid', `Mitte ${fmt(target(x, 'mid'), 1)}`]] : []), ['grp', `Gruppe ${fmt(target(x, 'grp'), 1)}`]], pk || '', `data-id="${x.id}"`, 'pill wrap')}</div>
         ${confRow(x)}` : '<div class="small muted">Keine Stimmen (alle „kann ich nicht beurteilen“).</div>'}</li>`;
     }).join('')}</ul>
@@ -10940,6 +11200,25 @@ const confWhy = p => (expert() && p.isNew ? 'weil „neu in der Gruppe“' : !ra
 /* Wer bin ich in dieser Umfrage? (Einstellung „Ich“ im Projekt) */
 const svMe = sv => { const k = S.me ? sv.players.findIndex(x => x.id === S.me) : -1; return k >= 0 ? 'p' + k.toString(36) : null; };
 /* Sicherheit laut Umfrage: ab 3 Stimmen; uneinig → unsicher, eng beieinander → sicher, dazwischen eher sicher */
+/* Wie einig ist sich die Gruppe? Einzelne Ausreißer (z. B. jemand bewertet aus persönlichen Gründen viel zu niedrig)
+   sollen weder „uneinig“ noch „unsicher“ auslösen. Deshalb:
+   1. Mitte = Median, typische Abweichung = MAD (Median der Abstände zum Median) × 1,48 – beides unempfindlich gegen Ausreißer.
+   2. Ausreißer = mehr als 1,5 Punkte und mehr als 2,5 typische Abweichungen von der Mitte – aber höchstens jede vierte
+      Stimme (sind es mehr, ist die Gruppe wirklich uneinig und nichts wird ausgeklammert).
+   3. Streuung (sd) und „uneinig“ werden ohne die Ausreißer berechnet. Der Gruppenwert ist ohnehin der Median. */
+function svSpread(dots) {
+  const k = dots.length, med = svMed(dots);
+  const mad = svMed(dots.map(v => Math.abs(v - med))) * 1.4826;
+  let core = dots;
+  if (k >= 3) {
+    const lim = Math.max(1.5, 2.5 * mad), keep = dots.filter(v => Math.abs(v - med) <= lim);
+    if (k - keep.length <= Math.max(1, Math.floor(k / 4))) core = keep;
+  }
+  const c = core.length, m = core.reduce((a, b) => a + b, 0) / c, sd = Math.sqrt(core.reduce((a, b) => a + (b - m) ** 2, 0) / c);
+  const srt = core.slice().sort((a, b) => a - b), q = p => { const pos = (c - 1) * p, lo = Math.floor(pos), hi = Math.ceil(pos); return srt[lo] + (srt[hi] - srt[lo]) * (pos - lo); };
+  const split = c >= 4 ? (q(0.75) - q(0.25) >= 1.5 || sd >= 1.3) : c >= 2 && srt[c - 1] - srt[0] >= 3;
+  return { sd, split, out: k - c };
+}
 function svConfSuggest(x) {
   if (!x.n || x.n < 3) return null;
   if (x.split) return 'unsure';
@@ -11038,7 +11317,7 @@ Object.assign(IN, {
   svPaste: el => { ui.svy.paste = el.value; const b = document.querySelector('[data-act="svRead"]'); if (b) b.disabled = !str(el.value); }
 });
 // Wird ein Umfrage-Link im selben Tab geöffnet (oder verlassen), neu laden – Umfrage und App laufen getrennt
-window.addEventListener('hashchange', e => { const was = /#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(e.oldURL || ''), now = SV_HASH.test(location.hash) || /^#ftg[A-Za-z0-9-]/.test(location.hash); if (was || now) location.reload(); });
+window.addEventListener('hashchange', e => { const was = /#(survey=[a-z2-7]|ftu[a-z2-7]|ft2[A-Za-z0-9-])/.test(e.oldURL || ''), now = SV_HASH.test(location.hash) || /^#ft[gk][A-Za-z0-9-]/.test(location.hash); if (was || now) location.reload(); });
 
 /* Notausgang: Ist der Link in WhatsApp nicht vollständig antippbar, öffnet sich nur die Startseite.
    Dort lässt sich die ganze Nachricht einfügen; der Link wird herausgesucht und die Umfrage geöffnet. */
@@ -11414,11 +11693,13 @@ function impFiltered(st0) {
 }
 Object.assign(A, { impOpt: el => { const o = ui.impOpt || (ui.impOpt = {}); o[el.dataset.k] = o[el.dataset.k] === false; render(); } });
 
+Object.assign(A, P10_ACTS);
 if (SV_MODE) svStart();
 else {
   load();
   linkCurrentTeams();
   guestFromHash();
+  calFromHash();
   render();
 }
 // Vorhersagen, die zu einer anderen Rechenversion gehören, im Hintergrund aus den Schnappschüssen neu rechnen
