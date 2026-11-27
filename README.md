@@ -2,7 +2,7 @@
   <img src="assets/logo-192.png" width="128" height="128" alt="Faire Teams Logo">
 </p>
 
-<h1 align="center">Faire Teams – Fußball</h1>
+<h1 align="center">Faire Teams – Fußball-Teamgenerator</h1>
 
 <p align="center">
   <strong>Gleich starke Teams in Sekunden – Schluss mit 10:1.</strong><br>

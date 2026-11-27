@@ -1,7 +1,7 @@
 {
   "name": "Faire Teams – Fußball",
   "short_name": "Faire Teams",
-  "description": "Faire Fußballteams für Hobbygruppen und Vereine – kostenlos, ohne Konto. Deine Daten bleiben auf deinem Gerät.",
+  "description": "Teamgenerator für Fußball: teilt die Anwesenden nach Stärke in gleich starke Teams. Kostenlos, ohne Anmeldung – die Daten bleiben auf dem Gerät.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
