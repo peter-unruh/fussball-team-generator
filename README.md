@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/screenshots/uebersicht.png" alt="Screenshots: Spieltag, faire Teams, dunkles Design" width="820">
+  <img src="assets/screenshots/uebersicht.png" alt="Screenshots: Spieltag, Aufstellung auf dem Spielfeld, Gruppenmeinung im dunklen Design" width="820">
 </p>
 
 ---
@@ -31,15 +31,15 @@ Zum Reinschnuppern gibt es eine **Beispielgruppe** („Erst mal ausprobieren“)
 
 - **Faire Einteilung** auf Knopfdruck – oder per Zufall oder selbst (Kapitäne wählen)
 - **Stärke 1–10** oder genauer nach Technik, Kondition, Defensive, Offensive und mehr
-- **Torhüter und Positionen** werden bei der Verteilung berücksichtigt
+- **Torhüter und Positionen** werden bei der Verteilung berücksichtigt – mit **Aufstellung auf dem Spielfeld** je Team
 - **2 oder mehr Teams**, Nachzügler lassen sich nachträglich einbauen
 - **Paarregeln**, z. B. zwei Spieler immer zusammen oder immer getrennt
 - **Ergebnisse eintragen** – der Rückblick lernt daraus und schätzt Stärken mit der Zeit genauer
-- **Orte, Platz und Wetter** pro Spieltag
+- **Orte, Felder und Wetter** pro Spieltag – mit Hinweis, wenn es vor Spielende dunkel wird
 - **Spielerliste aus Screenshots einlesen**, z. B. aus einer WhatsApp-Gruppe oder -Umfrage
-- **Spieler von der Gruppe bewerten lassen:** Link verschicken, Mitspieler schätzen alle ein (mit Reihenfolge-Check) und schicken einen kurzen Code zurück – du siehst die Gruppenmeinung neben deiner Bewertung und übernimmst, was passt
+- **Spieler von der Gruppe bewerten lassen:** Link verschicken, Mitspieler schätzen alle ein (mit Reihenfolge-Check) und schicken einen kurzen Code zurück – du siehst die Gruppenmeinung neben deiner Bewertung und übernimmst, was passt. Geht auch reihum auf einem Handy
 - **Gast-Link für die Gruppe:** Bist du mal nicht da, bildet die Gruppe mit einem Link selbst faire Teams – ohne die Bewertungen zu sehen. Ergebnisse kommen als Code zu dir zurück
-- **Teams teilen** per WhatsApp & Co. – übersichtlich mit Uhrzeit, Ort und einer Liste je Team
+- **Teams teilen** per WhatsApp & Co. – mit Uhrzeit, Ort, Karte, Wetter und Kalender-Link, auch als Bild
 - **Mehrere Gruppen** (Projekte), **Sicherung als Datei** und **Export als Tabelle (CSV)**
 - Fürs Handy gemacht, mit **hellem und dunklem Design**
 
@@ -49,6 +49,9 @@ Link im Browser öffnen und dann:
 
 - **iPhone (Safari):** Teilen-Symbol → „Zum Home-Bildschirm“
 - **Android (Chrome):** Menü ⋮ → „Zum Startbildschirm hinzufügen“ bzw. „App installieren“
+- **Computer (Chrome/Edge):** Installieren-Symbol in der Adressleiste – oder Edge: … → „Apps“ → „Diese Website als App installieren“
+
+Im privaten Fenster (Inkognito/InPrivate) bieten die Browser das nicht an.
 
 Die App erscheint dann mit eigenem Symbol auf dem Startbildschirm.
 

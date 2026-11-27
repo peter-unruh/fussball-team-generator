@@ -948,8 +948,8 @@ a.btn { color: inherit; text-decoration: none; }
 .boardwrap .brow { gap: 2px; padding-left: 3px; padding-right: 3px; }
 .posgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 14px; align-items: start; }
 @media (max-width: 620px) { .posgrid { grid-template-columns: minmax(0, 1fr); } }
-.minipitch { isolation: isolate; position: relative; display: grid; border-radius: var(--r-sm); overflow: hidden; border: 1px solid var(--line); }
-.mprow { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); min-height: 38px; align-items: center; }
+.minipitch { isolation: isolate; position: relative; display: grid; border-radius: var(--r-sm); overflow: hidden; border: 1px solid var(--line); width: min(100%, 330px); margin-inline: auto; }
+.mprow { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); min-height: 50px; align-items: center; }
 .mprow.z-att { background: color-mix(in srgb, var(--z-att) 12%, var(--surface)); } .mprow.z-mid { background: color-mix(in srgb, var(--z-mid) 12%, var(--surface)); }
 .mprow.z-def { background: color-mix(in srgb, var(--z-def) 12%, var(--surface)); } .mprow.z-gk { background: color-mix(in srgb, var(--z-gk) 14%, var(--surface)); }
 .mprow.main.z-att { background: color-mix(in srgb, var(--z-att) 55%, var(--surface)); } .mprow.main.z-mid { background: color-mix(in srgb, var(--z-mid) 55%, var(--surface)); }
@@ -1463,7 +1463,7 @@ body.has-bg main.wrap > .block, body.has-bg main.wrap > section, body.has-bg .te
 .welcome-hero { height: 150px; }
 /* Spielfeld mit freien Positionen */
 .pitch.free { display: block; position: relative; padding: 0; }
-.pitch.free .pspot { position: absolute; transform: translate(-50%, -38%); z-index: 2; }
+.pitch.free .pspot { position: absolute; transform: translate(-50%, -19px); z-index: 2; }
 .pitch.free .pchip { max-width: 78px; }
 .pitch.free .pchip .cn { white-space: normal; text-align: center; line-height: 1.15; max-width: 76px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 /* Datum: Antippen öffnet die Auswahl des Geräts */
@@ -1737,7 +1737,7 @@ tr.mixoff td:first-child b { opacity: .55; }
 .wtile .wt-sub { font-size: .84rem; color: var(--muted); }
 .wtile .wt-go { font-size: 1.6rem; color: var(--muted); }
 .welcome .svgot, .welcome .installhint { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
-.installhint { border: 1.5px solid color-mix(in srgb, var(--turf) 55%, var(--line)) !important; background: color-mix(in srgb, var(--turf) 10%, var(--surface)) !important; }
+.installhint { border: 1px solid var(--line); background: var(--surface); }
 .installhint > summary { font-size: .98rem; }
 .installhint .in-ic { font-size: 1.2rem; }
 .installnow { display: flex; align-items: center; gap: 10px; border-radius: var(--r); padding: 12px 14px; }
@@ -1748,7 +1748,7 @@ tr.mixoff td:first-child b { opacity: .55; }
 /* Spruch: kräftig abgesetzt, Emoji mittig zum Text */
 #quote { align-items: center; background: #1d5c3a; color: #fff; border: 1px solid rgba(255, 255, 255, .14); border-left: 5px solid #f2c230; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .6), 0 2px 6px rgba(0, 0, 0, .2); font-weight: 600; }
 #quote::before { background: #1d5c3a; border-color: rgba(255, 255, 255, .14); }
-#quote .qe { font-size: 1.7rem; line-height: 1; display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 50%; background: rgba(255, 255, 255, .12); }
+#quote .qe { font-size: 1.6rem; line-height: 1; flex: none; }
 #quote .qt { line-height: 1.35; }
 :root[data-theme="dark"] #quote, :root[data-theme="dark"] #quote::before { background: #2b7a49; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #quote, :root:not([data-theme="light"]) #quote::before { background: #2b7a49; } }
@@ -1760,6 +1760,11 @@ tr.mixoff td:first-child b { opacity: .55; }
 #main.teams-sw .teams > .team { animation: fxFade .22s ease both; }
 /* Touch: kein „hängender“ Hover-Rahmen nach dem Antippen */
 @media (hover: none) { .chip:hover { border-color: var(--line); } .chip.on:hover { border-color: var(--turf); } .wtile:hover { border-color: var(--line); } }
+
+.spl-next a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.spl-next .spl-pl, .spl-next .spl-wx { display: block; text-transform: none; letter-spacing: normal; font-size: .92rem; font-weight: 600; opacity: .95; margin-top: 2px; }
+.in-note { color: var(--muted); }
+.svback { margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -5563,18 +5568,32 @@ function installBannerHTML() {
   if (isStandalone() || !(isMobile() || installEvt) || !S.players.length) return '';
   return `<div class="installbar">${installHintHTML()}<button type="button" class="mini" data-act="installOff" aria-label="Hinweis ausblenden" title="Nicht mehr zeigen">${ICON.out}</button></div>`;
 }
+/* Schritte genau für den Browser, in dem die Seite gerade offen ist (Stand Ende 2026) */
+function installSteps() {
+  const ua = navigator.userAgent, ios = isIOS(), android = /Android/i.test(ua);
+  const edge = /Edg(e|A|iOS)?\//.test(ua), samsung = /SamsungBrowser/.test(ua), firefox = /Firefox|FxiOS/.test(ua), opera = /OPR\//.test(ua);
+  const chrome = !edge && !samsung && !opera && /Chrome|CriOS/.test(ua), mac = /Macintosh/.test(ua) && !ios, safari = !chrome && !edge && !firefox && /Safari/.test(ua);
+  if (ios) return safari
+    ? { li: '<li>Unten (iPad: oben) auf <b>Teilen</b> tippen – das Quadrat mit dem Pfeil nach oben</li><li>Nach unten scrollen: <b>„Zum Home-Bildschirm“</b></li><li><b>Hinzufügen</b> tippen – das Symbol startet die App ohne Adressleiste</li>' }
+    : { li: `<li>Im ${edge ? 'Edge' : chrome ? 'Chrome' : firefox ? 'Firefox' : 'Browser'}-Menü auf <b>Teilen</b> tippen</li><li><b>„Zum Home-Bildschirm“</b> wählen (fehlt der Eintrag: die Seite in <b>Safari</b> öffnen und dort teilen)</li><li><b>Hinzufügen</b> tippen</li>` };
+  if (android) {
+    if (samsung) return { li: '<li>Unten rechts auf das Menü <b>≡</b> tippen</li><li><b>„Seite hinzufügen zu“</b> → <b>„Startbildschirm“</b></li><li>Bestätigen</li>' };
+    if (firefox) return { li: '<li>Oben rechts auf <b>⋮</b> tippen</li><li><b>„Installieren“</b> bzw. <b>„Zum Startbildschirm hinzufügen“</b></li><li>Bestätigen</li>' };
+    return { li: `<li>Oben rechts auf <b>⋮</b> tippen${edge ? ' (Edge: unten <b>≡</b>)' : ''}</li><li><b>„App installieren“</b> bzw. <b>„Zum Startbildschirm hinzufügen“</b></li><li>Bestätigen – die App liegt dann bei deinen anderen Apps</li>` };
+  }
+  if (edge) return { li: '<li>Oben rechts auf <b>…</b> (Einstellungen und mehr) klicken</li><li><b>„Apps“</b> → <b>„Diese Website als App installieren“</b></li><li><b>Installieren</b> klicken – die App startet in einem eigenen Fenster</li>' };
+  if (chrome || opera) return { li: '<li>Rechts in der Adressleiste auf das Symbol <b>„Installieren“</b> (Bildschirm mit Pfeil) klicken</li><li>Gibt es das nicht: Menü <b>⋮</b> → <b>„Streamen, speichern und teilen“</b> → <b>„Seite als App installieren“</b></li><li><b>Installieren</b> klicken</li>' };
+  if (mac && safari) return { li: '<li>In der Menüleiste <b>Ablage</b> → <b>„Zum Dock hinzufügen“</b> (ab macOS Sonoma)</li><li><b>Hinzufügen</b> klicken – die App liegt dann im Dock</li>' };
+  if (firefox) return { no: 'Firefox am Computer kann Webseiten nicht als App installieren. Öffne die Seite dafür in <b>Chrome</b> oder <b>Edge</b> – oder leg dir einfach ein Lesezeichen an.' };
+  return { li: '<li>Im Browser-Menü nach <b>„App installieren“</b> oder <b>„Zum Startbildschirm“</b> suchen</li><li>Klappt es nicht: die Seite in Chrome oder Edge öffnen</li>' };
+}
 function installHintHTML() {
   if (isStandalone()) return '';
-  const ua = navigator.userAgent, ios = isIOS(), android = /Android/i.test(ua), safari = ios && !/CriOS|FxiOS|EdgiOS/.test(ua);
-  const steps = ios
-    ? (safari ? '<li>Unten (iPad: oben) auf <b>Teilen</b> tippen – das Quadrat mit dem Pfeil nach oben</li><li>Nach unten scrollen: <b>„Zum Home-Bildschirm“</b></li><li><b>Hinzufügen</b> – fertig. Das Symbol startet die App ohne Adressleiste.</li>'
-      : '<li>Diese Seite in <b>Safari</b> öffnen (Chrome auf dem iPhone kann es je nach Version auch: Teilen-Menü)</li><li><b>Teilen</b> → <b>„Zum Home-Bildschirm“</b> → <b>Hinzufügen</b></li>')
-    : android ? '<li>Oben rechts auf <b>⋮</b> tippen</li><li><b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b></li><li>Bestätigen – die App liegt dann bei deinen anderen Apps.</li>'
-      : '<li>In Chrome oder Edge: in der Adressleiste rechts auf das <b>Installieren-Symbol</b> (Bildschirm mit Pfeil) klicken</li><li>Oder im Menü <b>⋮</b> → <b>„App installieren“</b> bzw. „Speichern und teilen“ → „Seite als App installieren“</li><li>Safari auf dem Mac: <b>Ablage → Zum Dock hinzufügen</b></li>';
+  const steps = installSteps();
   if (installEvt) return `<div class="installhint installnow"><span class="in-ic" aria-hidden="true">📲</span><span class="grow"><b>Als App installieren</b><br><span class="in-sub">Startet ohne Adressleiste – wie eine normale App.</span></span><button type="button" class="btn sm primary" data-act="installApp">Installieren</button></div>`;
   return `<details class="installhint"><summary><span class="in-ic" aria-hidden="true">📲</span> Auch als App nutzbar</summary>
-    <ol class="small">${steps}</ol>
-    <p class="small muted">Die Daten bleiben dieselben, solange du die App im selben Browser installierst. Updates kommen automatisch, sobald die Seite neu geladen wird.</p></details>`;
+    ${steps.no ? `<p class="small">${steps.no}</p>` : `<ol class="small">${steps.li}</ol>`}
+    <p class="small in-note">Nicht im privaten Fenster (Inkognito/InPrivate) – dort bieten die Browser das nicht an. Die Daten bleiben dieselben, solange du im selben Browser installierst.</p></details>`;
 }
 var P10_ACTS = Object.assign(P10_ACTS || {}, {
   installOff: () => { try { localStorage.setItem('ft-install-off', '1'); } catch (e) { /* egal */ } render(); toast('Ausgeblendet. Die Anleitung steht weiter unter Einstellungen → Daten.'); },
@@ -6707,8 +6726,10 @@ const PITCH_PREF = { links: 0, halblinks: 0.25, innen: 0.5, halbrechts: 0.75, re
 function pitchLayout(entries) {
   const lines = [[], [], [], []], out = [];
   entries.forEach((x, i) => lines[PITCH_LINE[x.r] ?? 1].push({ x, i }));
-  const place = (L, y0, li, depthOn) => {
-    const k = L.length, xs = PITCH_X[k] || PITCH_X[5];
+  // stagger: hintere Reihe auf Lücke zur vorderen (versetzt), damit Namen und Kreise sich nicht überdecken
+  const STAG = { 1: [0.5], 2: [0.25, 0.75], 3: [0.25, 0.5, 0.75], 4: [0.25, 0.42, 0.58, 0.75] };
+  const place = (L, y0, li, depthOn, stagger, flat) => {
+    const k = L.length, xs = (stagger && STAG[k]) || PITCH_X[k] || PITCH_X[5];
     // Zuordnung zu den Plätzen: kleinste Abweichung von der eigenen Seite (alle Möglichkeiten, höchstens 5! = 120)
     const perms = a => a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map(r => [x, ...r]));
     const cost = (z, x) => { const pf = PITCH_PREF[z.x.side]; return pf == null ? Math.abs(x - 0.5) * 0.1 : Math.min(0.5, Math.abs(pf - x)); };
@@ -6718,15 +6739,22 @@ function pitchLayout(entries) {
       const x = xs[best[j0]], q = ((x - 0.5) / 0.4) ** 2;
       // Tiefe aus dem Profil (z. B. Libero hinter der Kette) nur in der Mitte – sonst stünde die Linie schief
       const rr = SPORT.roleRow[z.x.r], dep = depthOn && x === 0.5 && isNum(z.x.depth) && isNum(rr) ? clamp(z.x.depth - rr, -1, 1) * 0.04 : 0;
-      out.push({ e: z.x, x, y: y0 + PITCH_CURVE[li] * q + dep, li });
+      out.push({ e: z.x, x, y: y0 + PITCH_CURVE[li] * q * (flat ? 0.4 : 1) + dep, li });
     });
   };
+  const deep = lines[2].length > 5;   // zweireihige Abwehr: Mittelfeld und Sturm etwas nach vorn
   lines.forEach((L, li) => {
     if (!L.length) return;
+    if (deep && li < 2) { const up = li === 0 ? 0.06 : 0.09; place(L.length <= 5 ? L : L.slice(0, 5), PITCH_Y[li] - up, li, true); if (L.length > 5) place(L.slice(5), PITCH_Y[li] - up + 0.08, li, false, true); return; }
+    if (li === 3) { L.forEach((z, j) => out.push({ e: z.x, x: 0.5 + (j ? (j % 2 ? 0.2 : -0.2) * Math.ceil(j / 2) : 0), y: deep ? 0.925 : PITCH_Y[3], li })); return; }
     if (li === 3) { L.forEach((z, j) => out.push({ e: z.x, x: 0.5 + (j ? (j % 2 ? 0.2 : -0.2) * Math.ceil(j / 2) : 0), y: PITCH_Y[3], li })); return; }
     if (L.length <= 5) { place(L, PITCH_Y[li], li, true); return; }
-    const S2 = L.slice().sort((a, b) => (a.x.depth ?? 0) - (b.x.depth ?? 0)), h = Math.ceil(S2.length / 2);
-    place(S2.slice(0, h), PITCH_Y[li] - 0.065, li, false); place(S2.slice(h), PITCH_Y[li] + 0.065, li, false);
+    // Mehr als 5 in einer Linie: vorne eine Reihe mit 4 (ab 9 Spielern 5), dahinter der Rest – die defensivsten
+    // (größte Tiefe, bei Gleichstand die zentralsten) stehen hinten, z. B. 6 Abwehrspieler als 4 + 2
+    const cen = z => { const pf = PITCH_PREF[z.x.side]; return pf == null ? 0 : Math.abs(pf - 0.5); };
+    const S2 = L.slice().sort((a, b) => (a.x.depth ?? 0) - (b.x.depth ?? 0) || cen(b) - cen(a)), front = L.length >= 9 ? 5 : 4;
+    const gap = li === 2 ? [-0.12, 0.05] : [-0.07, 0.07];
+    place(S2.slice(0, front), PITCH_Y[li] + gap[0], li, false, false, true); place(S2.slice(front), PITCH_Y[li] + gap[1], li, false, true, true);
   });
   return out;
 }
@@ -8268,9 +8296,8 @@ function viewReviewSimple(all) {
     [[g.a, o], [g.b, -o]].forEach(([t, r]) => m.teams[t].forEach(id => { const b = bil[id] || (bil[id] = { w: 0, d: 0, l: 0 }); if (r > 0) b.w++; else if (r < 0) b.l++; else b.d++; }));
   }));
   const rows = Object.entries(bil).map(([id, b]) => ({ id, ...b, n: b.w + b.d + b.l })).map(x => ({ ...x, q: (x.w + x.d / 2) / Math.max(1, x.n) })).sort((a, b) => b.q - a.q || b.n - a.n);
-  return `${open.length ? `<section class="block"><div class="block-head"><h2>Ergebnis fehlt</h2><span class="muted small">${open.length}</span></div>
+  return `${rvImportHTML()}${open.length ? `<section class="block"><div class="block-head"><h2>Ergebnis fehlt</h2><span class="muted small">${open.length}</span></div>
       <ul class="mlist">${open.slice(0, 3).map(m => `<li class="mrow"><span class="grow"><b>${matchLabel(m)}</b></span><button type="button" class="btn sm primary" data-act="resOpen" data-id="${m.id}">Eintragen</button></li>`).join('')}</ul></section>` : ''}
-    ${rvImportHTML()}
     ${matchListBlock(all)}
     ${rows.length ? rvBlock('rvBil', false, 'Bilanz', '', `<span class="muted small">${rows.length} Spieler</span>`, `<div class="scroll"><table class="grid bil"><thead><tr><th>Spieler</th><th>Spiele</th><th title="Siege – Unentschieden – Niederlagen">S–U–N</th><th>Punkte je Spiel</th></tr></thead><tbody>
       ${rows.map(x => `<tr><td>${esc(nameAny(x.id))}</td><td class="num">${x.n}</td><td class="num">${x.w}–${x.d}–${x.l}</td><td class="num">${fmt((3 * x.w + x.d) / Math.max(1, x.n), 1)}</td></tr>`).join('')}</tbody></table></div>
@@ -8290,13 +8317,13 @@ function viewReview() {
   const A = anaNow();
   const open = all.filter(m => m.status === 'open');
   const parts = [];
+  parts.push(rvImportHTML());
   if (ui.storeBig) parts.push(`<div class="banner warn"><p>Der Speicher im Browser wird knapp. Sichere die Daten als Datei (Einstellungen → Daten) und lösche bei Bedarf alte Runden.</p></div>`);
   if (open.length) {
     parts.push(rvBlock('rvOpen', true, 'Ergebnis fehlt', '', `<span class="muted small">${open.length}</span>`,
       `<ul class="mlist">${open.slice(0, 3).map(m => `<li class="mrow"><span class="grow"><b>${matchLabel(m)}</b><br><span class="small muted">${inCols(m.colors, () => m.teams.map((t, i) => `${teamCol(i).name} ${t.length}`).join(' · '))} Spieler</span></span><button type="button" class="btn sm primary" data-act="resOpen" data-id="${m.id}">Eintragen</button></li>`).join('')}</ul>
       ${open.length > 3 ? '<p class="hint">Weitere stehen unten in der Liste.</p>' : ''}`, `${plural(open.length, 'Runde', 'Runden')} ohne Ergebnis.`));
   }
-  parts.push(rvImportHTML());
   // Erst was zu tun ist (Vorschläge), dann die Spiele selbst, dann die Auswertungen; die Erklärung der Rechnung ganz unten
   parts.push(recBlock(A), matchListBlock(all), playersBlock(A), howCmpBlock(all), placesBlock(A), labBlock(A));
   if (S.log.length) parts.push(logBlock());
@@ -11807,7 +11834,8 @@ function svRender() {
     if (svLocal()) {
       html += `<div class="svcard svdone svlocal${SVP.given ? ' sent' : ''}"><div class="svstep" aria-hidden="true">${SVP.given ? '✓' : '📲'}</div><h2>${SVP.given ? 'Abgegeben!' : 'Auf diesem Gerät abgeben'}</h2>
       <p class="svmust">${SVP.given ? `Die Bewertung von <b>${esc(who)}</b> liegt jetzt in der App auf diesem Gerät. Wer ist als Nächstes dran?` : 'Diese Umfrage gehört zur App auf diesem Gerät. Ein Tipp – und die Bewertung ist drin, ohne Nachricht.'}</p>
-      <div class="svsend">${SVP.given ? '<button type="button" class="btn primary big" data-act="svNext">📱 Nächste Person</button><button type="button" class="btn big" data-act="svGo" data-v="rate">Noch etwas ändern</button>' : `<button type="button" class="btn primary big" data-act="svGive">✅ Hier abgeben</button><button type="button" class="btn big" data-act="svGo" data-v="rate">Noch etwas ändern</button>`}</div>
+      <div class="svsend">${SVP.given ? `<button type="button" class="btn primary big" data-act="svNext">📱 Nächste Person</button><a class="btn big" href="${esc(location.pathname + location.search)}">← Zurück zur App</a>` : `<button type="button" class="btn primary big" data-act="svGive">✅ Hier abgeben</button>`}</div>
+      <button type="button" class="linkbtn" data-act="svGo" data-v="rate">Noch etwas ändern</button>
       <details class="svother"><summary class="small">Lieber als Nachricht schicken?</summary><pre class="svcode" id="svCode">${esc(msg)}</pre>
       <div class="svsend"><a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">WhatsApp</a><button type="button" class="btn sm" data-act="svCopy">${SVP.copied ? 'Kopiert ✓' : 'Kopieren'}</button></div></details></div>`;
     } else html += `<div class="svcard svdone${SVP.sent ? ' sent' : ''}"><div class="svstep" aria-hidden="true">${SVP.sent ? '✓' : '📨'}</div><h2>${SVP.sent ? 'Danke!' : 'Letzter Schritt: zurückschicken!'}</h2>
@@ -11945,11 +11973,11 @@ function svSheetHTML() {
     const det = !open ? '' : (() => {
       const L = st.list.slice().sort((a, b) => Math.abs(b.d) - Math.abs(a.d)), all = U.rAll === r.who, shown = all ? L : L.slice(0, 6);
       const self = r.who[0] === 'p' && isNum(r.self) ? (() => { const j = parseInt(r.who.slice(1), 36), row = E.rows[j]; return row && row.n ? `<p class="small">Selbsteinschätzung <b>${fmtS(r.self)}</b> · die Gruppe sieht ${esc(r.name)} bei <b>${fmt(row.val, 1)}</b></p>` : `<p class="small">Selbsteinschätzung <b>${fmtS(r.self)}</b></p>`; })() : '';
-      return `<div class="svrdet">${self}<p class="small muted">${all ? 'Alle Bewertungen' : 'Am stärksten abweichend'}, verglichen mit dem Median der anderen${sv.opt.adj ? ' (Strenge ausgeglichen)' : ''}${(() => { const up = L.filter(x => x.d >= 0.5).length, dn = L.filter(x => x.d <= -0.5).length; return up || dn ? ` – ${up}× deutlich höher, ${dn}× deutlich tiefer als die Gruppe` : ''; })()}:</p>
+      return `<div class="svrdet">${self}${strict && Math.abs(off) >= 0.3 ? `<p class="small">Bewertet insgesamt ${fmt(Math.abs(off), 1)} ${off > 0 ? 'höher' : 'niedriger'} als die anderen${sv.opt.adj ? ' – unten schon herausgerechnet' : ''}.</p>` : ''}<p class="small muted">${all ? 'Alle Bewertungen' : 'Größte Unterschiede'} im Vergleich zur Gruppe:</p>
         <ul class="svrdl">${shown.map(x => `<li><span class="grow">${nameOf(x.j)}</span><span class="num">${fmt(x.mine, 1)}</span><span class="small muted num">Gruppe ${fmt(x.g, 1)}</span><span class="svd${Math.abs(x.d) >= 1.5 ? ' big' : ''} num">${Math.abs(x.d) < 0.05 ? 'gleich' : `${fmt(Math.abs(x.d), 1)} ${x.d > 0 ? 'höher' : 'tiefer'}`}</span></li>`).join('') || '<li class="muted">Zu wenige gemeinsame Bewertungen.</li>'}</ul>
         ${L.length > shown.length ? `<button type="button" class="linkbtn small" data-act="svRAll" data-who="${r.who}">alle ${L.length} zeigen</button>` : ''}</div>`;
     })();
-    return `<li class="${r.on ? '' : 'off'}${open ? ' ropen' : ''}"><div class="svrrow"><span class="grow"><b>${esc(r.name)}</b>${r.who[0] === 'n' ? ' <span class="small muted">(nicht auf der Liste)</span>' : ''}<br><span class="small muted">${svDate(r.at)} · ${n} von ${sv.players.length - (r.who[0] === 'p' ? 1 : 0)} bewertet${strict ? ' · ' + strict : ''}${st.mad != null ? ` · einzeln Ø ${fmt(st.mad, 1)} daneben` : ''}</span></span>
+    return `<li class="${r.on ? '' : 'off'}${open ? ' ropen' : ''}"><div class="svrrow"><span class="grow"><b>${esc(r.name)}</b>${r.who[0] === 'n' ? ' <span class="small muted">(nicht auf der Liste)</span>' : ''}<br><span class="small muted">${svDate(r.at)} · ${n} von ${sv.players.length - (r.who[0] === 'p' ? 1 : 0)} bewertet${st.mad != null ? ` · Ø ${fmt(st.mad, 1)} Abweichung` : ''}</span></span>
       ${sw('svRespOn', r.on, `data-who="${r.who}"`, 'Zählt mit')}<button type="button" class="btn sm ${armed ? 'danger armed' : 'ghost'}" data-act="svRespDel" data-who="${r.who}">${armed ? 'Löschen?' : 'Löschen'}</button></div>
       <button type="button" class="linkbtn small svrtog" data-act="svROpen" data-who="${r.who}" aria-expanded="${open}">${open ? 'Einzelwerte ausblenden' : 'Einzelwerte ansehen ›'}</button>${det}</li>`;
   }).join('');
@@ -12114,7 +12142,12 @@ Object.assign(A, {
     sv.responses = sv.responses.filter(x => x.who !== el.dataset.who); render();
     toast('Antwort gelöscht.', { label: 'Rückgängig', act: 'undo' });
   },
-  svOpt: el => { const sv = svCur(), on = !(sv.opt.adj && sv.opt.scale); sv.opt.adj = on; sv.opt.scale = on; render(); },
+  svOpt: el => {
+    // Der Schalter bleibt an seiner Stelle, auch wenn sich darüber Texte ändern
+    const sh = $('.sheet'), y0 = el.getBoundingClientRect().top;
+    const sv = svCur(), on = !(sv.opt.adj && sv.opt.scale); sv.opt.adj = on; sv.opt.scale = on; render();
+    const t = document.querySelector('[data-act="svOpt"]'); if (sh && t) sh.scrollTop += t.getBoundingClientRect().top - y0;
+  },
   svSort: el => { ui.svy.sort = el.dataset.v; render(); },
   svConf: el => { const C = ui.svy.conf || (ui.svy.conf = {}); if (C[el.dataset.id] === el.dataset.v) delete C[el.dataset.id]; else C[el.dataset.id] = el.dataset.v; render(); },
   svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn, svMe(sv)), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id), w = svConfSuggest(x); if (p && w && w !== confOf(p)) C[x.id] = w; }); render(); },
@@ -12473,8 +12506,6 @@ const QUOTE_EMO = [[/Torwart|Handschuh|hält|Keeper|im Tor/, '🧤'], [/Elfmeter
   [/Halle|Kunstrasen|Asche|Rasen|Platz/, '🏟️'], [/Freund|Team|Gruppe|wiederkommen|verbindet|Familie/, '🫶'], [/Ball/, '⚽']];
 const QUOTE_FUN = ['😄', '😎', '🤪', '💪', '🙌', '🔥', '😅', '🤓', '🥳', '😏'];
 const quoteEmoji = t => { const m = QUOTE_EMO.find(([re]) => re.test(t)); return m ? m[1] : QUOTE_FUN[t.length % QUOTE_FUN.length]; };
-document.addEventListener('pointerdown', e => { const q = document.getElementById('quote'); if (q && q.classList.contains('on') && !q.contains(e.target) && !e.target.closest('#logo')) quoteHide(); }, true);
-window.addEventListener('scroll', () => { const q = document.getElementById('quote'); if (q && q.classList.contains('on') && !q.classList.contains('low')) quoteHide(); }, { passive: true });
 function quoteHide() { const q = document.getElementById('quote'); if (q) q.classList.remove('on'); clearTimeout(quoteT); }
 function quoteShow() {
   let q = document.getElementById('quote');
@@ -12502,18 +12533,35 @@ $('#logo').addEventListener('click', e => {
 });
 $('#logo').title = 'Antippen: ein Spruch · doppelt tippen: Stadion';
 /* Stadion-Seite: einfach schön anzusehen, mit dem nächsten Spieltag und einem Spruch */
+/* Nächster Spieltag: der früheste ab jetzt – offene Runden und der eingestellte Spieltag. Heute zählt, solange er nicht vorbei ist. */
+function nextMatchDay() {
+  const now = Date.now(), today = isoToday(), cands = [];
+  const add = (x, src) => {
+    if (!isIso(x.date) || x.date < today) return;
+    if (x.date === today && isTime(x.time) && new Date(`${x.date}T${x.time}:00`).getTime() + (x.minutes || 90) * 60000 < now) return;
+    cands.push({ date: x.date, time: isTime(x.time) ? x.time : '', place: x.place || '', weather: x.weather || null, indoor: src === 'day' ? isIndoor(S.day) : false });
+  };
+  S.matches.filter(m => m.status === 'open').forEach(m => add(m, 'm'));
+  add(S.day, 'day');
+  cands.sort((a, b) => (a.date + (a.time || '99')).localeCompare(b.date + (b.time || '99')));
+  const n = cands[0];
+  if (n && !n.weather && S.day.weather && S.day.date === n.date && S.day.place === n.place) n.weather = S.day.weather;
+  return n || null;
+}
 function splashShow() {
   if (document.getElementById('splash')) return;
   const d = S.day, pr = curProject(), done = S.matches.filter(m => m.status === 'done');
   const goals = done.reduce((t, m) => t + m.games.reduce((u, g) => u + (isNum(g.ga) ? +g.ga : 0) + (isNum(g.gb) ? +g.gb : 0), 0), 0);
-  const nextTxt = isIso(d.date) && d.date >= isoToday() ? `${new Date(d.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}${d.time ? ' · ' + d.time + ' Uhr' : ''}${d.place ? ' · ' + d.place : ''}` : '';
+  const nx = nextMatchDay(), npl = nx && nx.place ? placeByName(nx.place) : null;
+  const nextTxt = nx ? `${nx.date === isoToday() ? 'Heute' : new Date(nx.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}${nx.time ? ' · ' + nx.time + ' Uhr' : ''}` : '';
+  const nextMore = nx ? `${nx.place ? `<span class="spl-pl">📍 ${npl ? `<a href="${esc(mapsUrl(npl))}" target="_blank" rel="noopener">${esc(nx.place)}</a>` : esc(nx.place)}</span>` : ''}${nx.weather && !nx.indoor ? `<span class="spl-wx">${esc(wxShare(nx.weather))}</span>` : ''}` : '';
   const tip = tipNext(), el = document.createElement('div');
   el.id = 'splash'; el.className = 'splash'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Faire Teams');
   el.innerHTML = `<div class="spl-bg" aria-hidden="true"></div><div class="spl-in">
     <img class="spl-logo" src="${LOGO_SRC}" alt="" width="76" height="76">
     <h1 class="spl-title">Faire Teams</h1>
     ${pr ? `<p class="spl-proj">${esc(pr.name)}</p>` : ''}
-    ${nextTxt ? `<p class="spl-next"><span>Nächster Spieltag</span><b>${esc(nextTxt)}</b></p>` : ''}
+    ${nextTxt ? `<p class="spl-next"><span>Nächster Spieltag</span><b>${esc(nextTxt)}</b>${nextMore}</p>` : ''}
     ${S.players.length ? `<p class="spl-stats"><span><b>${S.players.filter(p => p.status !== 'archived').length}</b> Spieler</span>${done.length ? `<span><b>${done.length}</b> Runden</span>` : ''}${goals ? `<span><b>${goals}</b> Tore</span>` : ''}</p>` : ''}
     <p class="spl-tip"><span class="spl-tiph">💡 Wusstest du schon?</span><span>${tip}</span></p>
     <button type="button" class="btn primary big spl-go">⚽ Anpfiff</button></div>`;
