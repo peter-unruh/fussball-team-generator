@@ -1,7 +1,7 @@
 {
   "name": "Faire Teams – Fußball",
   "short_name": "Faire Teams",
-  "description": "Faire Fußballteams für Hobbygruppen und Vereine – läuft lokal im Browser, ohne Konto und ohne Server.",
+  "description": "Faire Fußballteams für Hobbygruppen und Vereine – kostenlos, ohne Konto. Deine Daten bleiben auf deinem Gerät.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
