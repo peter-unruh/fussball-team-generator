@@ -1233,7 +1233,8 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svline .new { bottom: 14px; width: 9px; height: 9px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 30%, transparent); z-index: 4; }
 .svrmid { align-items: flex-end; }
 .svconf { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.svctl { gap: 8px; }
+.svctl { gap: 8px; justify-content: flex-start; align-items: center; flex-wrap: wrap; }
+.svctl > .seg { flex: 0 1 auto; margin: 0; justify-content: flex-start; }
 .svctl .lbl { min-width: 5.5em; }
 .svbulk { display: grid; gap: 8px; }
 .svbulk .row > .small.grow { flex: 1 1 100%; }
@@ -1245,8 +1246,10 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svrsub { margin-top: -2px; }
 .svrpick .seg.pill button { min-height: 32px; }
 .svbulk { padding: 8px 10px; border-radius: var(--r-sm); background: var(--surface-2); }
-.svapply { position: sticky; bottom: calc(-24px - env(safe-area-inset-bottom)); z-index: 6; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 96%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.svapply.on { border-color: var(--good); box-shadow: 0 -6px 20px -12px rgba(0, 0, 0, .35); }
+.svapply { position: sticky; bottom: calc(-24px - env(safe-area-inset-bottom)); z-index: 6; display: flex; align-items: center; gap: 12px; margin: 0 -16px; padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 2px solid var(--good); box-shadow: 0 -12px 28px -14px rgba(0, 0, 0, .45); }
+.svapply .grow { font-size: .95rem; } .svapply .linkbtn { color: var(--muted); } .svapply .btn { min-width: 8.5em; }
+.svapplyhint { margin: 0; color: var(--muted); }
+@media (min-width: 760px) { .svapply { border-radius: 0 0 16px 16px; } }
 .svfoot { border-top: 1px solid var(--line); padding-top: 12px; }
 .svgot { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 12px; background: var(--surface); }
 .svgot > summary { cursor: pointer; font-weight: 650; font-size: .92rem; }
@@ -1271,6 +1274,18 @@ body.svmode main.wrap { max-width: 640px; padding-bottom: calc(120px + env(safe-
 .svconf { gap: 6px 10px; }
 .svconf .chip { min-height: 28px; }
 .svprof { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-top: 2px; }
+
+.svclose { margin: 0 0 8px; color: var(--ink); }
+.svacctog { justify-self: start; margin-top: 10px; }
+.svacc { margin-top: 10px; display: grid; gap: 8px; padding: 12px; border-radius: var(--r-sm); background: var(--surface-2); }
+.svacc p { margin: 0; }
+.svacct td, .svacct th { white-space: nowrap; padding-left: 6px; padding-right: 6px; }
+.svacct th.wrapth { white-space: normal; min-width: 5.5em; line-height: 1.2; }
+.svdone.svlocal .svsend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.svother { width: 100%; max-width: 34em; text-align: left; }
+.svother > summary { cursor: pointer; color: var(--muted); text-align: center; }
+.svother[open] { display: grid; gap: 8px; }
+.svaccnote { color: var(--muted); }
 
 /* ---------- Gast-Projekt: keine Einzelwerte zeigen ---------- */
 body.is-guest .tp .sv, body.is-guest .team-head .tval { display: none !important; }
@@ -1598,6 +1613,153 @@ tr.mixoff td:first-child b { opacity: .55; }
 .svdone.sent .svstep { animation: none; color: var(--good); }
 @keyframes svNudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 .svmust { font-size: 1.02rem; }
+/* Warte-Bühne: groß, Rasen mit Mähstreifen, Figuren als SVG */
+.busy { background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); gap: 18px; padding: 20px; }
+.bz-stage { width: min(92vw, 640px); aspect-ratio: 16 / 9; border-radius: 22px; overflow: hidden; position: relative;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, .18), transparent 60%), repeating-linear-gradient(90deg, #2f8a4c 0 40px, #2a7d45 40px 80px);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .55), inset 0 0 0 3px rgba(255, 255, 255, .25); animation: bzIn .35s var(--ease, ease) both; }
+.bz-stage.bz-topv { background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, .14), transparent 60%), repeating-linear-gradient(0deg, #2f8a4c 0 25px, #2a7d45 25px 50px); }
+@media (max-height: 560px) { .bz-stage { width: min(92vw, 420px); } }
+.bz-stage .scene { width: 100%; height: 100%; display: block; overflow: visible; }
+.bz-txt { display: grid; justify-items: center; gap: 8px; text-align: center; }
+.bz-txt .busytxt { font-family: var(--font-display); font-size: clamp(1.2rem, 4.6vw, 1.6rem); letter-spacing: .01em; }
+.bz-prog { width: min(70vw, 300px); height: 6px; border-radius: 6px; background: color-mix(in srgb, var(--ink) 14%, transparent); overflow: hidden; }
+.bz-prog i { display: block; height: 100%; width: 100%; border-radius: inherit; background: var(--turf); transform-origin: 0 50%; animation: bzProg linear both; }
+.bz-left { color: var(--muted); font-weight: 600; }
+@keyframes bzIn { from { opacity: 0; transform: scale(.94) translateY(8px); } }
+@keyframes bzProg { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.scene .bz-gl { stroke: rgba(255, 255, 255, .55); stroke-width: 2; }
+.scene .bz-frame { fill: none; stroke: #fff; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.scene .bz-leg, .scene .bz-arm { stroke: #f1c7a0; stroke-width: 6; stroke-linecap: round; }
+.scene .bz-leg { stroke: #f4f4f4; }
+.scene .bz-kick, .scene .bz-juggle { transform-box: fill-box; transform-origin: 50% 0; }
+.scene .bz-spin, .scene .bz-spin2, .scene .bz-penscale, .scene .bz-keeper, .scene .bz-net, .scene .bz-pnet, .scene .bz-boom, .scene .bz-yay, .scene .bz-conf, .scene .bz-ring, .scene .bz-shadow { transform-box: fill-box; transform-origin: 50% 50%; }
+.scene .bz-yay { font-family: var(--font-display); font-weight: 800; font-size: 34px; fill: #fff; text-anchor: middle; paint-order: stroke; stroke: rgba(0, 0, 0, .35); stroke-width: 5px; opacity: 0; }
+.scene .bz-conf { opacity: 0; }
+/* Torschuss (2,6 s) */
+.bz-shot .bz-kick, .bz-bar .bz-kick { animation: bzKick 2.6s ease-in-out infinite; }
+.bz-shot .bz-fly { animation: bzFly 2.6s infinite; }
+.bz-shot .bz-spin, .bz-bar .bz-spin { animation: bzSpin 2.6s linear infinite; }
+.bz-shot .bz-net { transform-origin: 0 50%; animation: bzNetHit 2.6s ease-out infinite; }
+.bz-shot .bz-yay, .bz-pen .bz-yay { animation: bzYay 2.6s ease-out infinite; }
+.bz-shot .bz-conf, .bz-pen .bz-conf { animation: bzConf 2.6s ease-in infinite; }
+.bz-shot .bz-pl { animation: bzJump 2.6s ease-in-out infinite; }
+@keyframes bzKick { 0%, 8% { transform: rotate(0); } 15% { transform: rotate(38deg); } 21% { transform: rotate(-62deg); } 30%, 100% { transform: rotate(0); } }
+@keyframes bzFly {
+  0%, 20% { transform: translate(0, 0); opacity: 1; animation-timing-function: linear; }
+  28% { transform: translate(48px, -50px); } 36% { transform: translate(100px, -76px); } 44% { transform: translate(148px, -74px); }
+  50% { transform: translate(178px, -54px); } 54% { transform: translate(192px, -34px); animation-timing-function: ease-out; }
+  62% { transform: translate(196px, 0); } 80% { transform: translate(194px, 0); opacity: 1; }
+  86% { transform: translate(194px, 0); opacity: 0; } 87% { transform: translate(0, 0); opacity: 0; } 96%, 100% { transform: translate(0, 0); opacity: 1; } }
+@keyframes bzSpin { 0%, 20% { transform: rotate(0); } 62% { transform: rotate(820deg); } 100% { transform: rotate(860deg); } }
+@keyframes bzNetHit { 0%, 53% { transform: scaleX(1); } 58% { transform: scaleX(1.25); } 66% { transform: scaleX(.95); } 74%, 100% { transform: scaleX(1); } }
+@keyframes bzYay { 0%, 54% { opacity: 0; transform: scale(.3); } 59% { opacity: 1; transform: scale(1.25); } 64%, 84% { opacity: 1; transform: scale(1); } 92%, 100% { opacity: 0; transform: scale(1); } }
+@keyframes bzConf { 0%, 55% { opacity: 0; transform: translate(0, 0) rotate(0); } 58% { opacity: 1; } 88% { opacity: 1; transform: translate(var(--dx), 140px) rotate(var(--rot)); } 92%, 100% { opacity: 0; transform: translate(var(--dx), 150px) rotate(var(--rot)); } }
+@keyframes bzJump { 0%, 58% { transform: none; } 63% { transform: translateY(-14px); } 68% { transform: none; } 73% { transform: translateY(-10px); } 78%, 100% { transform: none; } }
+/* Jonglieren (1,1 s) */
+.bz-jug .bz-juggle { animation: bzJuggle 1.1s ease-in-out infinite; }
+.bz-jug .bz-bounce { animation: bzBounce 1.1s infinite; }
+.bz-jug .bz-spin2 { animation: bzSpin2 1.1s linear infinite; }
+.scene .bz-shadow { fill: rgba(0, 0, 0, .35); animation: bzShadow 1.1s infinite; }
+.scene .bz-ring { fill: none; stroke: #fff; stroke-width: 2; opacity: 0; }
+.bz-jug .bz-ring { animation: bzRing 1.1s ease-out infinite; }
+@keyframes bzJuggle { 0% { transform: rotate(-52deg); } 16%, 84% { transform: rotate(-6deg); } 100% { transform: rotate(-52deg); } }
+@keyframes bzBounce { 0% { transform: translateY(0); animation-timing-function: cubic-bezier(.2, .7, .4, 1); } 50% { transform: translateY(-84px); animation-timing-function: cubic-bezier(.6, 0, .8, .3); } 100% { transform: translateY(0); } }
+@keyframes bzSpin2 { to { transform: rotate(-360deg); } }
+@keyframes bzShadow { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(.45); opacity: .35; } }
+@keyframes bzRing { 0% { opacity: .9; transform: scale(.4); } 25%, 100% { opacity: 0; transform: scale(1.8); } }
+/* Dribbling (3 s, von oben) */
+.scene .bz-top { stroke: rgba(255, 255, 255, .5); stroke-width: 2; fill: none; }
+.scene .bz-cone circle:first-child { fill: #ff8a2a; }
+.scene .bz-mgoal { fill: url(#bzNet); stroke: #fff; stroke-width: 3; }
+.bz-drib .bz-db { animation: bzDrib 3s ease-in-out infinite; }
+.bz-drib .bz-dot { animation: bzDot 3s ease-in-out infinite; }
+.bz-drib .bz-ok { font-size: 30px; animation: bzOk 3s ease-out infinite; }
+@keyframes bzDrib { 0% { transform: translate(30px, 100px); opacity: 0; } 4% { opacity: 1; } 16% { transform: translate(100px, 62px); } 30% { transform: translate(160px, 138px); } 44% { transform: translate(220px, 62px); }
+  56% { transform: translate(276px, 100px); } 61% { transform: translate(306px, 100px); } 80% { transform: translate(306px, 100px); opacity: 1; } 88%, 100% { transform: translate(306px, 100px); opacity: 0; } }
+@keyframes bzDot { 0% { transform: translate(14px, 100px); opacity: 0; } 4% { opacity: 1; } 18% { transform: translate(86px, 70px); } 32% { transform: translate(146px, 128px); } 46% { transform: translate(206px, 70px); }
+  58% { transform: translate(262px, 100px); } 80% { transform: translate(262px, 100px); opacity: 1; } 88%, 100% { transform: translate(262px, 100px); opacity: 0; } }
+@keyframes bzOk { 0%, 60% { opacity: 0; transform: scale(.3); } 65% { opacity: 1; transform: scale(1.3); } 70%, 82% { opacity: 1; transform: scale(1); } 90%, 100% { opacity: 0; } }
+/* Elfmeter (2,6 s) */
+.bz-pen .bz-keeper { animation: bzDive 2.6s ease-in-out infinite; }
+.bz-pen .bz-penfly { animation: bzPenFly 2.6s infinite; }
+.bz-pen .bz-penscale { animation: bzPenScale 2.6s infinite; }
+.bz-pen .bz-pnet { animation: bzPNet 2.6s ease-out infinite; }
+@keyframes bzDive { 0%, 30% { transform: none; } 36% { transform: translateY(5px); } 50% { transform: translate(-64px, 18px) rotate(-78deg); } 82% { transform: translate(-64px, 18px) rotate(-78deg); } 94%, 100% { transform: none; } }
+@keyframes bzPenFly { 0%, 36% { transform: translate(0, 0); opacity: 1; animation-timing-function: cubic-bezier(.2, .6, .4, 1); } 52% { transform: translate(66px, -120px); animation-timing-function: ease-in; }
+  64% { transform: translate(70px, -98px); } 82% { transform: translate(70px, -94px); opacity: 1; } 87% { opacity: 0; } 88% { transform: translate(0, 0); opacity: 0; } 96%, 100% { transform: translate(0, 0); opacity: 1; } }
+@keyframes bzPenScale { 0%, 36% { transform: scale(1.9); } 52% { transform: scale(.85); } 100% { transform: scale(.85); } }
+@keyframes bzPNet { 0%, 52% { opacity: 1; } 55% { opacity: .55; } 62%, 100% { opacity: 1; } }
+/* Latte (2,6 s) */
+.bz-bar .bz-barfly { animation: bzBarFly 2.6s infinite; }
+.bz-bar .bz-shake { animation: bzShake 2.6s linear infinite; }
+.scene .bz-boom { fill: #ffd54a; opacity: 0; }
+.bz-bar .bz-boom { animation: bzBoom 2.6s ease-out infinite; }
+.bz-bar .bz-uff { animation: bzYay 2.6s ease-out infinite; animation-delay: -.25s; }
+@keyframes bzBarFly {
+  0%, 20% { transform: translate(0, 0); opacity: 1; animation-timing-function: linear; }
+  28% { transform: translate(52px, -50px); } 36% { transform: translate(110px, -70px); } 46% { transform: translate(164px, -66px); animation-timing-function: ease-out; }
+  56% { transform: translate(128px, -38px); animation-timing-function: ease-in; } 64% { transform: translate(104px, 0); animation-timing-function: ease-out; }
+  70% { transform: translate(88px, -16px); animation-timing-function: ease-in; } 76% { transform: translate(76px, 0); } 84% { transform: translate(70px, 0); opacity: 1; }
+  88% { opacity: 0; } 89% { transform: translate(0, 0); opacity: 0; } 96%, 100% { transform: translate(0, 0); opacity: 1; } }
+@keyframes bzShake { 0%, 45% { transform: none; } 47% { transform: translate(2px, -2px); } 49% { transform: translate(-2px, 1px); } 51% { transform: translate(2px, 1px); } 53% { transform: translate(-1px, -1px); } 56%, 100% { transform: none; } }
+@keyframes bzBoom { 0%, 45% { opacity: 0; transform: scale(.3); } 47% { opacity: 1; transform: scale(1.3); } 56% { opacity: 0; transform: scale(1.6); } 100% { opacity: 0; } }
+/* Waage (3 s) */
+.scene .bz-stand { stroke: #fff; stroke-width: 5; fill: #fff; stroke-linejoin: round; }
+.scene .bz-beam { stroke: #fff; stroke-width: 4; stroke-linecap: round; fill: none; transform-origin: 160px 66px; animation: bzBeam 3s ease-in-out infinite; }
+.scene .bz-beam .bz-pan { fill: rgba(255, 255, 255, .85); stroke: none; }
+.scene .bz-beam circle { stroke-width: 1.5; }
+.bz-scale .bz-hopa { animation: bzHopA 3s ease-in-out infinite; } .bz-scale .bz-hopb { animation: bzHopB 3s ease-in-out infinite; }
+.bz-scale .bz-fair { animation: bzFair 3s ease-out infinite; }
+@keyframes bzBeam { 0%, 34% { transform: rotate(-11deg); } 46% { transform: rotate(7deg); } 56% { transform: rotate(-4deg); } 64% { transform: rotate(2deg); } 70%, 92% { transform: rotate(0); } 100% { transform: rotate(-11deg); } }
+@keyframes bzHopA { 0%, 12% { transform: translate(96px, 96px); opacity: 1; } 24% { transform: translate(160px, 30px); } 34%, 92% { transform: translate(222px, 96px); opacity: 1; } 96% { opacity: 0; } 97% { transform: translate(96px, 96px); opacity: 0; } 100% { transform: translate(96px, 96px); opacity: 1; } }
+@keyframes bzHopB { 0%, 12% { transform: translate(222px, 99px); opacity: 1; } 24% { transform: translate(160px, 16px); } 34%, 92% { transform: translate(96px, 99px); opacity: 1; } 96% { opacity: 0; } 97% { transform: translate(222px, 99px); opacity: 0; } 100% { transform: translate(222px, 99px); opacity: 1; } }
+@keyframes bzFair { 0%, 68% { opacity: 0; transform: scale(.4); } 73% { opacity: 1; transform: scale(1.2); } 78%, 90% { opacity: 1; transform: scale(1); } 97%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .bz-stage *, .bz-prog i { animation: none !important; } .scene .bz-yay { opacity: 1; } }
+
+.scene .bz-board { font-family: var(--font-display); font-weight: 800; font-size: 8.5px; letter-spacing: .12em; fill: #1d5c3a; text-anchor: middle; }
+
+/* Vorschläge: Kernaussage groß, Begründung aufklappbar */
+.rec .rec-lead { margin: 0; font-size: .98rem; }
+.rec-why > summary { cursor: pointer; font-size: .86rem; font-weight: 650; color: var(--turf); }
+.rec-why[open] > summary { margin-bottom: 6px; }
+.rec-why p { margin: 4px 0; color: var(--muted); }
+/* Ungewöhnliche Feldkombination */
+.oddhint { margin: 0; padding: 8px 10px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warn) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--line)); font-size: .88rem; }
+/* Startseite */
+.welcome .wbtns { gap: 10px; }
+.btn.try { background: transparent; border: 1.5px solid var(--turf); color: var(--turf); }
+.btn.try span { font-size: .8em; margin-right: 2px; }
+.wtile { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; }
+.wtile:hover { border-color: var(--turf); }
+.wtile .wt-ic { font-size: 1.6rem; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--surface-2); flex: none; }
+.wtile .wt-tx { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.wtile .wt-sub { font-size: .84rem; color: var(--muted); }
+.wtile .wt-go { font-size: 1.6rem; color: var(--muted); }
+.welcome .svgot, .welcome .installhint { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.installhint { border: 1.5px solid color-mix(in srgb, var(--turf) 55%, var(--line)) !important; background: color-mix(in srgb, var(--turf) 10%, var(--surface)) !important; }
+.installhint > summary { font-size: .98rem; }
+.installhint .in-ic { font-size: 1.2rem; }
+.installnow { display: flex; align-items: center; gap: 10px; border-radius: var(--r); padding: 12px 14px; }
+.installnow .in-sub { font-size: .84rem; color: var(--muted); }
+/* Rückblick: Ergebnis einfügen */
+.rvimp { margin: 0; }
+.rvimp[open] { display: grid; gap: 8px; }
+/* Spruch: kräftig abgesetzt, Emoji mittig zum Text */
+#quote { align-items: center; background: #1d5c3a; color: #fff; border: 1px solid rgba(255, 255, 255, .14); border-left: 5px solid #f2c230; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .6), 0 2px 6px rgba(0, 0, 0, .2); font-weight: 600; }
+#quote::before { background: #1d5c3a; border-color: rgba(255, 255, 255, .14); }
+#quote .qe { font-size: 1.7rem; line-height: 1; display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 50%; background: rgba(255, 255, 255, .12); }
+#quote .qt { line-height: 1.35; }
+:root[data-theme="dark"] #quote, :root[data-theme="dark"] #quote::before { background: #2b7a49; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #quote, :root:not([data-theme="light"]) #quote::before { background: #2b7a49; } }
+/* Stadion-Seite: Tipp */
+.spl-tip { display: grid; gap: 4px; max-width: 30em; margin: 0 auto; padding: 12px 16px; border-radius: 14px; background: rgba(0, 0, 0, .35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-size: 1rem; line-height: 1.4; }
+.spl-tip .spl-tiph { font-weight: 800; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #ffd54a; }
+
+/* Variante gewechselt: Teams nur kurz einblenden – Knöpfe bleiben stehen */
+#main.teams-sw .teams > .team { animation: fxFade .22s ease both; }
+/* Touch: kein „hängender“ Hover-Rahmen nach dem Antippen */
+@media (hover: none) { .chip:hover { border-color: var(--line); } .chip.on:hover { border-color: var(--turf); } .wtile:hover { border-color: var(--line); } }
 </style>
 </head>
 <body>
@@ -3337,7 +3499,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const isNum = v => v !== null && v !== '' && v !== undefined && Number.isFinite(+v);
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
-const fmt = (x, d = 1) => Number(x).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmt = (x, d = 1) => { let v = Number(x); if (Math.abs(v) < 0.5 * Math.pow(10, -d)) v = 0; return v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }); };
 // Kleinere Verschiebungen durch Platz, Form oder Position (in Punkten) werden nicht extra angezeigt – sie sind praktisch gleich
 const SHOW_SHIFT = 0.2;
 /* Zeigen, wenn sich die gerundet angezeigten Werte um mindestens 0,2 unterscheiden (nicht der ungerundete Abstand) */
@@ -4152,6 +4314,14 @@ function gamesCount12() {
    Adresse und Lage für Karte und Wetter) – Platz, Tore und Wetter gehören zum Spieltag. */
 const placeNames = () => S.places.map(x => x.name);
 const placeByName = name => S.places.find(x => x.name === name) || null;
+/* Reihenfolge nach Nutzung (letzte 12 Monate zählen doppelt), dann alphabetisch; das meistgenutzte Feld bekommt einen Stern */
+function placeUses(name, field) {
+  const y = addDays(isoToday(), -365);
+  return S.matches.reduce((t, m) => t + (m.place === name && (field == null || m.field === field) ? (m.date >= y ? 2 : 1) : 0), 0);
+}
+const placeUseOrder = list => list.slice().sort((a, b) => placeUses(b) - placeUses(a) || a.localeCompare(b, 'de'));
+const fieldUseOrder = P => (P.fields || []).slice().sort((a, b) => placeUses(P.name, b.name) - placeUses(P.name, a.name) || a.name.localeCompare(b.name, 'de'));
+function favField(P) { const f = fieldUseOrder(P)[0]; return f && placeUses(P.name, f.name) >= 4 ? f : null; }
 function placeField(id, cur, ch, t) {
   const list = placeNames().sort((a, b) => a.localeCompare(b, 'de'));
   const adding = ui.placeNew === id, pl = placeByName(cur);
@@ -4161,11 +4331,10 @@ function placeField(id, cur, ch, t) {
   // Mit Spieltag/Ergebnis: eine Liste – Orte fett (Gruppen), ihre Felder eingerückt darunter
   const sel = t
     ? `<select id="${id}" data-ch="placeSel" data-t="${t}"><option value="">– keine Angabe –</option>
-        ${list.map(x => { const P = placeByName(x), fl = P ? P.fields || [] : []; return `<optgroup label="📍 ${esc(x)}">
-          <option value="p:${esc(x)}"${x === cur && !curF ? ' selected' : ''} style="font-weight:700">${esc(x)}${fl.length ? ' – ohne Feld' : ''}</option>
-          ${fl.map(f => `<option value="f:${esc(x)}|${f.id}"${curF === f ? ' selected' : ''}>${esc(x)} · ${esc(f.name)}</option>`).join('')}
-          <option value="n:${esc(x)}" class="optnew" style="color:#7d8a82;font-style:italic">＋ Neues Feld bei ${esc(x)} …</option></optgroup>`; }).join('')}
-        ${cur && !list.includes(cur) ? `<option value="p:${esc(cur)}" selected>${esc(cur)}</option>` : ''}<optgroup label="Neu"><option value="__new" class="optnew" style="color:#7d8a82;font-style:italic">＋ Neuer Ort …</option></optgroup></select>`
+        ${placeUseOrder(list).map(x => { const P = placeByName(x), fl = P ? fieldUseOrder(P) : [], star = fl.length > 1 ? favField(P) : null; return `<optgroup label="📍 ${esc(x)}">
+          <option value="p:${esc(x)}"${x === cur && !curF ? ' selected' : ''} style="font-weight:700">${esc(x)}${fl.length ? ' · Feld offen' : ''}</option>
+          ${fl.map(f => `<option value="f:${esc(x)}|${f.id}"${curF === f ? ' selected' : ''}>${f === star ? '⭐' : '⚽'} ${esc(x)} · ${esc(f.name)}</option>`).join('')}</optgroup>`; }).join('')}
+        ${cur && !list.includes(cur) ? `<option value="p:${esc(cur)}" selected>${esc(cur)}</option>` : ''}<optgroup label="Neu">${pl ? `<option value="n:${esc(pl.name)}" class="optnew" style="color:#7d8a82;font-style:italic">＋ Neues Feld bei ${esc(pl.name)} …</option>` : ''}<option value="__new" class="optnew" style="color:#7d8a82;font-style:italic">＋ Neuer Ort …</option></optgroup></select>`
     : `<select id="${id}" data-ch="${ch}"><option value="">– keine Angabe –</option>${list.map(x => `<option${x === cur ? ' selected' : ''}>${esc(x)}</option>`).join('')}${cur && !list.includes(cur) ? `<option selected>${esc(cur)}</option>` : ''}<option value="__new" class="optnew" style="color:#7d8a82;font-style:italic">+ Neuer Ort …</option></select>`;
   return `<div class="field placefield"><label class="lbl" for="${id}">${t ? 'Ort und Feld' : 'Ort'} <span class="muted">(optional)</span></label>${adding
     ? `<div class="row"><input type="text" class="grow" id="${id}New" placeholder="Neuer Ort, z. B. Halle Nord" maxlength="60"><button type="button" class="btn sm primary" data-act="placeAdd" data-k="${id}" data-ch="${ch}">Anlegen</button><button type="button" class="btn sm ghost" data-act="placeCancel">Abbrechen</button></div>`
@@ -4713,6 +4882,8 @@ function placeMapUrl(pl) {
 }
 const addMin = (t, m) => { const x = (+t.slice(0, 2) * 60 + +t.slice(3, 5) + m) % 1440; return `${pad(Math.floor(x / 60))}:${pad(x % 60)}`; };
 const wxShare = w => `${WX_ICON(w.code)} ${fmt(w.temp, 0)} °C${w.rain >= 0.2 || (w.code >= 51 && w.code < 95) ? ', Regen möglich' : ', trocken'}${w.wind >= 25 ? `, Wind ${fmt(w.wind, 0)} km/h` : ''}`;
+// Geviert + Halbgeviert ≈ Breite eines Emojis mit Leerzeichen: Links stehen bündig unter dem Text
+const LINK_IND = '\u2003\u2002';
 function shareText(o) {
   o = o || { map: false, wx: false, cal: false };
   const R = S.result, M = buildModel(), A = shareAvail();
@@ -4721,9 +4892,9 @@ function shareText(o) {
   const day = isIso(S.day.date) ? new Date(S.day.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
   const lines = [`⚽ *Teams für ${day || 'heute'}*`];
   if (isTime(S.day.time)) lines.push(`⏰ ${S.day.time}${S.day.minutes ? '–' + addMin(S.day.time, S.day.minutes) : ''} Uhr`);
-  if (S.day.place) lines.push(`📍 ${S.day.place}${o.map && A.map ? '\n' + placeMapUrl(A.pl) : ''}`);
+  if (S.day.place) lines.push(`📍 ${S.day.place}${o.map && A.map ? '\n' + LINK_IND + placeMapUrl(A.pl) : ''}`);
   if (o.wx && A.wx && S.day.weather) { const L = daylight(); lines.push(wxShare(S.day.weather) + (L ? ` · 🌇 ${hhmm(L.set)}` : '')); }
-  if (o.cal && A.cal) lines.push(`📅 In den Kalender:\n${calLink()}`);
+  if (o.cal && A.cal) lines.push(`📅 In den Kalender:\n${LINK_IND}${calLink()}`);
   R.teams.forEach((ids, t) => {
     const c = teamCol(t);
     lines.push('', `${c.mark} *Team ${t + 1}* (${ids.length} Spieler)`);
@@ -4813,12 +4984,22 @@ function sunsetAt(date, lat, lon) {
 const DUSK_KEY = 'ft-dusk';
 function duskMin() { try { const v = +localStorage.getItem(DUSK_KEY); return isNum(localStorage.getItem(DUSK_KEY)) ? clamp(v, 0, 90) : 20; } catch (e) { return 20; } }
 const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-/* Übliche Gesamtspielzeit: angegeben, sonst die häufigste der letzten Runden, sonst 90 Minuten */
+/* Übliche Gesamtspielzeit: angegeben, sonst die häufigste auf genau diesem Feld, sonst an diesem Ort
+   (je mindestens 2 Runden, die letzten 20), sonst 90 Minuten */
 function usualMinutes() {
-  if (S.day.minutes) return { m: S.day.minutes, src: '' };
-  const c = {}; S.matches.slice(-20).forEach(m => { if (m.minutes) c[m.minutes] = (c[m.minutes] || 0) + 1; });
-  const top = Object.keys(c).sort((a, b) => c[b] - c[a])[0];
-  return top ? { m: +top, src: 'wie meist' } : { m: 90, src: 'angenommen' };
+  const d = S.day;
+  if (d.minutes) return { m: d.minutes, src: '' };
+  const pl = placeByName(d.place), fl = pl && (pl.fields || []).find(f => f.id === d.field), cur = S.result && S.result.mid;
+  const top = L => {
+    const c = {}; let n = 0;
+    L.filter(m => m.minutes && m.id !== cur).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20).forEach(m => { c[m.minutes] = (c[m.minutes] || 0) + 1; n++; });
+    return n >= 2 ? +Object.keys(c).sort((a, b) => c[b] - c[a] || b - a)[0] : null;
+  };
+  const onField = fl ? top(S.matches.filter(m => m.place === d.place && m.field === fl.name)) : null;
+  if (onField) return { m: onField, src: 'wie meist auf diesem Feld' };
+  const atPlace = d.place ? top(S.matches.filter(m => m.place === d.place)) : null;
+  if (atPlace) return { m: atPlace, src: 'wie meist an diesem Ort' };
+  return { m: 90, src: 'angenommen' };
 }
 /* Ergebnis: null (drinnen, Flutlicht, keine Lage) oder { set, light, end, late, latest } */
 function daylight() {
@@ -5363,8 +5544,8 @@ function viewWelcome() {
       <span class="small muted">Ein Name pro Zeile. Die Zahl ist die Stärke (5–6 = Durchschnitt), sie geht auch später.</span>
       ${ui.addErr ? `<p class="errtxt">${esc(ui.addErr)}</p>` : ''}
     </div>
-    <div class="row"><button type="button" class="btn primary" data-act="welcomeAdd">Gruppe anlegen</button><button type="button" class="btn ghost" data-act="welcomeSample">Erst mal ausprobieren</button></div>
-    <div class="row welcomeshot"><button type="button" class="btn" data-act="shotOpen" data-v="day">📷 Aus Screenshots einlesen</button><span class="small muted">z. B. die Mitgliederliste eurer WhatsApp-Gruppe oder eine Umfrage – du prüfst jede Zuordnung.</span></div>
+    <div class="row wbtns"><button type="button" class="btn primary" data-act="welcomeAdd">Gruppe anlegen</button><button type="button" class="btn try" data-act="welcomeSample"><span aria-hidden="true">▶</span> Erst mal ausprobieren</button></div>
+    <button type="button" class="wtile" data-act="shotOpen" data-v="day"><span class="wt-ic" aria-hidden="true">📷</span><span class="wt-tx"><b>Aus Screenshots einlesen</b><span class="wt-sub">z. B. die Mitgliederliste eurer WhatsApp-Gruppe oder eine Umfrage – du prüfst jede Zuordnung.</span></span><span class="wt-go" aria-hidden="true">›</span></button>
     ${ui.previous ? `<div class="banner"><p>In diesem Browser liegen Daten der Vorversion (${ui.previous.players.length} Spieler, ${ui.previous.rules.length} Regeln).</p><button type="button" class="btn sm primary" data-act="takePrevious">Übernehmen</button></div>` : ''}
     <p class="hint">Schon eine Sicherungsdatei? <button type="button" class="linkbtn" data-act="pickFile">Datei einlesen</button></p>
     ${installHintHTML()}
@@ -5373,12 +5554,13 @@ function viewWelcome() {
 }
 /* „Auch als App nutzbar“ – mit der Anleitung für das Gerät, auf dem die Seite gerade offen ist */
 var installEvt = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!S.players.length) render(); });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; try { render(); } catch (x) { /* noch nicht bereit */ } });
+window.addEventListener('appinstalled', () => { installEvt = null; try { render(); } catch (x) { /* egal */ } });
 function isStandalone() { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } }
 const isMobile = () => isIOS() || /Android/i.test(navigator.userAgent);
 function installBannerHTML() {
   try { if (localStorage.getItem('ft-install-off')) return ''; } catch (e) { return ''; }
-  if (isStandalone() || !isMobile() || !S.players.length) return '';
+  if (isStandalone() || !(isMobile() || installEvt) || !S.players.length) return '';
   return `<div class="installbar">${installHintHTML()}<button type="button" class="mini" data-act="installOff" aria-label="Hinweis ausblenden" title="Nicht mehr zeigen">${ICON.out}</button></div>`;
 }
 function installHintHTML() {
@@ -5389,8 +5571,8 @@ function installHintHTML() {
       : '<li>Diese Seite in <b>Safari</b> öffnen (Chrome auf dem iPhone kann es je nach Version auch: Teilen-Menü)</li><li><b>Teilen</b> → <b>„Zum Home-Bildschirm“</b> → <b>Hinzufügen</b></li>')
     : android ? '<li>Oben rechts auf <b>⋮</b> tippen</li><li><b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b></li><li>Bestätigen – die App liegt dann bei deinen anderen Apps.</li>'
       : '<li>In Chrome oder Edge: in der Adressleiste rechts auf das <b>Installieren-Symbol</b> (Bildschirm mit Pfeil) klicken</li><li>Oder im Menü <b>⋮</b> → <b>„App installieren“</b> bzw. „Speichern und teilen“ → „Seite als App installieren“</li><li>Safari auf dem Mac: <b>Ablage → Zum Dock hinzufügen</b></li>';
-  return `<details class="installhint"><summary>📱 Auch als App nutzbar – so geht’s</summary>
-    ${installEvt ? '<p><button type="button" class="btn sm primary" data-act="installApp">Jetzt installieren</button></p>' : ''}
+  if (installEvt) return `<div class="installhint installnow"><span class="in-ic" aria-hidden="true">📲</span><span class="grow"><b>Als App installieren</b><br><span class="in-sub">Startet ohne Adressleiste – wie eine normale App.</span></span><button type="button" class="btn sm primary" data-act="installApp">Installieren</button></div>`;
+  return `<details class="installhint"><summary><span class="in-ic" aria-hidden="true">📲</span> Auch als App nutzbar</summary>
     <ol class="small">${steps}</ol>
     <p class="small muted">Die Daten bleiben dieselben, solange du die App im selben Browser installierst. Updates kommen automatisch, sobald die Seite neu geladen wird.</p></details>`;
 }
@@ -5559,7 +5741,8 @@ function viewDay() {
     <div class="block-head"><div class="lblrow"><h2>Spielzeit und Ablauf</h2>${ib('dayTime')}</div>${(() => { const m = ['duration', 'flow', 'crowd'].filter(k => d.ctx[k]).map(k => ctxOpt(k, d.ctx[k])); return m.length || d.gameMin ? `<span class="muted small">${esc([...m, d.gameMin ? d.gameMin + ' Min. je Spiel' : ''].filter(Boolean).join(' · '))}</span>` : ''; })()}</div>
     ${(() => {
       const seen = [];
-      S.matches.slice().sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created).forEach(m => { if ((m.minutes || m.gameMin) && seen.length < 3 && !seen.some(x => x.t === (m.minutes || 0) && x.g === (m.gameMin || 0))) seen.push({ t: m.minutes || 0, g: m.gameMin || 0 }); });
+      const curM = S.result && S.result.mid;
+      S.matches.filter(m => m.id !== curM).sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created).forEach(m => { if ((m.minutes || m.gameMin) && seen.length < 3 && !seen.some(x => x.t === (m.minutes || 0) && x.g === (m.gameMin || 0))) seen.push({ t: m.minutes || 0, g: m.gameMin || 0 }); });
       return seen.length ? `<div class="field"><span class="lbl">Wie zuletzt</span><div class="chips">${seen.map(x => `<button type="button" class="chip${(d.minutes || 0) === x.t && (d.gameMin || 0) === x.g ? ' on' : ''}" data-act="timePick" data-t="${x.t}" data-g="${x.g}">${[x.t ? `${x.t} Min. gesamt` : '', x.g ? `${x.g} Min. je Spiel` : ''].filter(Boolean).join(' · ')}</button>`).join('')}</div></div>` : '';
     })()}
     <details class="field" data-sec="dayTime"${ui.open.dayTime ? ' open' : ''}><summary><b>Anpassen</b> <span class="muted small">Spielzeit gesamt und je Spiel${showCtx('flow') || showCtx('crowd') ? ', ' + ['flow', 'crowd'].filter(showCtx).map(k => k === 'flow' ? 'Spielfluss' : 'Zuschauer').join(', ') : ''}</span></summary>${ctxMoreHTML('day')}</details>
@@ -6519,7 +6702,7 @@ function pitchPlace(L) {
    (links → rechts) auf diese Plätze verteilt – zwei Außenstürmer stehen damit leicht innen, nicht ganz am Rand.
    Leichte Tiefe: In der Abwehr rücken die Außen etwas auf, im Sturm stehen die Außen etwas tiefer; dazu die Position
    aus dem Profil (z. B. 6er etwas tiefer als 10er, Libero hinter der Kette). Mehr als fünf in einer Linie: zwei Reihen. */
-const PITCH_Y = [0.15, 0.41, 0.67, 0.9], PITCH_X = { 1: [0.5], 2: [0.33, 0.67], 3: [0.19, 0.5, 0.81], 4: [0.13, 0.38, 0.62, 0.87], 5: [0.1, 0.3, 0.5, 0.7, 0.9] };
+const PITCH_Y = [0.3, 0.52, 0.72, 0.905], PITCH_X = { 1: [0.5], 2: [0.33, 0.67], 3: [0.19, 0.5, 0.81], 4: [0.13, 0.38, 0.62, 0.87], 5: [0.1, 0.3, 0.5, 0.7, 0.9] };
 const PITCH_PREF = { links: 0, halblinks: 0.25, innen: 0.5, halbrechts: 0.75, rechts: 1 }, PITCH_CURVE = [0.035, -0.02, -0.05, 0];
 function pitchLayout(entries) {
   const lines = [[], [], [], []], out = [];
@@ -7316,12 +7499,21 @@ function viewSettings() {
 }
 
 /* Feld eines Ortes anlegen oder bearbeiten (Einstellungen → Orte und Felder) */
+function fieldOdd(c) {
+  const sz = c && c.size, g = c && c.goal;
+  if (sz === 'gross' && (g === 'mini' || g === 'klein')) return `Großes Feld mit ${g === 'mini' ? 'Minitoren' : 'kleinen Toren'} ist ungewöhnlich – stimmt das so? Kleine Tore auf großem Feld machen Tore seltener.`;
+  if (sz === 'klein' && g === 'gross') return 'Kleines Feld mit großen Toren ist ungewöhnlich – stimmt das so? Dann fallen meist sehr viele Tore.';
+  if (sz === 'mittel' && g === 'mini') return 'Mittleres Feld mit Minitoren – eher selten. Stimmt das so?';
+  return '';
+}
+const fieldOddHTML = c => { const t = fieldOdd(c); return t ? `<p class="oddhint">⚠️ ${t}</p>` : ''; };
 function fieldEdHTML(pl) {
   const E = ui.fieldEd;
   if (!E || E.p !== pl.name) return '';
   return `<div class="fedit"><b>${E.id ? 'Feld bearbeiten' : `Neues Feld bei „${esc(pl.name)}“`}</b>
     <div class="field"><label class="lbl" for="fedName">Name</label><input type="text" id="fedName" data-in="fedName" value="${esc(E.name)}" maxlength="40" placeholder="${esc(uniqueFieldName(pl, 'Standardfeld'))}"></div>
     ${SPORT.context.filter(c => c.place).map(c => `<div class="field"><span class="lbl">${c.label}</span>${seg('fedCx', [['', 'keine Angabe'], ...c.options.map(o => [o[0], o[1]])], E.ctx[c.key] || '', `data-k="${c.key}"`)}${c.key === 'size' ? dimRowHTML('fedDim', 'set', E.ctx, 'field') : c.key === 'goal' ? dimRowHTML('fedDim', 'set', E.ctx, 'goal') : ''}</div>`).join('')}
+    ${fieldOddHTML(E.ctx)}
     <div class="row"><span class="grow">Drinnen (kein Wetter)</span>${sw('fedIn', E.ctx.weather === 'drinnen', '', 'Drinnen')}</div>
     <div class="row"><button type="button" class="btn sm primary" data-act="fedSave">Speichern</button><button type="button" class="btn sm ghost" data-act="fedCancel">Abbrechen</button></div></div>`;
 }
@@ -7709,7 +7901,7 @@ function recVisible(r) {
 }
 const recTitle = (r, plain) => {
   const e = plain ? (x => x) : esc, nm = e(nameAny(r.id));
-  if (r.type === 'ok') return `${nm}: Stärke ${fmtV(r.from)} passt`;
+  if (r.type === 'ok') { const p = byId(r.id); return p && p.isNew ? `${nm} ist nicht mehr neu` : `${nm}: Stärke ${fmtV(r.from)} bestätigt`; }
   return `${nm}: Stärke ${fmtV(r.from)} → ${fmtS(r.to)}`;
 };
 /* Begründung in Worten – dieselben Zahlen wie in der Spielerauswertung */
@@ -7739,19 +7931,21 @@ function recCard(r, A, inSheet) {
   let note = '';
   if (r.type === 'str' && p && effOf(p).auto) note = ' Die Stärke wird bisher aus Fähigkeiten berechnet; Übernehmen setzt sie als feste Zahl.';
   if (r.type === 'str' && p && (p.isNew || !ratedOf(p))) note += ` ${esc(disp(p))} gilt danach als eingeschätzt${p.isNew ? ' und nicht mehr als neu' : ''}.`;
-  const body = r.type === 'ok'
-    ? `${evidenceText(s)} Die Ergebnisse bestätigen die Bewertung. ${esc(disp(p))} kann als eingeschätzt gelten${p.isNew ? ' und nicht mehr als neu' : ''}.`
-    : evidenceText(s) + note;
+  const lead = r.type === 'ok'
+    ? `${s.nAll} Spiele bestätigen Stärke <b>${fmtV(r.from)}</b>.${p && p.isNew ? ' Die Markierung „neu“ kann weg – die Bewertung gilt dann als eingeschätzt.' : ' Die Bewertung gilt dann als eingeschätzt.'}`
+    : `Die Ergebnisse sprechen für etwa <b>${r10(s.est)}</b> statt ${fmtV(r.from)}. Wahrscheinlichkeit, dass ${esc(disp(p))} ${s.d > 0 ? 'stärker' : 'schwächer'} ist: <b>${probTxt(s.p)}</b>.`;
+  const body = evidenceText(s) + (r.type === 'str' ? note : '');
   const wi = r.type === 'str' ? whatIfNow(r) : '';
   return `<article class="rec conf-${r.type === 'ok' ? 'mittel' : 'hoch'}">
     <div class="rec-head"><b>${recTitle(r)}</b>${inSheet ? '' : `<button type="button" class="btn sm ghost" data-act="paOpen" data-id="${r.id}">Spiele ansehen</button>`}</div>
-    <p class="small">${body}</p>
-    ${r.n < 4 && r.type === 'str' ? `<p class="small muted">Erst ${plural(r.n, 'Spiel', 'Spiele')} mit Toren – ein vorläufiger Vorschlag.</p>` : ''}
+    <p class="rec-lead">${lead}</p>
+    <details class="rec-why"><summary>Begründung</summary><p class="small">${body}</p>
+    ${r.n < 4 && r.type === 'str' ? `<p class="small">Erst ${plural(r.n, 'Spiel', 'Spiele')} mit Toren – ein vorläufiger Vorschlag.</p>` : ''}
     ${confoundText(A, s)}
-    ${wi ? `<p class="small muted">${wi}</p>` : ''}
+    ${wi ? `<p class="small">${wi}</p>` : ''}</details>
     ${own ? `<div class="row"><label class="lbl" for="recOwn">Eigener Wert</label><input type="number" id="recOwn" class="numin" step="0.5" min="1" max="10" inputmode="decimal" value="${r.to}"><button type="button" class="btn sm primary" data-act="recApplyOwn" data-k="${esc(r.key)}">Setzen</button><button type="button" class="btn sm ghost" data-act="recOwn" data-k="">Abbrechen</button></div>` : ''}
     <div class="row rec-btns">
-      <button type="button" class="btn sm primary" data-act="recApply" data-k="${esc(r.key)}">${r.type === 'ok' ? 'Bestätigen' : `Auf ${fmtS(r.to)} setzen`}</button>
+      <button type="button" class="btn sm primary" data-act="recApply" data-k="${esc(r.key)}">${r.type === 'ok' ? (p && p.isNew ? 'Nicht mehr neu' : 'Als eingeschätzt merken') : `Auf ${fmtS(r.to)} setzen`}</button>
       ${r.type === 'str' && !own ? `<button type="button" class="btn sm" data-act="recOwn" data-k="${esc(r.key)}">Eigener Wert</button>` : ''}
       <button type="button" class="btn sm ghost" data-act="recLater" data-k="${esc(r.key)}">Später</button>
       <button type="button" class="btn sm ghost" data-act="recReject" data-k="${esc(r.key)}">Ablehnen</button>
@@ -8076,11 +8270,12 @@ function viewReviewSimple(all) {
   const rows = Object.entries(bil).map(([id, b]) => ({ id, ...b, n: b.w + b.d + b.l })).map(x => ({ ...x, q: (x.w + x.d / 2) / Math.max(1, x.n) })).sort((a, b) => b.q - a.q || b.n - a.n);
   return `${open.length ? `<section class="block"><div class="block-head"><h2>Ergebnis fehlt</h2><span class="muted small">${open.length}</span></div>
       <ul class="mlist">${open.slice(0, 3).map(m => `<li class="mrow"><span class="grow"><b>${matchLabel(m)}</b></span><button type="button" class="btn sm primary" data-act="resOpen" data-id="${m.id}">Eintragen</button></li>`).join('')}</ul></section>` : ''}
+    ${rvImportHTML()}
+    ${matchListBlock(all)}
     ${rows.length ? rvBlock('rvBil', false, 'Bilanz', '', `<span class="muted small">${rows.length} Spieler</span>`, `<div class="scroll"><table class="grid bil"><thead><tr><th>Spieler</th><th>Spiele</th><th title="Siege – Unentschieden – Niederlagen">S–U–N</th><th>Punkte je Spiel</th></tr></thead><tbody>
       ${rows.map(x => `<tr><td>${esc(nameAny(x.id))}</td><td class="num">${x.n}</td><td class="num">${x.w}–${x.d}–${x.l}</td><td class="num">${fmt((3 * x.w + x.d) / Math.max(1, x.n), 1)}</td></tr>`).join('')}</tbody></table></div>
       <p class="hint">Aus allen eingetragenen Spielen. Sieg 3 Punkte, Unentschieden 1.</p>`, 'Siege, Unentschieden und Niederlagen je Spieler.') : ''}
     ${howCmpBlock(all)}
-    ${matchListBlock(all)}
     ${all.filter(m => m.status === 'done').length >= 3 ? '<p class="hint">Ob die Ergebnisse zu den Bewertungen passen und wer vermutlich zu hoch oder zu niedrig eingeschätzt ist, zeigt der erweiterte Modus. <button type="button" class="linkbtn" data-act="mode" data-v="expert">Erweitert einschalten</button></p>' : ''}`;
 }
 function viewReview() {
@@ -8101,8 +8296,11 @@ function viewReview() {
       `<ul class="mlist">${open.slice(0, 3).map(m => `<li class="mrow"><span class="grow"><b>${matchLabel(m)}</b><br><span class="small muted">${inCols(m.colors, () => m.teams.map((t, i) => `${teamCol(i).name} ${t.length}`).join(' · '))} Spieler</span></span><button type="button" class="btn sm primary" data-act="resOpen" data-id="${m.id}">Eintragen</button></li>`).join('')}</ul>
       ${open.length > 3 ? '<p class="hint">Weitere stehen unten in der Liste.</p>' : ''}`, `${plural(open.length, 'Runde', 'Runden')} ohne Ergebnis.`));
   }
-  parts.push(recBlock(A), playersBlock(A), howCmpBlock(all), placesBlock(A), labBlock(A), howBlock(), matchListBlock(all));
+  parts.push(rvImportHTML());
+  // Erst was zu tun ist (Vorschläge), dann die Spiele selbst, dann die Auswertungen; die Erklärung der Rechnung ganz unten
+  parts.push(recBlock(A), matchListBlock(all), playersBlock(A), howCmpBlock(all), placesBlock(A), labBlock(A));
   if (S.log.length) parts.push(logBlock());
+  parts.push(howBlock());
   return parts.join('');
 }
 /* Teamwahl im Vergleich: Wie knapp gingen Spiele aus, je nachdem wie die Teams entstanden sind?
@@ -9322,29 +9520,79 @@ function toast(msg, action) {
   toastT = setTimeout(() => { el.hidden = true; }, action ? 7000 : 3500);
 }
 let busyT = 0;
-/* Szenen fürs Warten – jedes Mal eine andere (nie zweimal dieselbe hintereinander) */
+/* Warte-Szenen: große Bühne (Rasen) mit SVG-Figuren. Je Szene eine Schleife; nie zweimal dieselbe hintereinander. */
+const BZ_DEFS = `<defs>
+  <g id="bzBall"><circle r="8" fill="#fff" stroke="#1d1d1d" stroke-width="1.1"/><path d="M0-3.3l3.1 2.3-1.2 3.6h-3.8l-1.2-3.6z" fill="#1d1d1d"/><path d="M0-8v4.7M7.6-2.5l-4.5 1.5M4.7 6.5 1.9 2.6M-4.7 6.5l2.8-3.9M-7.6-2.5l4.5 1.5" stroke="#1d1d1d" stroke-width=".9" fill="none"/></g>
+  <pattern id="bzCrowd" width="14" height="12" patternUnits="userSpaceOnUse"><rect width="14" height="12" fill="#183527"/><circle cx="3.5" cy="4" r="2.7" fill="#e9dcc6" opacity=".45"/><circle cx="10.5" cy="9" r="2.7" fill="#d8443c" opacity=".5"/><circle cx="10.5" cy="2.5" r="2.1" fill="#5c8fe0" opacity=".45"/><circle cx="3.5" cy="10.5" r="2.1" fill="#f2c230" opacity=".4"/></pattern>
+  <linearGradient id="bzSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+  <pattern id="bzNet" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 0L7 7M7 0L0 7" stroke="rgba(255,255,255,.5)" stroke-width=".7"/></pattern>
+</defs>`;
+const BZ_BACK = `<rect x="-40" y="-40" width="400" height="160" fill="url(#bzCrowd)"/><rect x="-40" y="-40" width="400" height="160" fill="url(#bzSky)"/>
+  <rect x="-40" y="120" width="400" height="16" fill="#f4f1e8"/><rect x="-40" y="120" width="400" height="3" fill="#1d5c3a"/>
+  <text class="bz-board" x="160" y="132.5">FAIRE TEAMS  ·  FAIR PLAY  ·  FAIRE TEAMS  ·  FAIR PLAY</text>`;
+// Figur von der Seite, 1,25-fach um die Füße vergrößert
+const bzPlayer = (x, col, kickCls) => `<g class="bz-pl" transform="translate(${x} 172) scale(1.25) translate(${-x} -172)">
+  <line class="bz-leg" x1="${x - 4}" y1="148" x2="${x - 6}" y2="172"/>
+  <line class="bz-leg ${kickCls}" x1="${x + 4}" y1="148" x2="${x + 4}" y2="172"/>
+  <rect x="${x - 9}" y="122" width="18" height="28" rx="6" fill="${col}"/>
+  <rect x="${x - 9}" y="141" width="18" height="9" rx="3" fill="#f4f4f4"/>
+  <circle cx="${x}" cy="111" r="9" fill="#f1c7a0"/><path d="M${x - 9} 109a9 9 0 0 1 18 0z" fill="#3b2a20"/>
+</g>`;
+const bzConf = () => ['#ffd54a', '#ff6b6b', '#5cc8ff', '#ffffff', '#9cff8a', '#ff9de0', '#ffd54a', '#5cc8ff']
+  .map((c, i) => `<rect class="bz-conf" x="${70 + i * 26}" y="14" width="5" height="9" rx="1" fill="${c}" style="--dx:${(i % 2 ? 1 : -1) * (6 + i * 3)}px;--rot:${(i % 3 + 1) * 160}deg;animation-delay:${(i % 4) * 0.05}s"/>`).join('');
+const BZ_GOAL = `<g class="bz-goal"><path class="bz-net" d="M272 96 L308 104 L308 172 L272 172Z" fill="url(#bzNet)"/><path class="bz-frame" d="M272 172 V96 L308 104 V172"/></g>`;
 const BUSY_SCENES = [
-  // Torschuss: Schuh tritt, Ball fliegt im Bogen ins Netz, „TOR!“
-  `<div class="scene sc-shot" aria-hidden="true"><i class="ground"></i><span class="goal"></span><span class="boot">👟</span><span class="ball">⚽</span><b class="yay">TOR!</b></div>`,
-  // Jonglieren: Ball hüpft weich, Schatten wächst und schrumpft
-  `<div class="scene sc-juggle" aria-hidden="true"><i class="shadow"></i><span class="ball">⚽</span><span class="knee">🦵</span></div>`,
-  // Dribbling um Hütchen
-  `<div class="scene sc-dribble" aria-hidden="true"><i class="ground"></i><i class="cone c1"></i><i class="cone c2"></i><i class="cone c3"></i><span class="ball">⚽</span></div>`,
-  // Elfmeter: Torwart springt in die falsche Ecke
-  `<div class="scene sc-pen" aria-hidden="true"><span class="goal"></span><span class="keeper">🧤</span><span class="ball">⚽</span><b class="yay">TOR!</b></div>`,
-  // Lattenknaller: Ball an die Latte, zurück, „Uff!“
-  `<div class="scene sc-bar" aria-hidden="true"><i class="ground"></i><span class="goal"></span><span class="ball">⚽</span><b class="yay">Latte!</b></div>`
+  // Torschuss: Anlauf, Schuss, Ball im Bogen ins Netz, Netz beult aus, „TOR!“ mit Konfetti
+  { k: 'shot', t: 'Torschuss', svg: `${BZ_BACK}<line class="bz-gl" x1="-40" y1="172" x2="360" y2="172"/>${BZ_GOAL}${bzPlayer(70, '#d8443c', 'bz-kick')}
+    <g transform="translate(98 164)"><g class="bz-fly"><g class="bz-spin"><use href="#bzBall"/></g></g></g>
+    <text class="bz-yay" x="160" y="64">TOR!</text>${bzConf()}` },
+  // Jonglieren: Ball tanzt auf dem Fuß, Schatten wird kleiner und größer
+  { k: 'jug', t: 'Jonglieren', svg: `${BZ_BACK}<line class="bz-gl" x1="-40" y1="172" x2="360" y2="172"/><ellipse class="bz-shadow" cx="190" cy="173" rx="13" ry="3"/>
+    ${bzPlayer(160, '#2f6fd6', 'bz-juggle')}<circle class="bz-ring" cx="190" cy="156" r="10"/>
+    <g transform="translate(190 150)"><g class="bz-bounce"><g class="bz-spin2"><use href="#bzBall"/></g></g></g>` },
+  // Dribbling (von oben): Slalom um Hütchen, dann ins Minitor
+  { k: 'drib', t: 'Dribbling', svg: `<g class="bz-top"><line x1="160" y1="0" x2="160" y2="200"/><circle cx="160" cy="100" r="34"/></g>
+    <rect class="bz-mgoal" x="300" y="82" width="14" height="36" rx="2"/>
+    ${[100, 160, 220].map((x, i) => `<g class="bz-cone"><circle cx="${x}" cy="100" r="8"/><circle cx="${x}" cy="100" r="3" fill="#fff4"/></g>`).join('')}
+    <g class="bz-dot"><circle r="10" fill="#d8443c" stroke="#fff" stroke-width="2.5"/></g>
+    ${[3, 2, 1].map(i => `<g class="bz-db bz-ghost" style="animation-delay:${i * 0.06}s;opacity:${0.15 * (4 - i)}"><circle r="5" fill="#fff"/></g>`).join('')}
+    <g class="bz-db"><circle r="5.5" fill="#fff" stroke="#1d1d1d" stroke-width="1"/></g><text class="bz-yay bz-ok" x="292" y="70">✓</text>` },
+  // Elfmeter (von vorn): Torwart fliegt in die falsche Ecke
+  { k: 'pen', t: 'Elfmeter', svg: `${BZ_BACK.replace(/120/g, '104').replace('132.5', '116.5')}<line class="bz-gl" x1="-40" y1="152" x2="360" y2="152"/><rect class="bz-pnet" x="62" y="42" width="196" height="110" fill="url(#bzNet)"/>
+    <path class="bz-frame" d="M62 152 V42 H258 V152"/>
+    <g class="bz-keeper"><line class="bz-leg" x1="154" y1="126" x2="150" y2="150"/><line class="bz-leg" x1="166" y1="126" x2="170" y2="150"/>
+      <line class="bz-arm" x1="151" y1="104" x2="131" y2="90"/><line class="bz-arm" x1="169" y1="104" x2="189" y2="90"/>
+      <circle cx="130" cy="89" r="5" fill="#fff"/><circle cx="190" cy="89" r="5" fill="#fff"/>
+      <rect x="150" y="98" width="20" height="30" rx="6" fill="#f2c230"/><circle cx="160" cy="88" r="9" fill="#f1c7a0"/><path d="M151 86a9 9 0 0 1 18 0z" fill="#222"/></g>
+    <g transform="translate(160 184)"><g class="bz-penfly"><g class="bz-penscale"><use href="#bzBall"/></g></g></g>
+    <text class="bz-yay" x="160" y="78">TOR!</text>${bzConf()}` },
+  // Lattenknaller: an die Latte, Tor zittert, Ball springt zurück
+  { k: 'bar', t: 'Latte', svg: `${BZ_BACK}<line class="bz-gl" x1="-40" y1="172" x2="360" y2="172"/><g class="bz-shake">${BZ_GOAL}</g>${bzPlayer(70, '#d8443c', 'bz-kick')}
+    <path class="bz-boom" d="M268 90l4-10 3 9 9-4-5 8 9 4-10 1 2 9-7-6-6 7 1-9-9-1 8-5z"/>
+    <g transform="translate(98 164)"><g class="bz-barfly"><g class="bz-spin"><use href="#bzBall"/></g></g></g>
+    <text class="bz-yay bz-uff" x="186" y="70">Latte!</text>` },
+  // Waage: Spieler wechseln die Seite, bis beide Seiten gleich schwer sind
+  { k: 'scale', t: 'Waage', svg: `<g transform="translate(0 14)"><path class="bz-stand" d="M160 66 V160 M136 166 H184 L172 158 H148Z"/>
+    <g class="bz-beam"><line x1="82" y1="66" x2="238" y2="66"/><circle cx="160" cy="66" r="5" fill="#fff"/>
+      <path d="M82 66 L64 106 M82 66 L100 106 M238 66 L220 106 M238 66 L256 106"/>
+      <path class="bz-pan" d="M58 106 H106 a24 9 0 0 1 -48 0z"/><path class="bz-pan" d="M214 106 H262 a24 9 0 0 1 -48 0z"/>
+      <circle cx="70" cy="96" r="9" fill="#d8443c" stroke="#fff"/><circle cx="238" cy="99" r="6" fill="#2f6fd6" stroke="#fff"/>
+      <g class="bz-hopa"><circle r="9" fill="#d8443c" stroke="#fff"/></g><g class="bz-hopb"><circle r="6" fill="#2f6fd6" stroke="#fff"/></g></g>
+    <text class="bz-yay bz-fair" x="160" y="34">fair!</text></g>` }
 ];
 let busyLast = -1;
 function showBusy(budget) {
   const el = $('#busy'), end = Date.now() + budget;
   let k = Math.floor(Math.random() * BUSY_SCENES.length); if (k === busyLast) k = (k + 1) % BUSY_SCENES.length; busyLast = k;
-  el.innerHTML = `${BUSY_SCENES[k]}<span class="busytxt"></span>`;
-  const txt = el.querySelector('.busytxt');
-  const tick = () => { const left = Math.ceil((end - Date.now()) / 1000); txt.textContent = budget > 1500 && left > 0 ? `Suche die fairsten Teams … höchstens noch ${left} s` : 'Suche die fairsten Teams …'; };
+  const sc = BUSY_SCENES[k];
+  el.innerHTML = `<div class="bz-stage bz-${sc.k}${sc.k === 'drib' || sc.k === 'scale' ? ' bz-topv' : ''}" aria-hidden="true"><svg class="scene" viewBox="${sc.k === 'drib' || sc.k === 'scale' ? '0 12 320 180' : '26 36 296 166'}" preserveAspectRatio="xMidYMid slice">${BZ_DEFS}${sc.svg}</svg></div>
+    <div class="bz-txt"><b class="busytxt">Suche die fairsten Teams …</b><span class="bz-prog"><i style="animation-duration:${Math.max(400, budget)}ms"></i></span><span class="small bz-left"></span></div>`;
+  const left = el.querySelector('.bz-left');
+  const tick = () => { const s = Math.ceil((end - Date.now()) / 1000); left.textContent = budget > 1500 && s > 0 ? `höchstens noch ${s} s` : 'gleich fertig'; };
   el.hidden = false; tick();
   clearInterval(busyT); busyT = setInterval(tick, 250);
 }
+
 function hideBusy() { clearInterval(busyT); $('#busy').hidden = true; }
 function startGenerate() {
   document.querySelectorAll('[data-act="generate"]').forEach(b => { b.disabled = true; b.textContent = 'Rechne …'; });
@@ -9381,11 +9629,17 @@ function addNames(text, status) {
   return { added, ticked, asked, bad, any: list.length };
 }
 /* Uhrzeit setzen ('' = keine); ein offener Spieltag zieht mit */
-function setTime(t, v) {
-  if (t === 'res') { if (!ui.res) return; ui.res.d.time = v; ui.res.d.weather = null; render(); return; }
+/* Auswahlrad (iPhone) noch offen: Wert merken, erst nach dem Schließen neu zeichnen – sonst springt das Rad zu oder geht erneut auf */
+function laterOnBlur(el) {
+  if (!el || document.activeElement !== el || !['time', 'date'].includes(el.type)) return false;
+  if (!el._rb) { el._rb = 1; el.addEventListener('blur', () => { el._rb = 0; render(); }, { once: true }); }
+  save(); return true;
+}
+function setTime(t, v, el) {
+  if (t === 'res') { if (!ui.res) return; ui.res.d.time = v; ui.res.d.weather = null; if (!laterOnBlur(el)) render(); return; }
   S.day.time = v; S.day.weather = null;
   const m = S.result && matchById(S.result.mid); if (m && m.status === 'open') { m.time = v; m.upd = Date.now(); }
-  render();
+  if (!laterOnBlur(el)) render();
 }
 function setMinutes(t, v) {
   const R = t === 'res' ? ui.res && ui.res.d : S.day; if (!R) return;
@@ -9852,7 +10106,8 @@ const A = {
   // Teams
   pickVar: el => {
     const R = S.result, i = +el.dataset.v; if (!R.vars[i]) return;
-    R.vsel = i; R.manual = false; R.hand = false; R.teams = clone(R.vars[i].teams); ui.fxTeams = true;
+    if (R.vsel === i && !R.manual) return;
+    R.vsel = i; R.manual = false; R.hand = false; R.teams = clone(R.vars[i].teams); ui.fxTeams = 'var';
     // Fixierungen, die nicht mehr zum Team passen, lösen
     Object.keys(S.day.pins).forEach(id => { const t = R.teams.findIndex(x => x.includes(id)); if (t >= 0 && t !== S.day.pins[id]) delete S.day.pins[id]; });
     ui.sel = []; ui.suggest = null; syncMatch('plan'); render();
@@ -10523,7 +10778,7 @@ const CH = {
   valSlideDone: () => render(),
   dayPlace: el => { if (el.value === '__new') { ui.placeNew = 'dayPlace'; render(); setTimeout(() => { const i = $('#dayPlaceNew'); if (i) i.focus(); }, 20); return; } S.day.place = el.value; S.day.field = ''; S.day.weather = null; const m = S.result && matchById(S.result.mid); if (m && m.status === 'open') { m.place = el.value; m.field = ''; m.upd = Date.now(); } render(); },
   setPlace: el => { if (el.value === '__new') { ui.placeNew = 'setPlace'; render(); setTimeout(() => { const i = $('#setPlaceNew'); if (i) i.focus(); }, 20); } },
-  dayTime: el => { const v = parseTime(el.value); if (v === null) { toast('Uhrzeit nicht erkannt – z. B. 18:30 oder 1830.'); el.value = S.day.time || ''; return; } setTime('day', v); },
+  dayTime: el => { const v = parseTime(el.value); if (v === null) { toast('Uhrzeit nicht erkannt – z. B. 18:30 oder 1830.'); el.value = S.day.time || ''; return; } setTime('day', v, el); },
   resPlace: el => { if (!ui.res) return; if (el.value === '__new') { ui.placeNew = 'resPlace'; render(); setTimeout(() => { const i = $('#resPlaceNew'); if (i) i.focus(); }, 20); return; } ui.res.d.place = el.value; ui.res.d.field = ''; ui.res.d.weather = null; render(); },
   dayDate: el => {
     if (!isIso(el.value)) return;
@@ -10532,7 +10787,7 @@ const CH = {
     const m = S.result && matchById(S.result.mid);
     if (m && m.status === 'open') { m.date = el.value; m.upd = Date.now(); }
     ui.keepDate = false;
-    render();
+    if (!laterOnBlur(el)) render();
   },
   rfA: el => { ui.ruleForm.a = el.value; },
   rfB: el => { ui.ruleForm.b = el.value; },
@@ -10573,8 +10828,8 @@ const CH = {
   gameMinSet: el => { const t = el.dataset.t, R = t === 'res' ? ui.res && ui.res.d : S.day; if (!R) return; R.gameMin = isNum(el.value) && +el.value > 0 ? Math.min(300, Math.round(+el.value)) : null; render(); },
   minSet: el => setMinutes(el.dataset.t, isNum(el.value) && +el.value > 0 ? Math.min(600, Math.round(+el.value)) : null),
   resMin: el => { const g = ui.res && ui.res.d.games[+el.dataset.k]; if (g) { g.min = !isNum(el.value) || +el.value <= 0 ? null : Math.min(300, Math.round(+el.value)); render(); } },
-  resDate: el => { if (ui.res && isIso(el.value)) { ui.res.d.date = el.value; ui.res.d.weather = null; render(); } },
-  resTime: el => { if (!ui.res) return; const v = parseTime(el.value); if (v === null) { toast('Uhrzeit nicht erkannt – z. B. 18:30 oder 1830.'); el.value = ui.res.d.time || ''; return; } setTime('res', v); },
+  resDate: el => { if (ui.res && isIso(el.value)) { ui.res.d.date = el.value; ui.res.d.weather = null; if (!laterOnBlur(el)) render(); } },
+  resTime: el => { if (!ui.res) return; const v = parseTime(el.value); if (v === null) { toast('Uhrzeit nicht erkannt – z. B. 18:30 oder 1830.'); el.value = ui.res.d.time || ''; return; } setTime('res', v, el); },
   placeSel: el => {
     const t = el.dataset.t, v = el.value, R = t === 'res' ? ui.res && ui.res.d : S.day; if (!R) return;
     const setPlace = name => { if (t === 'res') CH.resPlace({ value: name }); else CH.dayPlace({ value: name }); };
@@ -10781,7 +11036,7 @@ window.addEventListener('resize', () => snapLines());
 /* ---------- Übergänge und Effekte ----------
    Die Oberfläche wird bei jeder Änderung neu gezeichnet. Effekte laufen deshalb nur bei echten Anlässen
    (anderer Bereich, neue Teams, Fenster öffnet sich, Spieler angekreuzt) und nie beim gewöhnlichen Neuzeichnen. */
-const FX_CLS = ['pg-in', 'pg-l', 'pg-r', 'teams-in'];
+const FX_CLS = ['pg-in', 'pg-l', 'pg-r', 'teams-in', 'teams-sw'];
 const TAB_ORDER = ['day', 'teams', 'review', 'players', 'rules', 'settings'];
 let FX = { tab: null, sheet: false };
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -10801,7 +11056,8 @@ function playEffects(anySheet) {
   const main = $('#main'), sheet = $('#sheet');
   const teamsNew = ui.fxTeams && ui.tab === 'teams' && S.result && S.result.teams;
   if (!reduceMotion() && FX.tab !== null) {
-    if (teamsNew) {
+    if (teamsNew && ui.fxTeams === 'var') fxRestart(main, ['teams-sw']);
+    else if (teamsNew) {
       fxRestart(main, ['teams-in']);
       main.querySelectorAll('.teams > .team').forEach((c, t) => { c.style.setProperty('--t', t); c.querySelectorAll('.tp').forEach((li, i) => li.style.setProperty('--i', i)); });
       fxCount(main.querySelector('.lamp .num'));
@@ -10874,7 +11130,7 @@ function renderNow() {
 
   if (focusId) {
     const el = document.getElementById(focusId);
-    if (el && el !== document.activeElement && el.tagName !== 'SELECT' && el.type !== 'date') {
+    if (el && el !== document.activeElement && el.tagName !== 'SELECT' && el.type !== 'date' && el.type !== 'time') {
       el.focus({ preventScroll: true });
       try { if (selS != null) el.setSelectionRange(selS, selE); } catch (e) { /* Feld ohne Auswahl */ }
     }
@@ -11302,6 +11558,47 @@ function svIngest(text) {
   return res;
 }
 
+
+/* Wessen Bewertung passt am besten zu den Ergebnissen? Für jedes entschiedene Spiel aus dem Verlauf:
+   Welches Team wäre nach den Werten dieses Bewerters stärker gewesen (Mittelwert, Strenge ausgeglichen)?
+   Hat dieses Team gewonnen? Gezählt werden nur Spiele, in denen er die meisten Spieler selbst bewertet hat;
+   Lücken (auch er selbst) füllt der Gruppenwert. Zum Vergleich die Gruppe auf denselben Spielen. */
+const SV_ACC_MIN = 8;
+function svAcc(sv, E) {
+  const idx = new Map(sv.players.map((pl, j) => [pl.id, j])), grp = E.rows.map(x => (x.n ? x.raw : null));
+  const games = [];
+  S.matches.filter(m => m.status === 'done' && !m.exclude).forEach(m => (m.games || []).forEach(g => {
+    if (!isNum(g.ga) || !isNum(g.gb) || +g.ga === +g.gb) return;
+    const TA = m.teams[g.a], TB = m.teams[g.b];
+    if (!TA || !TB || !TA.length || !TB.length) return;
+    games.push({ A: TA.map(id => idx.get(id)), B: TB.map(id => idx.get(id)), s: Math.sign(g.ga - g.gb) });
+  }));
+  const mean = (L, f) => { const v = L.map(j => (j == null ? null : f(j))).filter(isNum); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  const tip = (gm, f) => { const a = mean(gm.A, f), b = mean(gm.B, f); if (a == null || b == null) return null; const d = a - b; return Math.abs(d) < 0.05 ? 0 : Math.sign(d); };
+  const pts = (t, s0) => (t === 0 ? 0.5 : t === s0 ? 1 : 0);
+  const rows = E.R.map((r, k) => {
+    const off = E.off[k] || 0, f = j => (isNum(r.vals[j]) ? r.vals[j] - off : grp[j]);
+    let n = 0, hit = 0, gHit = 0, dis = 0, disHit = 0;
+    games.forEach(gm => {
+      const L = [...gm.A, ...gm.B].filter(j => j != null), own = L.filter(j => isNum(r.vals[j])).length;
+      if (L.length < (gm.A.length + gm.B.length) * 0.6 || own < L.length * 0.6) return;
+      const t = tip(gm, f), tg = tip(gm, j => grp[j]);
+      if (t == null || tg == null) return;
+      n++; hit += pts(t, gm.s); gHit += pts(tg, gm.s);
+      if (t !== 0 && tg !== 0 && t !== tg) { dis++; if (t === gm.s) disHit++; }
+    });
+    return { r, n, rate: n ? hit / n : null, g: n ? gHit / n : null, dis, disHit };
+  });
+  return { games: games.length, rows: rows.filter(x => x.n >= SV_ACC_MIN).sort((a, b) => (b.rate - b.g) - (a.rate - a.g) || b.n - a.n), few: rows.filter(x => x.n < SV_ACC_MIN) };
+}
+function svAccHTML(sv, E) {
+  const R = svAcc(sv, E), pct = x => `${Math.round(x * 100)} %`;
+  if (!R.rows.length) return `<div class="svacc"><p class="small">Noch zu wenig Spiele: Je Bewerter braucht es mindestens ${SV_ACC_MIN} entschiedene Spiele mit Spielern, die er bewertet hat (bisher ${plural(R.games, 'entschiedenes Spiel', 'entschiedene Spiele')} insgesamt). Mit jedem eingetragenen Ergebnis wird es aussagekräftiger.</p></div>`;
+  return `<div class="svacc"><p class="small">Hätte das Team gewonnen, das nach den Werten dieser Person stärker war? Daneben die Gruppe auf denselben Spielen.</p>
+    <div class="scroll"><table class="grid svacct"><thead><tr><th>Bewerter</th><th class="num">Spiele</th><th class="num">richtig</th><th class="num">Gruppe</th><th class="num wrapth" title="Spiele, in denen diese Person ein anderes Team vorn sah als die Gruppe">anders getippt: richtig</th></tr></thead><tbody>
+    ${R.rows.map(x => `<tr><td>${esc(x.r.name)}</td><td class="num">${x.n}</td><td class="num"><b>${pct(x.rate)}</b></td><td class="num">${pct(x.g)}</td><td class="num">${x.dis ? `${x.disHit} / ${x.dis}` : '–'}</td></tr>`).join('')}</tbody></table></div>
+    <p class="small svaccnote">Faire Teams sind knapp – da liegt jeder oft nur bei gut 50 %. Am meisten sagt „anders getippt“: Wo jemand anders lag als die Gruppe, wer hatte recht? Unter etwa 20 Spielen sind 10 Prozentpunkte Unterschied noch Zufall. Spiele vor der Umfrage zählen mit.${R.few.length ? ` Noch zu wenige Spiele: ${R.few.map(x => esc(x.r.name)).join(', ')}.` : ''}</p></div>`;
+}
 /* ---------- Auswertung ----------
    1. Strenge ausgleichen: Versatz je Bewerter = Median seiner Abweichungen von den (bereinigten) Werten der anderen,
       über die Spieler, die er bewertet hat. Nur verschoben, nicht gestreckt; mehrmals wiederholt.
@@ -11401,6 +11698,37 @@ function svStart() {
   } else $('#sub').textContent = 'Spieler-Bewertung';
   svRender();
 }
+
+/* Gehört die Umfrage zur App auf diesem Gerät? Dann kann man direkt hier abgeben (Handy herumreichen). */
+function svLocal() {
+  if (SVP.local != null) return SVP.local;
+  SVP.local = false;
+  try {
+    const needle = `"id":"${SVP.data.i}"`;
+    for (let k = 0; k < localStorage.length; k++) { const key = localStorage.key(k); if (/^team-generator\.p\./.test(key) && (localStorage.getItem(key) || '').includes(needle)) { SVP.local = true; break; } }
+  } catch (e) { SVP.local = false; }
+  return SVP.local;
+}
+Object.assign(A, {
+  svGive: () => {
+    const code = (/FTU1-[A-Za-z0-9-]+/.exec(SVP.msg || '') || [])[0];
+    if (!code) return;
+    const key = code.split('-').slice(0, 3).join('-').toLowerCase();
+    let L = [];
+    try { L = JSON.parse(localStorage.getItem('ft-svinbox') || '[]'); } catch (e) { L = []; }
+    if (!Array.isArray(L)) L = [];
+    L = L.filter(c => String(c).split('-').slice(0, 3).join('-').toLowerCase() !== key).concat(SVP.msg);
+    try { localStorage.setItem('ft-svinbox', JSON.stringify(L)); } catch (e) { toast('Speichern ging nicht – bitte kopieren und in der App einfügen.'); return; }
+    SVP.given = true; SVP.sent = true; svRender(); window.scrollTo(0, 0);
+  },
+  svNext: () => {
+    const n = SVP.data.n.length;
+    SVP.d = { who: '', name: '', self: null, vals: Array(n).fill(null), step: 'rate' };
+    SVP.given = false; SVP.sent = false; SVP.copied = false; SVP.arm = false;
+    svSaveDraft(); svRender(); window.scrollTo(0, 0);
+    toast('Bereit für die nächste Person.');
+  }
+});
 const svMeIdx = d => (/^\d+$/.test(String(d.who)) ? +d.who : -1);
 const svClash = d => { if (d.who !== 'x' || !SVP.data) return ''; const nm = str(d.name).trim().toLowerCase(); return nm.length >= 2 ? (SVP.data.n.find(x => x.trim().toLowerCase() === nm) || '') : ''; };
 const svClashHTML = d => { const x = svClash(d); return x ? `⚠️ „${esc(x)}“ steht schon in der Liste – bist du das? Dann oben auswählen. Wenn nicht: bitte mit Nachnamen, damit man euch unterscheiden kann.` : ''; };
@@ -11476,7 +11804,13 @@ function svRender() {
     const who = me >= 0 ? D.n[me] : str(d.name);
     const msg = `Faire Teams – Bewertung von ${who} (${ratedN} von ${idx.length} Spielern)\n${code}`;
     SVP.msg = msg;
-    html += `<div class="svcard svdone${SVP.sent ? ' sent' : ''}"><div class="svstep" aria-hidden="true">${SVP.sent ? '✓' : '📨'}</div><h2>${SVP.sent ? 'Danke!' : 'Letzter Schritt: zurückschicken!'}</h2>
+    if (svLocal()) {
+      html += `<div class="svcard svdone svlocal${SVP.given ? ' sent' : ''}"><div class="svstep" aria-hidden="true">${SVP.given ? '✓' : '📲'}</div><h2>${SVP.given ? 'Abgegeben!' : 'Auf diesem Gerät abgeben'}</h2>
+      <p class="svmust">${SVP.given ? `Die Bewertung von <b>${esc(who)}</b> liegt jetzt in der App auf diesem Gerät. Wer ist als Nächstes dran?` : 'Diese Umfrage gehört zur App auf diesem Gerät. Ein Tipp – und die Bewertung ist drin, ohne Nachricht.'}</p>
+      <div class="svsend">${SVP.given ? '<button type="button" class="btn primary big" data-act="svNext">📱 Nächste Person</button><button type="button" class="btn big" data-act="svGo" data-v="rate">Noch etwas ändern</button>' : `<button type="button" class="btn primary big" data-act="svGive">✅ Hier abgeben</button><button type="button" class="btn big" data-act="svGo" data-v="rate">Noch etwas ändern</button>`}</div>
+      <details class="svother"><summary class="small">Lieber als Nachricht schicken?</summary><pre class="svcode" id="svCode">${esc(msg)}</pre>
+      <div class="svsend"><a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">WhatsApp</a><button type="button" class="btn sm" data-act="svCopy">${SVP.copied ? 'Kopiert ✓' : 'Kopieren'}</button></div></details></div>`;
+    } else html += `<div class="svcard svdone${SVP.sent ? ' sent' : ''}"><div class="svstep" aria-hidden="true">${SVP.sent ? '✓' : '📨'}</div><h2>${SVP.sent ? 'Danke!' : 'Letzter Schritt: zurückschicken!'}</h2>
       <p class="svmust">${SVP.sent ? 'Hast du die Nachricht abgeschickt? Dann ist deine Bewertung angekommen. Falls WhatsApp nicht aufging: kopieren und selbst schicken.' : '<b>Deine Bewertung ist noch nicht angekommen.</b> Schick diese Nachricht an die Person, die dir den Link geschickt hat – erst dann zählt sie.'}</p>
       <pre class="svcode" id="svCode">${esc(msg)}</pre>
       <div class="svsend"><a class="btn primary big" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-svsent="1">📨 Per WhatsApp zurückschicken</a>
@@ -11510,7 +11844,7 @@ Object.assign(A, {
   svGo: el => {
     const to = el.dataset.v, d = SVP.d;
     if (to === 'order') { SVP.order = null; SVP.dirty = false; }
-    if (to === 'rate' && d.step === 'done') SVP.copied = false;
+    if (to === 'rate' && d.step === 'done') { SVP.copied = false; SVP.given = false; SVP.sent = false; }
     d.step = to; SVP.arm = false; svSaveDraft(); svRender(); window.scrollTo(0, 0);
   },
   svResort: () => { SVP.order = null; SVP.dirty = false; svRender(); },
@@ -11601,7 +11935,7 @@ function svSheetHTML() {
   const RS = new Map(sv.responses.map(r => [r.who, rater(r)]));
   const ranked = sv.responses.filter(r => r.on && RS.get(r.who).mad != null).sort((a, b) => RS.get(a.who).mad - RS.get(b.who).mad);
   const nameOf = j => esc(ownName(sv.players[j].id) || sv.players[j].name);
-  const raterTop = ranked.length >= 4 ? `<p class="small svrank">Am nächsten an der Gruppe: ${ranked.slice(0, 2).map(r => `<b>${esc(r.name)}</b> (Ø ${fmt(RS.get(r.who).mad, 1)})`).join(', ')} · am eigenwilligsten: ${ranked.slice(-2).reverse().map(r => `<b>${esc(r.name)}</b> (Ø ${fmt(RS.get(r.who).mad, 1)})`).join(', ')}</p>` : '';
+  const raterTop = ranked.length >= 4 ? `<p class="small svclose">Am nächsten an der Gruppe: ${ranked.slice(0, Math.min(5, ranked.length - 1)).map(r => `<b>${esc(r.name)}</b> <span class="muted">(Ø ${fmt(RS.get(r.who).mad, 1)})</span>`).join(', ')}</p>` : '';
   // Antworten
   const resp = sv.responses.slice().sort((a, b) => b.at - a.at).map(r => {
     const k = E.R.indexOf(r), off = k >= 0 ? E.off[k] : null, n = r.vals.filter(x => x != null).length;
@@ -11611,11 +11945,11 @@ function svSheetHTML() {
     const det = !open ? '' : (() => {
       const L = st.list.slice().sort((a, b) => Math.abs(b.d) - Math.abs(a.d)), all = U.rAll === r.who, shown = all ? L : L.slice(0, 6);
       const self = r.who[0] === 'p' && isNum(r.self) ? (() => { const j = parseInt(r.who.slice(1), 36), row = E.rows[j]; return row && row.n ? `<p class="small">Selbsteinschätzung <b>${fmtS(r.self)}</b> · die Gruppe sieht ${esc(r.name)} bei <b>${fmt(row.val, 1)}</b></p>` : `<p class="small">Selbsteinschätzung <b>${fmtS(r.self)}</b></p>`; })() : '';
-      return `<div class="svrdet">${self}<p class="small muted">${all ? 'Alle Bewertungen' : 'Am stärksten abweichend'}, verglichen mit dem Median der anderen${sv.opt.adj ? ' (Strenge ausgeglichen)' : ''}:</p>
-        <ul class="svrdl">${shown.map(x => `<li><span class="grow">${nameOf(x.j)}</span><span class="num">${fmt(x.mine, 1)}</span><span class="small muted num">Gruppe ${fmt(x.g, 1)}</span><span class="svd${Math.abs(x.d) >= 1.5 ? ' big' : ''} num">${x.d > 0 ? '+' : x.d < 0 ? '−' : '±'}${fmt(Math.abs(x.d), 1)}</span></li>`).join('') || '<li class="muted">Zu wenige gemeinsame Bewertungen.</li>'}</ul>
+      return `<div class="svrdet">${self}<p class="small muted">${all ? 'Alle Bewertungen' : 'Am stärksten abweichend'}, verglichen mit dem Median der anderen${sv.opt.adj ? ' (Strenge ausgeglichen)' : ''}${(() => { const up = L.filter(x => x.d >= 0.5).length, dn = L.filter(x => x.d <= -0.5).length; return up || dn ? ` – ${up}× deutlich höher, ${dn}× deutlich tiefer als die Gruppe` : ''; })()}:</p>
+        <ul class="svrdl">${shown.map(x => `<li><span class="grow">${nameOf(x.j)}</span><span class="num">${fmt(x.mine, 1)}</span><span class="small muted num">Gruppe ${fmt(x.g, 1)}</span><span class="svd${Math.abs(x.d) >= 1.5 ? ' big' : ''} num">${Math.abs(x.d) < 0.05 ? 'gleich' : `${fmt(Math.abs(x.d), 1)} ${x.d > 0 ? 'höher' : 'tiefer'}`}</span></li>`).join('') || '<li class="muted">Zu wenige gemeinsame Bewertungen.</li>'}</ul>
         ${L.length > shown.length ? `<button type="button" class="linkbtn small" data-act="svRAll" data-who="${r.who}">alle ${L.length} zeigen</button>` : ''}</div>`;
     })();
-    return `<li class="${r.on ? '' : 'off'}${open ? ' ropen' : ''}"><div class="svrrow"><span class="grow"><b>${esc(r.name)}</b>${r.who[0] === 'n' ? ' <span class="small muted">(nicht auf der Liste)</span>' : ''}<br><span class="small muted">${svDate(r.at)} · ${n} von ${sv.players.length - (r.who[0] === 'p' ? 1 : 0)} bewertet${strict ? ' · ' + strict : ''}${st.mad != null ? ` · Ø ${fmt(st.mad, 1)} Abstand` : ''}</span></span>
+    return `<li class="${r.on ? '' : 'off'}${open ? ' ropen' : ''}"><div class="svrrow"><span class="grow"><b>${esc(r.name)}</b>${r.who[0] === 'n' ? ' <span class="small muted">(nicht auf der Liste)</span>' : ''}<br><span class="small muted">${svDate(r.at)} · ${n} von ${sv.players.length - (r.who[0] === 'p' ? 1 : 0)} bewertet${strict ? ' · ' + strict : ''}${st.mad != null ? ` · einzeln Ø ${fmt(st.mad, 1)} daneben` : ''}</span></span>
       ${sw('svRespOn', r.on, `data-who="${r.who}"`, 'Zählt mit')}<button type="button" class="btn sm ${armed ? 'danger armed' : 'ghost'}" data-act="svRespDel" data-who="${r.who}">${armed ? 'Löschen?' : 'Löschen'}</button></div>
       <button type="button" class="linkbtn small svrtog" data-act="svROpen" data-who="${r.who}" aria-expanded="${open}">${open ? 'Einzelwerte ausblenden' : 'Einzelwerte ansehen ›'}</button>${det}</li>`;
   }).join('');
@@ -11657,7 +11991,7 @@ function svSheetHTML() {
     <p class="small muted svlegend"><span><i class="lg own"></i> deine Bewertung</span><span><i class="lg grp"></i> Gruppe</span><span><i class="lg dot"></i> einzelne Stimmen</span>${meWho && sv.responses.some(r => r.who === meWho && r.on) ? '<span><i class="lg dot me"></i> deine Stimme</span>' : ''}${nPick ? '<span><i class="lg new"></i> neu</span>' : ''}</p>
     <ul class="svres">${rows.map(x => {
       const pk = picks[x.id], tv = pk ? target(x, pk) : null, weak = x.n > 0 && x.n < 3;
-      const dTxt = x.d == null ? '' : Math.abs(x.d) < 0.25 ? '<span class="svd ok">passt</span>' : `<span class="svd${Math.abs(x.d) >= 1 ? ' big' : ''}">${x.d > 0 ? '+' : '−'}${fmt(Math.abs(x.d), 1)}</span>`;
+      const dTxt = x.d == null ? '' : Math.abs(x.d) < 0.25 ? '<span class="svd ok">passt</span>' : `<span class="svd${Math.abs(x.d) >= 1 ? ' big' : ''}" title="Gruppe im Vergleich zu deiner Bewertung">Gruppe ${fmt(Math.abs(x.d), 1)} ${x.d > 0 ? 'höher' : 'tiefer'}</span>`;
       return `<li id="svr-${x.id}" class="${weak ? 'weak' : ''}${!x.n ? ' none' : ''}">
         <div class="svrtop"><button type="button" class="svwho grow" data-act="svEdit" data-id="${x.id}" title="Profil öffnen">${avatar(byId(x.id))}<b>${esc(ownName(x.id) || x.name)}</b></button>${x.split ? tag('uneinig', 't-split', 'Die Stimmen liegen weit auseinander') : ''}${dTxt}</div>
         ${x.n ? `<div class="svrmid">${svDotsHTML(x, x.own, tv)}<span class="svnums"><span title="deine Bewertung">${isNum(x.own) ? fmt(x.own, 1) : '–'}</span> → <b title="Gruppe">${fmt(x.val, 1)}</b></span></div>
@@ -11669,21 +12003,21 @@ function svSheetHTML() {
       <div class="row"><span class="small grow">Alle ${plural(voted, 'Spieler', 'Spieler')} mit Stimmen:</span><button type="button" class="btn sm" data-act="svBulk" data-v="grp" data-s="all">alle auf Gruppe</button>${rowsAll.some(x => x.n && isNum(x.own)) ? '<button type="button" class="btn sm" data-act="svBulk" data-v="mid" data-s="all">alle auf Mitte</button>' : ''}</div>
       ${strong.length ? `<div class="row"><span class="small grow">Nur die ${plural(strong.length, 'Spieler', 'Spieler')} mit mindestens 1 Punkt Abweichung (ab 3 Stimmen):</span><button type="button" class="btn sm" data-act="svBulk" data-v="mid">auf Mitte</button><button type="button" class="btn sm" data-act="svBulk" data-v="grp">auf Gruppe</button></div>` : ''}
       ${confN ? `<div class="row"><span class="small grow">Sicherheit laut Umfrage bei ${plural(confN, 'Spieler', 'Spielern')}:</span><button type="button" class="btn sm" data-act="svBulkConf">alle vormerken</button></div>` : ''}</div>` : ''}
-    <div class="svapply${nPick ? ' on' : ''}"><span class="grow small">${nPick ? `${plural(nPick, 'Änderung', 'Änderungen')} vorgemerkt${nVal ? ' – der grüne Punkt zeigt den neuen Wert' : ''}.` : 'Je Spieler „Mitte“ oder „Gruppe“ wählen, dann hier übernehmen. Nichts ändert sich automatisch.'}</span>${nPick ? '<button type="button" class="btn sm ghost" data-act="svPickClear">verwerfen</button>' : ''}<button type="button" class="btn sm primary" data-act="svApply"${nPick ? '' : ' disabled'}>Übernehmen</button></div>`;
+    ${nPick ? `<div class="svapply on"><span class="grow"><b class="num">${nPick}</b> vorgemerkt</span><button type="button" class="linkbtn small" data-act="svPickClear">verwerfen</button><button type="button" class="btn primary" data-act="svApply">Übernehmen</button></div>` : '<p class="small svapplyhint">Je Spieler „Mitte“ oder „Gruppe“ wählen – übernommen wird erst unten mit „Übernehmen“.</p>'}`;
   const msgTxt = svMsg(sv);
   const armedSv = ui.arm === 'svDrop:' + sv.id;
   return sheetWrap(`${head('Gruppenmeinung')}
     ${L.length > 1 ? `<div class="row"><span class="lbl">Umfrage</span><select data-ch="svSel" aria-label="Umfrage wählen">${L.map(x => `<option value="${x.id}"${x.id === sv.id ? ' selected' : ''}>vom ${svDate(x.created)} · ${plural(x.responses.length, 'Antwort', 'Antworten')}</option>`).join('')}</select></div>` : ''}
     <details class="field svsec" data-sec="svLink"${ui.open.svLink || !sv.responses.length ? ' open' : ''}><summary><b>1. Link teilen</b> <span class="small muted">· ${plural(sv.players.length, 'Spieler', 'Spieler')} · vom ${svDate(sv.created)}</span></summary>
       ${link ? `<div class="svlinkbox"><input type="text" readonly id="svLinkIn" value="${esc(link)}" aria-label="Umfrage-Link"></div>
-      <div class="row"><a class="btn sm primary" href="https://wa.me/?text=${encodeURIComponent(msgTxt)}" target="_blank" rel="noopener">WhatsApp</a>${navigator.share ? '<button type="button" class="btn sm" data-act="svShareLink">Teilen …</button>' : ''}<button type="button" class="btn sm" data-act="svCopyLink">Kopieren</button><a class="btn sm ghost" href="${esc(link)}" target="_blank" rel="noopener">Selbst ausfüllen</a></div>
+      <div class="row"><a class="btn sm primary" href="https://wa.me/?text=${encodeURIComponent(msgTxt)}" target="_blank" rel="noopener">WhatsApp</a>${navigator.share ? '<button type="button" class="btn sm" data-act="svShareLink">Teilen …</button>' : ''}<button type="button" class="btn sm" data-act="svCopyLink">Kopieren</button><a class="btn sm ghost" href="${esc(link)}" target="_blank" rel="noopener" title="Auch zum Herumreichen: Jede Person gibt am Ende direkt auf diesem Gerät ab.">Selbst ausfüllen / herumreichen</a></div>
       ${link.length > 700 ? '<p class="small muted">Der Link ist lang (viele Spieler). Lässt er sich in WhatsApp nicht ganz antippen, öffnet sich nur die Startseite – dort können die Mitspieler die Nachricht unter „Link einfügen“ einsetzen. Steht so auch in der Nachricht.</p>' : ''}
       <p class="small muted">Tipp: Füll die Umfrage selbst aus, bevor du dir die Ergebnisse ansiehst – dann zählt deine Meinung unbeeinflusst mit.</p>` : '<p class="small errtxt">Kein Link möglich: Die App ist als Datei geöffnet. Öffne sie über ihre Internetadresse.</p>'}</details>
     <div class="field"><label class="lbl" for="svPaste">2. Antworten einfügen</label>
       <textarea id="svPaste" data-in="svPaste" rows="3" placeholder="Nachrichten mit „FTU1-…“ hier einfügen – auch mehrere auf einmal oder ein ganzer Chat.">${esc(U.paste || '')}</textarea>
       <div class="row"><button type="button" class="btn sm primary" data-act="svRead"${str(U.paste) ? '' : ' disabled'}>Einlesen</button>${U.msg ? `<span class="small ${U.msgBad ? 'errtxt' : ''}">${esc(U.msg)}</span>` : ''}</div>
       ${U.bad && U.bad.length ? `<ul class="small errtxt svbad">${U.bad.map(b => `<li>${esc(b.head || 'Code')}: ${esc(b.why)} – bitte noch einmal schicken lassen</li>`).join('')}</ul>` : ''}</div>
-    ${sv.responses.length ? `<details class="field svsec" data-sec="svResp"${ui.open.svResp ? ' open' : ''}><summary><b>Antworten (${sv.responses.length})</b> <span class="small muted">· ${plural(E.nResp, 'zählt', 'zählen')} mit</span></summary>${raterTop}<ul class="rules svresp">${resp}</ul></details>` : ''}
+    ${sv.responses.length ? `<details class="field svsec" data-sec="svResp"${ui.open.svResp ? ' open' : ''}><summary><b>Antworten (${sv.responses.length})</b> <span class="small muted">· ${plural(E.nResp, 'zählt', 'zählen')} mit</span></summary>${raterTop}<ul class="rules svresp">${resp}</ul>${E.nResp >= 2 ? `<button type="button" class="btn sm svacctog" data-act="svAccTog" aria-expanded="${!!U.acc}">⚽ ${U.acc ? 'Abgleich ausblenden' : 'Mit Spielergebnissen abgleichen'}</button>${U.acc ? svAccHTML(sv, E) : ''}` : ''}</details>` : ''}
     <div class="field"><span class="lbl">3. Vergleich: du und die Gruppe</span>${resTable}</div>
     <div class="row svfoot"><button type="button" class="btn sm ghost" data-act="svView" data-v="new">Neue Umfrage</button><span class="grow"></span><button type="button" class="btn sm ${armedSv ? 'danger armed' : 'ghost danger'}" data-act="svDrop">${armedSv ? 'Umfrage mit allen Antworten löschen?' : 'Umfrage löschen'}</button></div>`, 'svTitle', 'svClose');
 }
@@ -11785,6 +12119,7 @@ Object.assign(A, {
   svConf: el => { const C = ui.svy.conf || (ui.svy.conf = {}); if (C[el.dataset.id] === el.dataset.v) delete C[el.dataset.id]; else C[el.dataset.id] = el.dataset.v; render(); },
   svBulkConf: () => { const sv = svCur(), E = svEval(sv, svOwn, svMe(sv)), C = ui.svy.conf || (ui.svy.conf = {}); E.rows.forEach(x => { const p = byId(x.id), w = svConfSuggest(x); if (p && w && w !== confOf(p)) C[x.id] = w; }); render(); },
   svEdit: el => { const sh = $('.sheet'); ui._svScroll = sh ? sh.scrollTop : null; ui.editId = el.dataset.id; render(); },
+  svAccTog: () => { ui.svy.acc = !ui.svy.acc; render(); },
   svROpen: el => { const U = ui.svy, w = el.dataset.who; U.rOpen = U.rOpen === w ? null : w; U.rAll = null; render(); },
   svRAll: el => { ui.svy.rAll = el.dataset.who; render(); },
   svOpenAt: el => { ui.editId = null; ui._svScroll = null; ui._svFocus = el.dataset.pid || null; ui.svy = { view: '', sel: el.dataset.id, picks: {} }; render(); },
@@ -11845,6 +12180,76 @@ Object.assign(A, {
     location.hash = '#' + m[1];   // löst das Neuladen aus (Umfrage-Modus bzw. Gast-Projekt)
   }
 });
+
+
+/* Rückblick: Ergebnisse der Gruppe (Gast-Link) einfügen – dieselbe Logik wie im Fenster „Gast-Link“ */
+function rvImportHTML() {
+  if (isGuest() || !(S.share && S.share.list && S.share.list.length)) return '';
+  const U = ui.rvImp || {};
+  return `<details class="svgot rvimp"${U.open ? ' open' : ''}><summary>📩 Ergebnis von der Gruppe einfügen</summary>
+    <p class="small">Wer mit deinem Gast-Link gespielt hat, schickt dir eine Nachricht mit „FTR1-…“. In WhatsApp gedrückt halten → Kopieren, hier einfügen.</p>
+    <textarea id="rvRes" data-in="rvRes" rows="3" placeholder="Nachricht mit „FTR1-…“ hier einfügen">${esc(U.paste || '')}</textarea>
+    <div class="row"><button type="button" class="btn sm primary" data-act="rvResRead"${str(U.paste) ? '' : ' disabled'}>Einlesen</button>${U.msg ? `<span class="small ${U.bad ? 'errtxt' : ''}">${esc(U.msg)}</span>` : ''}</div></details>`;
+}
+function shareIngestText(r) {
+  const parts = [];
+  if (r.add) parts.push(`${plural(r.add, 'Runde', 'Runden')} übernommen`);
+  if (r.upd) parts.push(`${plural(r.upd, 'Runde', 'Runden')} aktualisiert`);
+  if (r.same) parts.push(`${r.same} schon vorhanden`);
+  if (r.newPl.length) parts.push(`neu als Gast: ${r.newPl.join(', ')}`);
+  if (r.bad) parts.push(`${r.bad} fehlerhaft`);
+  return parts.length ? parts.join(' · ') + '.' : 'Keine Ergebnis-Codes gefunden. Es müssen Nachrichten mit „FTR1-…“ sein.';
+}
+Object.assign(A, {
+  rvResRead: () => {
+    const U = ui.rvImp || (ui.rvImp = {}); remember('Ergebnisse der Gruppe eingelesen');
+    const r = shareIngest(U.paste || '');
+    U.open = true; U.msg = shareIngestText(r); U.bad = !r.add && !r.upd && !r.same;
+    if (r.add || r.upd) { U.paste = ''; anaCache = null; toast(U.msg, { label: 'Rückgängig', act: 'undo' }); }
+    render();
+  }
+});
+Object.assign(IN, { rvRes: el => { const U = ui.rvImp || (ui.rvImp = {}); U.paste = el.value; U.open = true; const b = document.querySelector('[data-act="rvResRead"]'); if (b) b.disabled = !str(el.value); } });
+
+/* Umfrage auf diesem Gerät ausgefüllt (Handy wird herumgereicht): die Bewertungsseite legt die Codes hier ab,
+   die App holt sie ab, sobald sie (wieder) sichtbar ist – ohne Kopieren und Einfügen. */
+const SV_INBOX = 'ft-svinbox';
+function svInboxPull() {
+  if (SV_MODE || CAL_MODE || !S || !(S.surveys || []).length) return;
+  let L = [];
+  try { L = JSON.parse(localStorage.getItem(SV_INBOX) || '[]'); } catch (e) { L = []; }
+  if (!Array.isArray(L) || !L.length) return;
+  const mine = c => { const m = /FTU1-([a-z0-9]{6})-/i.exec(String(c)); return !!m && S.surveys.some(sv => sv.id === m[1].toLowerCase()); };
+  const take = L.filter(mine), keep = L.filter(c => !mine(c));
+  if (!take.length) return;
+  const r = svIngest(take.join('\n'));
+  try { if (keep.length) localStorage.setItem(SV_INBOX, JSON.stringify(keep)); else localStorage.removeItem(SV_INBOX); } catch (e) { /* egal */ }
+  const n = r.add.length + r.upd.length;
+  if (n) { save(); render(); toast(`${plural(n, 'Bewertung', 'Bewertungen')} von diesem Gerät übernommen: ${[...r.add, ...r.upd].join(', ')}.`); }
+}
+window.addEventListener('storage', e => { if (e.key === SV_INBOX) svInboxPull(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') svInboxPull(); });
+window.addEventListener('focus', () => svInboxPull());
+setTimeout(() => { try { svInboxPull(); } catch (e) { console.error(e); } }, 600);
+
+/* Tipps zur App für die Stadion-Seite – der Reihe nach, damit jeder mal drankommt */
+const TIPS = [
+  'Faire Teams lässt sich wie eine App auf den Startbildschirm legen – startet dann ohne Adressleiste.',
+  'Im <b>Erweitert-Modus</b> (Einstellungen) gibt es Positionen, Fähigkeiten, Tagesform, Regeln und die Auswertung eurer Spiele.',
+  'Mit dem <b>Gast-Link</b> bildet die Gruppe auch ohne dich faire Teams – ohne die Bewertungen zu sehen.',
+  'Mit einer <b>Umfrage</b> bewertet die ganze Gruppe. Strenge und milde Bewerter werden ausgeglichen.',
+  'Die Spielerliste lässt sich aus <b>Screenshots</b> einlesen – z. B. aus der WhatsApp-Gruppe.',
+  'Trag nach dem Spiel das <b>Ergebnis</b> ein: Mit der Zeit zeigt die App, wer vermutlich zu hoch oder zu niedrig eingeschätzt ist.',
+  'Im WhatsApp-Text können <b>Karte, Wetter und ein Kalender-Link</b> mit – ein Tipp, und der Termin steht im Kalender.',
+  'Alles bleibt auf deinem Gerät. Sichere ab und zu eine Datei unter <b>Einstellungen → Daten</b>.',
+  'Ein einfacher Tipp aufs Logo zeigt einen Fußball-Spruch.'
+];
+function tipNext() {
+  const L = TIPS.filter((t, k) => !(k === 0 && isStandalone()));
+  let i = 0;
+  try { i = (+localStorage.getItem('ft-tip') || 0) % L.length; localStorage.setItem('ft-tip', String(i + 1)); } catch (e) { i = Math.floor(Math.random() * L.length); }
+  return L[i];
+}
 
 /* Sprüche fürs Logo: Antippen zeigt einen davon, zufällig, ohne Wiederholung, bis alle durch sind */
 const QUOTES = [
@@ -12068,6 +12473,8 @@ const QUOTE_EMO = [[/Torwart|Handschuh|hält|Keeper|im Tor/, '🧤'], [/Elfmeter
   [/Halle|Kunstrasen|Asche|Rasen|Platz/, '🏟️'], [/Freund|Team|Gruppe|wiederkommen|verbindet|Familie/, '🫶'], [/Ball/, '⚽']];
 const QUOTE_FUN = ['😄', '😎', '🤪', '💪', '🙌', '🔥', '😅', '🤓', '🥳', '😏'];
 const quoteEmoji = t => { const m = QUOTE_EMO.find(([re]) => re.test(t)); return m ? m[1] : QUOTE_FUN[t.length % QUOTE_FUN.length]; };
+document.addEventListener('pointerdown', e => { const q = document.getElementById('quote'); if (q && q.classList.contains('on') && !q.contains(e.target) && !e.target.closest('#logo')) quoteHide(); }, true);
+window.addEventListener('scroll', () => { const q = document.getElementById('quote'); if (q && q.classList.contains('on') && !q.classList.contains('low')) quoteHide(); }, { passive: true });
 function quoteHide() { const q = document.getElementById('quote'); if (q) q.classList.remove('on'); clearTimeout(quoteT); }
 function quoteShow() {
   let q = document.getElementById('quote');
@@ -12100,7 +12507,7 @@ function splashShow() {
   const d = S.day, pr = curProject(), done = S.matches.filter(m => m.status === 'done');
   const goals = done.reduce((t, m) => t + m.games.reduce((u, g) => u + (isNum(g.ga) ? +g.ga : 0) + (isNum(g.gb) ? +g.gb : 0), 0), 0);
   const nextTxt = isIso(d.date) && d.date >= isoToday() ? `${new Date(d.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}${d.time ? ' · ' + d.time + ' Uhr' : ''}${d.place ? ' · ' + d.place : ''}` : '';
-  const t = quoteNext(), el = document.createElement('div');
+  const tip = tipNext(), el = document.createElement('div');
   el.id = 'splash'; el.className = 'splash'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Faire Teams');
   el.innerHTML = `<div class="spl-bg" aria-hidden="true"></div><div class="spl-in">
     <img class="spl-logo" src="${LOGO_SRC}" alt="" width="76" height="76">
@@ -12108,7 +12515,7 @@ function splashShow() {
     ${pr ? `<p class="spl-proj">${esc(pr.name)}</p>` : ''}
     ${nextTxt ? `<p class="spl-next"><span>Nächster Spieltag</span><b>${esc(nextTxt)}</b></p>` : ''}
     ${S.players.length ? `<p class="spl-stats"><span><b>${S.players.filter(p => p.status !== 'archived').length}</b> Spieler</span>${done.length ? `<span><b>${done.length}</b> Runden</span>` : ''}${goals ? `<span><b>${goals}</b> Tore</span>` : ''}</p>` : ''}
-    <p class="spl-quote"><span aria-hidden="true">${quoteEmoji(t)}</span> ${esc(t)}</p>
+    <p class="spl-tip"><span class="spl-tiph">💡 Wusstest du schon?</span><span>${tip}</span></p>
     <button type="button" class="btn primary big spl-go">⚽ Anpfiff</button></div>`;
   const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 320); document.removeEventListener('keydown', onKey); };
   const onKey = e => { if (e.key === 'Escape' || e.key === 'Enter') close(); };
@@ -12434,6 +12841,9 @@ function bgOn() { try { return localStorage.getItem(BG_KEY) !== 'off'; } catch (
 const bgField = () => `<div class="field"><span class="lbl">Stadionbild im Hintergrund</span>${seg('bgSet', [['on', 'zeigen'], ['off', 'aus']], bgOn() ? 'on' : 'off')}<span class="small muted">Dezent hinter den Bereichen. Das Bild lädt aus dem Internet; ohne Verbindung bleibt der Hintergrund einfarbig.</span></div>`;
 Object.assign(A, { bgSet: el => { try { localStorage.setItem(BG_KEY, el.dataset.v === 'off' ? 'off' : 'on'); } catch (e) { /* privat */ } render(); } });
 function helpOff() { try { return localStorage.getItem(HELP_KEY) !== 'on'; } catch (e) { return true; } }
+// Nicht ausblenden: Warnungen, Zustände („zählt nicht“, „erscheint ab“) und Anweisungen, ohne die man nicht weiterkommt
+const KEEP_HELP = /⚠|Achtung|nicht möglich|zählt nicht|zählen nicht|noch nicht für|braucht es|erscheint ab|spielen nicht mit|noch ohne Team|Schick diese Nachricht|fehlen die|nur in diesem Browser|nicht angegeben|Der Link ist lang|Beispielgruppe|seitdem Bewertungen|nicht gespeichert|geht verloren|überschrieben/;
+const keepHelp = (el, t) => el.classList.contains('keep') || !!el.closest('.banner, .keep') || KEEP_HELP.test(t);
 function tidyHelp() {
   const off = helpOff() && !SV_MODE;
   document.body.classList.toggle('no-help', off);
@@ -12441,12 +12851,12 @@ function tidyHelp() {
   const live = el => el.querySelector('button, a, input, select, textarea, label');
   document.querySelectorAll('#main .hint, #main .hintlist, #sheet .hint, #sheet .hintlist, #actionbar .hint').forEach(el => {
     const t = el.textContent.trim();
-    if (live(el) || /^(Noch |Zurzeit |Kein |Keine |Niemand )/.test(t) || t.includes('✓')) return;
+    if (live(el) || keepHelp(el, t) || /^(Noch |Zurzeit |Kein |Keine |Niemand )/.test(t) || t.includes('✓')) return;
     el.classList.add('xhelp');
   });
   document.querySelectorAll('#main .small.muted, #sheet .small.muted, #main p.muted, #sheet p.muted').forEach(el => {
     const t = el.textContent.trim();
-    if (t.length < 55 || live(el) || el.closest('.verdict, .svres, .svresp') || /^(Noch |Zurzeit |Kein |Keine |Niemand )/.test(t) || !(/[.!?…)]$/.test(t) || /[.!?] /.test(t))) return;
+    if (t.length < 55 || live(el) || keepHelp(el, t) || el.closest('.verdict, .svres, .svresp') || /^(Noch |Zurzeit |Kein |Keine |Niemand )/.test(t) || !(/[.!?…)]$/.test(t) || /[.!?] /.test(t))) return;
     el.classList.add('xhelp');
   });
 }
